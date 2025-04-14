@@ -1,10 +1,13 @@
-﻿namespace Neuroglia.A2A.Events;
+﻿using Neuroglia.A2A.Serialization.Json;
+
+namespace Neuroglia.A2A;
 
 /// <summary>
 /// Represents the base class for all A2A events
 /// </summary>
 [DataContract]
-public abstract record Event
+[JsonConverter(typeof(RpcEventJsonConverter))]
+public abstract record RpcEvent
 {
 
     /// <summary>

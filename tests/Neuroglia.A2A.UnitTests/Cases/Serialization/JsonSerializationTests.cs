@@ -212,7 +212,7 @@ public class JsonSerializationTests
         {
             JsonRpc = JsonRpcVersion.V2,
             Id = Guid.NewGuid().ToString("N"),
-            Params = new()
+            Parameters = new()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 SessionId = Guid.NewGuid().ToString("N"),

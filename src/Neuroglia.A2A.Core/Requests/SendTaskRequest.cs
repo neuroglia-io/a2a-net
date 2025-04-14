@@ -5,12 +5,10 @@
 /// </summary>
 [DataContract]
 public record SendTaskRequest
-    : RpcRequest<SendTaskRequestParameters>
+    : RpcRequest<TaskSendParameters>
 {
 
-    /// <summary>
-    /// Gets/sets the name of the A2A Protocol method to use
-    /// </summary>
+    /// <inheritdoc/>
     public override string Method { get; } = "tasks/send";
 
 }

@@ -1,10 +1,10 @@
-﻿namespace Neuroglia.A2A.Requests;
+﻿namespace Neuroglia.A2A.Models;
 
 /// <summary>
-/// Represents the parameters of a request used to create, continue or restart a task
+/// Represents the parameters used to send a task
 /// </summary>
 [DataContract]
-public record SendTaskRequestParameters
+public record TaskSendParameters
 {
 
     /// <summary>
@@ -34,7 +34,7 @@ public record SendTaskRequestParameters
     [Required]
     [DataMember(Name = "historyLength", Order = 4), JsonPropertyName("historyLength"), JsonPropertyOrder(4), YamlMember(Alias = "historyLength", Order = 4)]
     public virtual uint? HistoryLength { get; set; } = null!;
-    
+
     /// <summary>
     /// Gets/sets the configuration, if any, for the task's push notifications
     /// </summary>

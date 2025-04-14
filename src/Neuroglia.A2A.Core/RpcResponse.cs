@@ -21,7 +21,7 @@ public abstract record RpcResponse
 /// </summary>
 /// <typeparam name="TResult">The type of the response's content</typeparam>
 [DataContract]
-public abstract record Response<TResult>
+public record RpcResponse<TResult>
     : RpcResponse
     where TResult : class
 {

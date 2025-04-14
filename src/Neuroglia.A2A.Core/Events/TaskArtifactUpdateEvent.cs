@@ -5,7 +5,7 @@
 /// </summary>
 [DataContract]
 public record TaskArtifactUpdateEvent
-    : Event
+    : RpcEvent
 {
 
     /// <summary>
@@ -13,6 +13,6 @@ public record TaskArtifactUpdateEvent
     /// </summary>
     [Required]
     [DataMember(Name = "artifact", Order = 1), JsonPropertyName("artifact"), JsonPropertyOrder(1), YamlMember(Alias = "artifact", Order = 1)]
-    public virtual Models.TaskStatus Status { get; set; } = null!;
+    public virtual Artifact Artifact { get; set; } = null!;
 
 }
