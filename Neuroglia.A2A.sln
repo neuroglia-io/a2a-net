@@ -35,6 +35,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{6CD1D227-B
 		SECURITY.md = SECURITY.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4D677FA6-4CC9-4363-BDD0-E19B5B0185F7}"
+	ProjectSection(SolutionItems) = preProject
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{0A4C0D6C-1811-4F04-AD98-65CE132B8F1F}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\bug.yml = .github\ISSUE_TEMPLATE\bug.yml
+		.github\ISSUE_TEMPLATE\config.yml = .github\ISSUE_TEMPLATE\config.yml
+		.github\ISSUE_TEMPLATE\feature.yml = .github\ISSUE_TEMPLATE\feature.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E9FF2046-783A-442B-8473-F134AC5FCDFF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +109,8 @@ Global
 		{E7FC1D4C-D4E8-400D-8963-D7294A1653CC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{3371623F-955A-4051-9E77-032A79614BCC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{24F063DB-2DFB-FA0C-2AA8-C8D5365B5F4B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{0A4C0D6C-1811-4F04-AD98-65CE132B8F1F} = {4D677FA6-4CC9-4363-BDD0-E19B5B0185F7}
+		{E9FF2046-783A-442B-8473-F134AC5FCDFF} = {4D677FA6-4CC9-4363-BDD0-E19B5B0185F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {698C2979-1A16-437B-8C04-1357EB80CC7F}
