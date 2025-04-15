@@ -1,6 +1,6 @@
 ﻿# 👥 Contributing to `akordai/net-sdk`
 
-Thanks for your interest in contributing to [Neuroglia A2A](https://github.com/neuroglia-io/a2a).
+Thanks for your interest in contributing to [A2A-NET](https://github.com/neuroglia-io/a2a-net).
 
 Whether you're fixing bugs, improving documentation, or implementing new capabilities — we appreciate your help!
 
@@ -83,4 +83,4 @@ We are committed to a respectful and inclusive environment. Please read our [Cod
 
 You're helping shape a modular, open foundation for agent orchestration in AI-native applications. We’re grateful you're here.
 
-— The Neuroglia Team
+— The A2A-NET Team

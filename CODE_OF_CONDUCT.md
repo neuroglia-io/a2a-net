@@ -1,8 +1,8 @@
 ﻿# Code of Conduct
 
-## 🌐 Neuroglia Community Code of Conduct
+## 🌐 A2A-NET Community Code of Conduct
 
-As contributors and maintainers of the Neuroglia project, we pledge to foster a community that is:
+As contributors and maintainers of the A2A-NET solution, we pledge to foster a community that is:
 
 - 🛠️ **Inclusive**
 - 📚 **Respectful**
@@ -64,4 +64,4 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 We strive to build not just a powerful agentic orchestration system, but a community as thoughtful and adaptive as the agents it empowers.
 
-**— The Neuroglia Team**
+**— The A2A-NET Team**

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "A2A.Server.AspNetCore": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51801;http://localhost:51802"
+    }
+  }
+}

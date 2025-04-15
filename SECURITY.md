@@ -2,17 +2,17 @@
 
 ## Reporting a Vulnerability
 
-The [Neuroglia A2A SDK](https://github.com/neuroglia-io/a2a) team and community take security vulnerabilities very seriously. Responsible disclosure of security issues is greatly appreciated, and every effort will be made to acknowledge and address your findings.
+The [A2A NET SDK](https://github.com/neuroglia-io/a2a-net) team and community take security vulnerabilities very seriously. Responsible disclosure of security issues is greatly appreciated, and every effort will be made to acknowledge and address your findings.
 
 To report a security issue:
 
-- **Use the GitHub Security Advisory**: Please use the ["Report a Vulnerability"](https://github.com/neuroglia-io/a2a/security/advisories/new) tab on GitHub to submit your report.
+- **Use the GitHub Security Advisory**: Please use the ["Report a Vulnerability"](https://github.com/neuroglia-io/a2a-net/security/advisories/new) tab on GitHub to submit your report.
 
 The team will acknowledge your report and provide details on the next steps. After the initial response, the security team will keep you informed of the progress towards a fix and any subsequent announcements. Additional information or guidance may be requested as necessary.
 
 ## Security Best Practices
 
-To ensure the security and stability of the [Neuroglia A2A SDK](https://github.com/neuroglia-io/a2a), consider the following best practices:
+To ensure the security and stability of the [A2A NET SDK](https://github.com/neuroglia-io/a2a-net), consider the following best practices:
 
 - **Runtime Environment Hardening**: Secure the underlying infrastructure where the SDK is used. This includes using up-to-date operating systems, applying security patches regularly, and configuring firewalls and security groups to limit access to only necessary ports and services.
 
@@ -20,8 +20,8 @@ To ensure the security and stability of the [Neuroglia A2A SDK](https://github.c
 
 - **Dependency Management**: Regularly audit and update dependencies used in your project. Use tools like [Dependabot](https://github.com/dependabot) or similar dependency management solutions to identify vulnerabilities in third-party NuGet packages and address them promptly.
 
-By adhering to these best practices, the security of workflows and applications built using the [Neuroglia A2A SDK](https://github.com/neuroglia-io/a2a) can be significantly enhanced, reducing the risk of vulnerabilities and ensuring the integrity and reliability of the workflows executed.
+By adhering to these best practices, the security of workflows and applications built using the [A2A NET SDK](https://github.com/neuroglia-io/a2a-net) can be significantly enhanced, reducing the risk of vulnerabilities and ensuring the integrity and reliability of the workflows executed.
 
 ---
 
-Thank you for contributing to the security and integrity of the [Neuroglia A2A SDK](https://github.com/neuroglia-io/a2a)!
+Thank you for contributing to the security and integrity of the [A2A NET SDK](https://github.com/neuroglia-io/a2a-net)!

@@ -1,4 +1,4 @@
-# Neuroglia A2A - NET SDK
+# A2A-NET
 
 **Agent-to-Agent (A2A)** is a lightweight, extensible protocol and framework for orchestrating tasks and exchanging structured content between autonomous agents using JSON-RPC 2.0.
 
@@ -10,7 +10,7 @@ This repository provides a complete set of libraries and components for building
 
 ### 🧠 Core
 
-- **`Neuroglia.A2A.Core`**  
+- **`a2a-net.Core`**  
   Contains the core abstractions, models, contracts, and data types shared across both clients and servers.  
   _This package is dependency-free and safe to use in any environment._
 
@@ -18,22 +18,22 @@ This repository provides a complete set of libraries and components for building
 
 ### 📡 Client
 
-- **`Neuroglia.A2A.Client`**  
+- **`a2a-net.Client`**  
   Provides the default implementation of an A2A client for sending tasks and interacting with agents via JSON-RPC.
 
-- **`Neuroglia.A2A.Client.Transport.WebSocket`**  
-  Implements the WebSocket transport for `Neuroglia.A2A.Client`.  
+- **`a2a-net.Client.Transport.WebSocket`**  
+  Implements the WebSocket transport for `a2a-net.Client`.  
   Allows establishing persistent agent-to-agent communication over WebSocket connections.
 
 ---
 
 ### 🛠️ Server
 
-- **`Neuroglia.A2A.Server`**  
+- **`a2a-net.Server`**  
   Core components for building A2A-compatible agents.  
   Includes task execution, state management, event streaming, and runtime integration.
 
-- **`Neuroglia.A2A.Server.AspNetCore`**  
+- **`a2a-net.Server.AspNetCore`**  
   ASP.NET Core integration layer that allows hosting A2A endpoints over WebSocket using JSON-RPC.  
   Provides middleware, routing, and server bootstrap extensions.
 
@@ -41,11 +41,11 @@ This repository provides a complete set of libraries and components for building
 
 ### 🧱 Server Infrastructure
 
-- **`Neuroglia.A2A.Server.Infrastructure.Abstractions`**  
+- **`a2a-net.Server.Infrastructure.Abstractions`**  
   Defines abstractions for task persistence, event streaming, and other infrastructure concerns.  
   Enables support for custom and pluggable storage/event backends.
 
-- **`Neuroglia.A2A.Server.Infrastructure.DistributedCache`**  
+- **`a2a-net.Server.Infrastructure.DistributedCache`**  
   Distributed cache–based implementation of A2A task storage using `IDistributedCache`.  
   Useful for scenarios that require scalable, lightweight task state persistence.
 
@@ -56,10 +56,10 @@ This repository provides a complete set of libraries and components for building
 ### Install the packages
 
 ```
-dotnet add package Neuroglia.A2A.Client
-dotnet add package Neuroglia.A2A.Client.Transport.WebSocket
-dotnet add package Neuroglia.A2A.Server
-dotnet add package Neuroglia.A2A.Server.AspNetCore
+dotnet add package a2a-net.Client
+dotnet add package a2a-net.Client.Transport.WebSocket
+dotnet add package a2a-net.Server
+dotnet add package a2a-net.Server.AspNetCore
 ```
 
 ### Configure the client
