@@ -1,1 +1,11 @@
-﻿global using StreamJsonRpc;
+﻿global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Neuroglia.A2A.Errors;
+global using Neuroglia.A2A.Events;
+global using Neuroglia.A2A.Models;
+global using Neuroglia.A2A.Requests;
+global using Neuroglia.A2A.Server.Infrastructure;
+global using Neuroglia.A2A.Server.Infrastructure.Services;
+global using StreamJsonRpc;
+global using System.Reactive.Linq;
+global using System.Runtime.CompilerServices;

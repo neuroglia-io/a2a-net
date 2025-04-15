@@ -8,6 +8,25 @@ public record RpcError
 {
 
     /// <summary>
+    /// Initializes a new <see cref="RpcError"/>
+    /// </summary>
+    public RpcError() { }
+
+    /// <summary>
+    /// Initializes a new <see cref="RpcError"/>
+    /// </summary>
+    /// <param name="code">The error code</param>
+    /// <param name="message">The error message</param>
+    /// <param name="data">Data, if any, associated to the error</param>
+    public RpcError(int code, string message, object? data = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        Code = code;
+        Message = message;
+        Data = data;
+    }
+
+    /// <summary>
     /// Gets/sets the error code
     /// </summary>
     [DataMember(Name = "code", Order = 1), JsonPropertyName("code"), JsonPropertyOrder(1), YamlMember(Alias = "code", Order = 1)]

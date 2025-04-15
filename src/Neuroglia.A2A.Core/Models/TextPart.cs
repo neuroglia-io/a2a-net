@@ -8,6 +8,21 @@ public record TextPart
     : Part
 {
 
+    /// <summary>
+    /// Initializes a new <see cref="TextPart"/>
+    /// </summary>
+    public TextPart() { }
+
+    /// <summary>
+    /// Initializes a new <see cref="TextPart"/>
+    /// </summary>
+    /// <param name="text">The part's text</param>
+    public TextPart(string text) 
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(text);
+        Text = text;
+    }
+
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
     public override string Type => PartType.Text;

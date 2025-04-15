@@ -8,6 +8,23 @@ public record TaskIdParameters
 {
 
     /// <summary>
+    /// Initializes a new <see cref="TaskIdParameters"/>
+    /// </summary>
+    public TaskIdParameters() { }
+
+    /// <summary>
+    /// Initializes a new <see cref="TaskIdParameters"/>
+    /// </summary>
+    /// <param name="id">The task's id</param>
+    /// <param name="metadata">A key/value mapping that contains the task's additional properties, if any</param>
+    public TaskIdParameters(string id, IDictionary<string, object>? metadata = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        Id = id;
+        Metadata = metadata == null ? null : new(metadata);
+    }
+
+    /// <summary>
     /// Gets/sets the task's id
     /// </summary>
     [Required, MinLength(1)]

@@ -35,9 +35,15 @@ public record Task
     public virtual EquatableList<Message>? History { get; set; }
 
     /// <summary>
+    /// Gets/sets a collection of the artifacts, if any, created by the agent
+    /// </summary>
+    [DataMember(Name = "artifacts", Order = 5), JsonPropertyName("artifacts"), JsonPropertyOrder(5), YamlMember(Alias = "artifacts", Order = 5)]
+    public virtual EquatableList<Artifact>? Artifacts { get; set; }
+
+    /// <summary>
     /// Gets/sets a key/value mapping that contains the task's additional properties, if any
     /// </summary>
-    [DataMember(Name = "metadata", Order = 5), JsonPropertyName("metadata"), JsonPropertyOrder(5), YamlMember(Alias = "metadata", Order = 5)]
+    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
     public virtual EquatableDictionary<string, object>? Metadata { get; set; }
 
 }

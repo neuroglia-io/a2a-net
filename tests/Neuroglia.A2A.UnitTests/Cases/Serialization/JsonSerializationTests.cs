@@ -212,7 +212,7 @@ public class JsonSerializationTests
         {
             JsonRpc = JsonRpcVersion.V2,
             Id = Guid.NewGuid().ToString("N"),
-            Parameters = new()
+            Params = new()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 SessionId = Guid.NewGuid().ToString("N"),
@@ -225,26 +225,6 @@ public class JsonSerializationTests
         //act
         var json = JsonSerializer.Serialize(toSerialize);
         var deserialized = JsonSerializer.Deserialize<SendTaskRequest>(json);
-
-        //assert
-        deserialized.Should().NotBeNull();
-        deserialized.Should().BeEquivalentTo(toSerialize);
-    }
-
-    [Fact]
-    public void Serialize_And_Deserialize_SendTaskResponse_Should_Work()
-    {
-        //arrange
-        var toSerialize = new SendTaskResponse()
-        {
-            JsonRpc = JsonRpcVersion.V2,
-            Id = Guid.NewGuid().ToString("N"),
-            Result = Services.TaskFactory.Create()
-        };
-
-        //act
-        var json = JsonSerializer.Serialize(toSerialize);
-        var deserialized = JsonSerializer.Deserialize<SendTaskResponse>(json);
 
         //assert
         deserialized.Should().NotBeNull();

@@ -5,7 +5,7 @@
 /// </summary>
 [DataContract]
 public record TaskStatusUpdateEvent
-    : RpcEvent
+    : TaskEvent
 {
 
     /// <summary>
