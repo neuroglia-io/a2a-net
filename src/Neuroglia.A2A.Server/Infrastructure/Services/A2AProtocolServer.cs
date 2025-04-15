@@ -1,14 +1,27 @@
-﻿namespace Neuroglia.A2A.Server.Infrastructure.Services;
+﻿// Copyright � 2025-Present Neuroglia SRL
+//
+// Licensed under the Apache License, Version 2.0 (the "License"),
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+namespace Neuroglia.A2A.Server.Infrastructure.Services;
 
 /// <summary>
-/// Represents the default implementation of the <see cref="IA2AProtocolHandler"/> interface
+/// Represents the default <see cref="IA2AProtocolServer"/> implementation
 /// </summary>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="tasks">The service used to persist <see cref="Models.Task"/>s</param>
 /// <param name="taskHandler">The service used to handle <see cref="Models.Task"/>s</param>
 /// <param name="taskEventStream">The service used to stream task events</param>
-public class A2AProtocolHandler(ILogger<A2AProtocolHandler> logger, ITaskRepository tasks, ITaskHandler taskHandler, ITaskEventStream taskEventStream)
-    : IA2AProtocolHandler
+public class A2AProtocolServer(ILogger<A2AProtocolServer> logger, ITaskRepository tasks, ITaskHandler taskHandler, ITaskEventStream taskEventStream)
+    : IA2AProtocolServer
 {
 
     /// <summary>
@@ -50,7 +63,7 @@ public class A2AProtocolHandler(ILogger<A2AProtocolHandler> logger, ITaskReposit
         task = await TaskHandler.SubmitAsync(task, cancellationToken).ConfigureAwait(false);
         return new()
         {
-            Id = task.Id,
+            Id = request.Id,
             Result = task.AsTask()
         };
     }
@@ -81,7 +94,7 @@ public class A2AProtocolHandler(ILogger<A2AProtocolHandler> logger, ITaskReposit
             {
                 Logger.LogError("An error occurred while (re)submitting the task with id '{taskId}': {ex}", task.Id, ex);
             }
-        });
+        }, cancellationToken);
         await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
         {
             Id = request.Id,

@@ -1,4 +1,17 @@
-﻿using Neuroglia.A2A.Server.Infrastructure.Services;
+﻿// Copyright � 2025-Present Neuroglia SRL
+//
+// Licensed under the Apache License, Version 2.0 (the "License"),
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Neuroglia.A2A.Server.Infrastructure.Services;
 using StreamJsonRpc;
 
 namespace Neuroglia.A2A.Server.AspNetCore;
@@ -24,7 +37,7 @@ public static class IApplicationBuilderExtensions
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var protocolHandler = context.RequestServices.GetRequiredService<IA2AProtocolHandler>();
+                    var protocolHandler = context.RequestServices.GetRequiredService<IA2AProtocolServer>();
                     using var socket = await context.WebSockets.AcceptWebSocketAsync();
                     using var jsonRpc = new JsonRpc(new WebSocketMessageHandler(socket, new SystemTextJsonFormatter()), protocolHandler);
                     jsonRpc.CancelLocallyInvokedMethodsWhenConnectionIsClosed = true;

@@ -4,9 +4,33 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".DistributedCache", ""))</RootNamespace>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <Title>Neuroglia A2A Protocol Server - Distributed Cache Infrastructure</Title>
+	<Description>Contains a distributed cache implementation of the task repository</Description>
+	<PackageTags>a2a;server;infrastructure;cache;distributed</PackageTags>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+	<Copyright>Copyright © 2025-Present Neuroglia SRL. All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/neuroglia-io/a2a</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/neuroglia-io/a2a</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+  	<None Include="..\..\README.md">
+  		<Pack>True</Pack>
+  		<PackagePath>\</PackagePath>
+  	</None>
+  </ItemGroup>
+	
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.4" />
   </ItemGroup>

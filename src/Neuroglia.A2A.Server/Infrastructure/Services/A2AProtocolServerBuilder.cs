@@ -1,11 +1,24 @@
-﻿namespace Neuroglia.A2A.Server.Infrastructure.Services;
+﻿// Copyright � 2025-Present Neuroglia SRL
+//
+// Licensed under the Apache License, Version 2.0 (the "License"),
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+namespace Neuroglia.A2A.Server.Infrastructure.Services;
 
 /// <summary>
-/// Represents the default implementation of the <see cref="IA2AProtocolHandlerBuilder"/>
+/// Represents the default implementation of the <see cref="IA2AProtocolServerBuilder"/>
 /// </summary>
 /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-public class A2AProtocolHandlerBuilder(IServiceCollection services)
-    : IA2AProtocolHandlerBuilder
+public class A2AProtocolServerBuilder(IServiceCollection services)
+    : IA2AProtocolServerBuilder
 {
 
     /// <summary>
@@ -34,47 +47,47 @@ public class A2AProtocolHandlerBuilder(IServiceCollection services)
     protected ServiceDescriptor? TaskRepository { get; set; }
 
     /// <summary>
-    /// Gets the type of the <see cref="IA2AProtocolHandler"/> to build
+    /// Gets the type of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
-    protected Type ProtocolHandlerType { get; set; } = typeof(A2AProtocolHandler);
+    protected Type ServerType { get; set; } = typeof(A2AProtocolServer);
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolHandlerBuilder UseAgentRuntime<TRuntime>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
-        where TRuntime : IAgentRuntime
+    public virtual IA2AProtocolServerBuilder UseAgentRuntime<TRuntime>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+        where TRuntime : class, IAgentRuntime
     {
         AgentRuntime = new(typeof(IAgentRuntime), typeof(TRuntime), serviceLifetime);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolHandlerBuilder UseTaskEventStream<TStream>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
-        where TStream : ITaskEventStream
+    public virtual IA2AProtocolServerBuilder UseTaskEventStream<TStream>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+        where TStream : class, ITaskEventStream
     {
         TaskEventStream = new(typeof(ITaskEventStream), typeof(TStream), serviceLifetime);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolHandlerBuilder UseTaskHandler<THandler>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
-        where THandler : ITaskHandler
+    public virtual IA2AProtocolServerBuilder UseTaskHandler<THandler>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+        where THandler : class, ITaskHandler
     {
         TaskHandler = new(typeof(ITaskHandler), typeof(THandler), serviceLifetime);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolHandlerBuilder UseTaskRepository<TRepository>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
-        where TRepository : ITaskRepository
+    public virtual IA2AProtocolServerBuilder UseTaskRepository<TRepository>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+        where TRepository : class, ITaskRepository
     {
         TaskRepository = new(typeof(ITaskRepository), typeof(TRepository), serviceLifetime);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolHandlerBuilder OfType<THandler>() 
-        where THandler : IA2AProtocolHandler
+    public virtual IA2AProtocolServerBuilder OfType<TServer>() 
+        where TServer : class, IA2AProtocolServer
     {
-        ProtocolHandlerType = typeof(THandler);
+        ServerType = typeof(TServer);
         return this;
     }
 
@@ -87,7 +100,7 @@ public class A2AProtocolHandlerBuilder(IServiceCollection services)
         Services.Add(TaskEventStream);
         Services.Add(TaskHandler);
         Services.Add(TaskRepository);
-        Services.Add(new(typeof(IA2AProtocolHandler), ProtocolHandlerType, ServiceLifetime.Singleton));
+        Services.Add(new(typeof(IA2AProtocolServer), ServerType, ServiceLifetime.Singleton));
         return Services;
     }
 
