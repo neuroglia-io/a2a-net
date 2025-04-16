@@ -16,22 +16,22 @@ namespace A2A.Server.Infrastructure.Services;
 /// <summary>
 /// Defines the fundamentals of a service used to build the manifest of an agent's provider
 /// </summary>
-public interface IAgentProviderManifestBuilder
+public interface IAgentProviderBuilder
 {
 
     /// <summary>
     /// Configures the agent's provider name
     /// </summary>
     /// <param name="name">The agent's provider name</param>
-    /// <returns>The configured <see cref="IAgentProviderManifestBuilder"/></returns>
-    IAgentProviderManifestBuilder WithName(string name);
+    /// <returns>The configured <see cref="IAgentProviderBuilder"/></returns>
+    IAgentProviderBuilder WithOrganization(string name);
 
     /// <summary>
     /// Configures the url referencing the official website of the agent's provider
     /// </summary>
     /// <param name="url">The url referencing the official website of the agent's provider</param>
-    /// <returns>The configured <see cref="IAgentProviderManifestBuilder"/></returns>
-    IAgentProviderManifestBuilder WithUrl(Uri url);
+    /// <returns>The configured <see cref="IAgentProviderBuilder"/></returns>
+    IAgentProviderBuilder WithUrl(Uri url);
 
     /// <summary>
     /// Builds the configured <see cref="AgentProvider"/>

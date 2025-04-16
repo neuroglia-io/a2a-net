@@ -30,7 +30,7 @@ public record AgentProvider
     /// <summary>
     /// Gets/sets a url, if any, referencing the official website of the agent's organization or provider
     /// </summary>
-    [DataMember(Name = "url", Order = 2), JsonPropertyName("organization"), JsonPropertyOrder(2), YamlMember(Alias = "organization", Order = 2)]
+    [DataMember(Name = "url", Order = 2), JsonPropertyName("url"), JsonPropertyOrder(2), YamlMember(Alias = "url", Order = 2)]
     public virtual Uri? Url { get; set; }
 
 }

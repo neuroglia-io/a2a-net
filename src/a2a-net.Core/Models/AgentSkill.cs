@@ -58,13 +58,13 @@ public record AgentSkill
     /// Gets/sets the set of supported mime types for input
     /// </summary>
     [DataMember(Name = "inputModes", Order = 6), JsonPropertyName("inputModes"), JsonPropertyOrder(6), YamlMember(Alias = "inputModes", Order = 6)]
-    public virtual EquatableList<string> DefaultInputModes { get; set; } = [MediaTypeNames.Text.Plain];
+    public virtual EquatableList<string> InputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <summary>
     /// Gets/sets the set of supported mime types for output
     /// </summary>
     [DataMember(Name = "outputModes", Order = 7), JsonPropertyName("outputModes"), JsonPropertyOrder(7), YamlMember(Alias = "outputModes", Order = 7)]
-    public virtual EquatableList<string> DefaultOutputModes { get; set; } = [MediaTypeNames.Text.Plain];
+    public virtual EquatableList<string> OutputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <inheritdoc/>
     public override string ToString() => Name;

@@ -20,6 +20,33 @@ public static class IServiceCollectionExtensions
 {
 
     /// <summary>
+    /// Adds and configures a new well known A2A agent
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="agent">The <see cref="AgentCard"/> that describes the well known A2A agent to add</param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddA2AWellKnownAgent(this IServiceCollection services, AgentCard agent)
+    {
+        ArgumentNullException.ThrowIfNull(agent);
+        services.AddSingleton(agent);
+        return services;
+    }
+
+    /// <summary>
+    /// Adds and configures a new well known A2A agent
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="setup">An <see cref="Action{T}"/> used to setup the <see cref="AgentCard"/> that describes the well known A2A agent to add</param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddA2AWellKnownAgent(this IServiceCollection services, Action<IAgentCardBuilder> setup)
+    {
+        ArgumentNullException.ThrowIfNull(setup);
+        var builder = new AgentCardBuilder();
+        setup(builder);
+        return services.AddA2AWellKnownAgent(builder.Build());
+    }
+
+    /// <summary>
     /// Adds and configures a new <see cref="IA2AProtocolServer"/>
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>

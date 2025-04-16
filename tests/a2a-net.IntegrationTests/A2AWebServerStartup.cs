@@ -24,6 +24,30 @@ public class A2AWebServerStartup
     public override void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging();
+        services.AddA2AWellKnownAgent(agent => agent
+            .WithName("fake-agent-1")
+            .WithDescription("fake-agent-1-description")
+            .WithVersion("1.0.0")
+            .WithUrl(new("http://localhost/a2a/fake-agent"))
+            .WithProvider(provider => provider
+                .WithOrganization("Neuroglia SRL")
+                .WithUrl(new("https://neuroglia.io")))
+            .WithSkill(skill => skill
+                .WithId("fake-skill-id")
+                .WithName("fake-skill-name")
+                .WithDescription("fake-skill-description")));
+        services.AddA2AWellKnownAgent(agent => agent
+            .WithName("fake-agent-2")
+            .WithDescription("fake-agent-2-description")
+            .WithVersion("1.0.0")
+            .WithUrl(new("http://localhost/a2a/fake-agent"))
+            .WithProvider(provider => provider
+                .WithOrganization("Neuroglia SRL")
+                .WithUrl(new("https://neuroglia.io")))
+            .WithSkill(skill => skill
+                .WithId("fake-skill-id")
+                .WithName("fake-skill-name")
+                .WithDescription("fake-skill-description")));
         services.AddDistributedMemoryCache();
         services.AddA2AProtocolServer(builder =>
         {
@@ -39,6 +63,7 @@ public class A2AWebServerStartup
     public override void Configure(IApplicationBuilder app)
     {
         app.UseRouting();
+        app.MapA2AWellKnownAgentEndpoint();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapA2AAgentHttpEndpoint("/a2a");
