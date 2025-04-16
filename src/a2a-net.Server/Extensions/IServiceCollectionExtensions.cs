@@ -23,14 +23,24 @@ public static class IServiceCollectionExtensions
     /// Adds and configures a new <see cref="IA2AProtocolServer"/>
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="name">The name of the <see cref="IA2AProtocolServer"/> to add and configure</param>
     /// <param name="setup">An <see cref="Action{T}"/> used to setup the <see cref="IA2AProtocolServer"/> to use</param>
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
-    public static IServiceCollection AddA2AProtocolServer(this IServiceCollection services, Action<IA2AProtocolServerBuilder> setup)
+    public static IServiceCollection AddA2AProtocolServer(this IServiceCollection services, string name, Action<IA2AProtocolServerBuilder> setup)
     {
         ArgumentNullException.ThrowIfNull(setup);
-        var builder = new A2AProtocolServerBuilder(services);
+        services.TryAddTransient<IA2AProtocolServerProvider, A2AProtocolServerProvider>();
+        var builder = new A2AProtocolServerBuilder(name, services);
         setup(builder);
         return builder.Build();
     }
+
+    /// <summary>
+    /// Adds and configures a new <see cref="IA2AProtocolServer"/>
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="setup">An <see cref="Action{T}"/> used to setup the <see cref="IA2AProtocolServer"/> to use</param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddA2AProtocolServer(this IServiceCollection services, Action<IA2AProtocolServerBuilder> setup) => services.AddA2AProtocolServer(A2AProtocolServer.DefaultName, setup);
 
 }

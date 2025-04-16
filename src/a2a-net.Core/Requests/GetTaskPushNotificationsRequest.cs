@@ -17,11 +17,10 @@ namespace A2A.Requests;
 /// Represents the request used to retrieve the currently configured push notification configuration for a Task
 /// </summary>
 [DataContract]
-public record GetTaskPushNotificationsRequest
-    : RpcRequest<TaskIdParameters>
+public record GetTaskPushNotificationsRequest()
+    : RpcRequest<TaskIdParameters>("tasks/pushNotification/get")
 {
 
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/pushNotification/get";
+
 
 }

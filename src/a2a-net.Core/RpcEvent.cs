@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using A2A.Serialization.Json;
-
 namespace A2A;
 
 /// <summary>
 /// Represents the base class for all A2A events
 /// </summary>
 [DataContract]
-[JsonConverter(typeof(RpcEventJsonConverter))]
 public abstract record RpcEvent
 {
 

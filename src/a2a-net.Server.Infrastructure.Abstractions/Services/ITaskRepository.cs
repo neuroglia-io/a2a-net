@@ -56,7 +56,7 @@ public interface ITaskRepository
     /// </summary>
     /// <param name="id">The id of the <see cref="TaskRecord"/> to delete</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
+    /// <returns>A new awaitable <see cref=" System.Threading.Tasks.Task"/></returns>
     System.Threading.Tasks.Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 
 }

@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Caching.Distributed;
-using A2A.Models;
 using System.Text.Json;
 
 namespace A2A.Server.Infrastructure.Services;

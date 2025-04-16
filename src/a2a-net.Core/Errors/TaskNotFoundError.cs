@@ -14,7 +14,7 @@
 namespace A2A.Errors;
 
 /// <summary>
-/// Represents an error indicating that the specified task could not be found.
+/// Represents an error indicating that the specified task could not be found
 /// </summary>
 [DataContract]
 public record TaskNotFoundError()
@@ -22,7 +22,7 @@ public record TaskNotFoundError()
 {
 
     /// <summary>
-    /// Gets the error code associated with the <see cref="TaskNotFoundError"/>
+    /// Gets the error code associated with the <see cref="RpcError"/>
     /// </summary>
     public const int ErrorCode = -32001;
 

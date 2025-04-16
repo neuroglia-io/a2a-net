@@ -17,7 +17,7 @@ namespace A2A;
 /// Represents the base class for all A2A RPC requests
 /// </summary>
 [DataContract]
-public abstract record RpcRequest
+public record RpcRequest
     : RpcMessage
 {
 
@@ -30,11 +30,27 @@ public abstract record RpcRequest
     }
 
     /// <summary>
-    /// Gets/sets the name of the A2A Protocol method to use
+    /// Initializes a new <see cref="RpcRequest"/>
+    /// </summary>
+    /// <param name="method">The name of the RPC method to invoke</param>
+    public RpcRequest(string method)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(method);
+        Method = method;
+    }
+
+    /// <summary>
+    /// Gets/sets the name of the RPC method to invoke
     /// </summary>
     [Required, MinLength(1)]
     [DataMember(Name = "method", Order = 2), JsonInclude, JsonPropertyName("method"), JsonPropertyOrder(2), YamlMember(Alias = "method", Order = 2)]
-    public abstract string Method { get; }
+    public virtual string Method { get; set; } = null!;
+
+    /// <summary>
+    /// Gets/sets a key/value mapping, if any, containing extension properties
+    /// </summary>
+    [JsonExtensionData]
+    public virtual IDictionary<string, object>? ExtensionData { get; set; }
 
 }
 
@@ -43,10 +59,21 @@ public abstract record RpcRequest
 /// </summary>
 /// <typeparam name="TParams">The type of the request's parameters</typeparam>
 [DataContract]
-public abstract record RpcRequest<TParams>
+public record RpcRequest<TParams>
     : RpcRequest
     where TParams : class
 {
+
+    /// <summary>
+    /// Initializes a new <see cref="RpcRequest"/>
+    /// </summary>
+    public RpcRequest() : base() { }
+
+    /// <summary>
+    /// Initializes a new <see cref="RpcRequest"/>
+    /// </summary>
+    /// <param name="method">The name of the RPC method to invoke</param>
+    public RpcRequest(string method): base(method) { }
 
     /// <summary>
     /// Gets/sets the request's parameters

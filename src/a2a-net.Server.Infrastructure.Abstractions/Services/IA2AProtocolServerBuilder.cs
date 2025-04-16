@@ -20,39 +20,60 @@ public interface IA2AProtocolServerBuilder
 {
 
     /// <summary>
+    /// Configures the <see cref="ServiceLifetime"/> of the <see cref="IA2AProtocolServer"/> to build
+    /// </summary>
+    /// <param name="lifetime">The <see cref="ServiceLifetime"/> of the <see cref="IA2AProtocolServer"/> to build</param>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder WithLifetime(ServiceLifetime lifetime);
+
+    /// <summary>
+    /// Configures the server to support streaming
+    /// </summary>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder SupportsStreaming();
+
+    /// <summary>
+    /// Configures the server to support push notifications
+    /// </summary>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder SupportsPushNotifications();
+
+    /// <summary>
+    /// Configures the server to support state transition history
+    /// </summary>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder SupportsStateTransitionHistory();
+
+    /// <summary>
     /// Configures the server to use the specified <see cref="IAgentRuntime"/>
     /// </summary>
     /// <typeparam name="TRuntime">The type of <see cref="IAgentRuntime"/> to use</typeparam>
-    /// <param name="serviceLifetime">The <see cref="IAgentRuntime"/>'s service lifetime</param>
     /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
-    IA2AProtocolServerBuilder UseAgentRuntime<TRuntime>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+    IA2AProtocolServerBuilder UseAgentRuntime<TRuntime>()
         where TRuntime : class, IAgentRuntime;
 
     /// <summary>
     /// Configures the server to use the specified <see cref="ITaskEventStream"/>
     /// </summary>
     /// <typeparam name="TStream">The type of <see cref="ITaskEventStream"/> to use</typeparam>
-    /// <param name="serviceLifetime">The <see cref="ITaskEventStream"/>'s service lifetime</param>
     /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
-    IA2AProtocolServerBuilder UseTaskEventStream<TStream>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+    IA2AProtocolServerBuilder UseTaskEventStream<TStream>()
         where TStream : class, ITaskEventStream;
 
     /// <summary>
     /// Configures the server to use the specified <see cref="ITaskRepository"/>
     /// </summary>
     /// <typeparam name="TRepository">The type of <see cref="ITaskRepository"/> to use</typeparam>
-    /// <param name="serviceLifetime">The <see cref="ITaskRepository"/>'s service lifetime</param>
     /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
-    IA2AProtocolServerBuilder UseTaskRepository<TRepository>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+    IA2AProtocolServerBuilder UseTaskRepository<TRepository>()
         where TRepository : class, ITaskRepository;
 
     /// <summary>
     /// Configures the server to use the specified <see cref="ITaskHandler"/>
     /// </summary>
     /// <typeparam name="THandler">The type of <see cref="ITaskHandler"/> to use</typeparam>
-    /// <param name="serviceLifetime">The <see cref="ITaskHandler"/>'s service lifetime</param>
     /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
-    IA2AProtocolServerBuilder UseTaskHandler<THandler>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+    IA2AProtocolServerBuilder UseTaskHandler<THandler>()
         where THandler : class, ITaskHandler;
 
     /// <summary>

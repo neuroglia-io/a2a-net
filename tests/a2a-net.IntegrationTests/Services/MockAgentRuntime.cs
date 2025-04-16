@@ -21,7 +21,7 @@ internal class MockAgentRuntime
 
     public async IAsyncEnumerable<AgentResponseContent> ExecuteAsync(Models.Task task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await System.Threading.Tasks.Task.CompletedTask;
+        await System.Threading.Tasks.Task.Delay(100);
         yield break;
     }
 

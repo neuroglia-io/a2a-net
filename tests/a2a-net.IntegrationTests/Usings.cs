@@ -11,16 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using FluentAssertions;
-global using Microsoft.Extensions.DependencyInjection;
-global using Nerdbank.Streams;
 global using A2A.Client;
 global using A2A.Client.Services;
-global using A2A.Client.Transport.WebSocket.Configuration;
 global using A2A.IntegrationTests.Services;
 global using A2A.Models;
 global using A2A.Requests;
 global using A2A.Server;
 global using A2A.Server.Infrastructure;
 global using A2A.Server.Infrastructure.Services;
+global using FluentAssertions;
+global using Microsoft.Extensions.DependencyInjection;
+global using Nerdbank.Streams;
 global using StreamJsonRpc;

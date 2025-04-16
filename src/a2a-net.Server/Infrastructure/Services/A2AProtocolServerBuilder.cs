@@ -16,10 +16,16 @@ namespace A2A.Server.Infrastructure.Services;
 /// <summary>
 /// Represents the default implementation of the <see cref="IA2AProtocolServerBuilder"/>
 /// </summary>
+/// <param name="name">The name of the <see cref="IA2AProtocolServer"/> to build</param>
 /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-public class A2AProtocolServerBuilder(IServiceCollection services)
+public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     : IA2AProtocolServerBuilder
 {
+
+    /// <summary>
+    /// Gets the name of the <see cref="IA2AProtocolServer"/> to build
+    /// </summary>
+    protected string Name { get; } = name;
 
     /// <summary>
     /// Gets the <see cref="IServiceCollection"/> to configure
@@ -27,24 +33,34 @@ public class A2AProtocolServerBuilder(IServiceCollection services)
     protected IServiceCollection Services { get; } = services;
 
     /// <summary>
-    /// Gets a <see cref="ServiceDescriptor"/> used to describe the <see cref="IAgentRuntime"/> to use
+    /// Gets the capabilities of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
-    protected ServiceDescriptor? AgentRuntime { get; set; }
+    protected AgentCapabilities Capabilities { get; } = new();
 
     /// <summary>
-    /// Gets a <see cref="ServiceDescriptor"/> used to describe the <see cref="ITaskEventStream"/> to use
+    /// Gets/sets the lifetime of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
-    protected ServiceDescriptor TaskEventStream { get; set; } = new(typeof(ITaskEventStream), typeof(TaskEventStream), ServiceLifetime.Singleton);
+    protected ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 
     /// <summary>
-    /// Gets a <see cref="ServiceDescriptor"/> used to describe the <see cref="ITaskHandler"/> to use
+    /// Gets the type of the <see cref="IAgentRuntime"/> to use
     /// </summary>
-    protected ServiceDescriptor TaskHandler { get; set; } = new(typeof(ITaskHandler), typeof(TaskHandler), ServiceLifetime.Singleton);
+    protected Type? AgentRuntimeType { get; set; }
+
+    /// <summary>
+    /// Gets the type of the <see cref="ITaskEventStream"/> to use
+    /// </summary>
+    protected Type TaskEventStreamType { get; set; } = typeof(TaskEventStream);
+
+    /// <summary>
+    /// Gets the type of the <see cref="ITaskHandler"/> to use
+    /// </summary>
+    protected Type TaskHandlerType { get; set; } = typeof(TaskHandler);
 
     /// <summary>
     /// Gets a <see cref="ServiceDescriptor"/> used to describe the <see cref="ITaskRepository"/> to use
     /// </summary>
-    protected ServiceDescriptor? TaskRepository { get; set; }
+    protected Type? TaskRepositoryType { get; set; }
 
     /// <summary>
     /// Gets the type of the <see cref="IA2AProtocolServer"/> to build
@@ -52,34 +68,62 @@ public class A2AProtocolServerBuilder(IServiceCollection services)
     protected Type ServerType { get; set; } = typeof(A2AProtocolServer);
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolServerBuilder UseAgentRuntime<TRuntime>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+    public virtual IA2AProtocolServerBuilder WithLifetime(ServiceLifetime lifetime)
+    {
+        Lifetime = lifetime;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder SupportsStreaming()
+    {
+        Capabilities.Streaming = true;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder SupportsPushNotifications()
+    {
+        Capabilities.PushNotifications = true;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder SupportsStateTransitionHistory()
+    {
+        Capabilities.StateTransitionHistory = true;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder UseAgentRuntime<TRuntime>() 
         where TRuntime : class, IAgentRuntime
     {
-        AgentRuntime = new(typeof(IAgentRuntime), typeof(TRuntime), serviceLifetime);
+        AgentRuntimeType = typeof(TRuntime);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolServerBuilder UseTaskEventStream<TStream>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+    public virtual IA2AProtocolServerBuilder UseTaskEventStream<TStream>() 
         where TStream : class, ITaskEventStream
     {
-        TaskEventStream = new(typeof(ITaskEventStream), typeof(TStream), serviceLifetime);
+        TaskEventStreamType = typeof(TStream);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolServerBuilder UseTaskHandler<THandler>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+    public virtual IA2AProtocolServerBuilder UseTaskHandler<THandler>() 
         where THandler : class, ITaskHandler
     {
-        TaskHandler = new(typeof(ITaskHandler), typeof(THandler), serviceLifetime);
+        TaskHandlerType = typeof(THandler);
         return this;
     }
 
     /// <inheritdoc/>
-    public virtual IA2AProtocolServerBuilder UseTaskRepository<TRepository>(ServiceLifetime serviceLifetime = ServiceLifetime.Singleton) 
+    public virtual IA2AProtocolServerBuilder UseTaskRepository<TRepository>() 
         where TRepository : class, ITaskRepository
     {
-        TaskRepository = new(typeof(ITaskRepository), typeof(TRepository), serviceLifetime);
+        TaskRepositoryType = typeof(TRepository);
         return this;
     }
 
@@ -94,13 +138,17 @@ public class A2AProtocolServerBuilder(IServiceCollection services)
     /// <inheritdoc/>
     public virtual IServiceCollection Build()
     {
-        if (AgentRuntime == null) throw new NullReferenceException("The agent runtime must be configured");
-        if (TaskRepository == null) throw new NullReferenceException("The task repository must be configured");
-        Services.Add(AgentRuntime);
-        Services.Add(TaskEventStream);
-        Services.Add(TaskHandler);
-        Services.Add(TaskRepository);
-        Services.Add(new(typeof(IA2AProtocolServer), ServerType, ServiceLifetime.Singleton));
+        if (AgentRuntimeType == null) throw new NullReferenceException("The agent runtime type must be configured");
+        if (TaskRepositoryType == null) throw new NullReferenceException("The task repository type must be configured");
+        Func<IServiceProvider, object?, object> factory = (provider, key) =>
+        {
+            var agentRuntime = ActivatorUtilities.CreateInstance(provider, AgentRuntimeType);
+            var taskEventStream = ActivatorUtilities.CreateInstance(provider, TaskEventStreamType);
+            var taskRepository = ActivatorUtilities.CreateInstance(provider, TaskRepositoryType);
+            var taskHandler = ActivatorUtilities.CreateInstance(provider, TaskHandlerType, agentRuntime, taskEventStream, taskRepository);
+            return ActivatorUtilities.CreateInstance(provider, ServerType, Name, Capabilities, taskEventStream, taskHandler, taskRepository);
+        };
+        Services.Add(new(typeof(IA2AProtocolServer), Name, factory, Lifetime));
         return Services;
     }
 

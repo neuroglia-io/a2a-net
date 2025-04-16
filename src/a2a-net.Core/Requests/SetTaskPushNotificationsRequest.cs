@@ -17,11 +17,9 @@ namespace A2A.Requests;
 /// Represents the request used to configure a push notification URL for receiving an update on Task status change
 /// </summary>
 [DataContract]
-public record SetTaskPushNotificationsRequest
-    : RpcRequest<TaskPushNotificationConfiguration>
+public record SetTaskPushNotificationsRequest()
+    : RpcRequest<TaskPushNotificationConfiguration>("tasks/pushNotification/set")
 {
 
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/pushNotification/set";
 
 }

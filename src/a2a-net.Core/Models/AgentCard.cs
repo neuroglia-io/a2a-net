@@ -91,7 +91,7 @@ public record AgentCard
     /// Gets/sets the set of the agent's skills
     /// </summary>
     [Required, MinLength(1)]
-    [DataMember(Name = "skils", Order = 11), JsonPropertyName("skils"), JsonPropertyOrder(11), YamlMember(Alias = "skils", Order = 11)]
+    [DataMember(Name = "skills", Order = 11), JsonPropertyName("skills"), JsonPropertyOrder(11), YamlMember(Alias = "skills", Order = 11)]
     public virtual EquatableList<AgentSkill> Skills { get; set; } = null!;
 
     /// <inheritdoc/>

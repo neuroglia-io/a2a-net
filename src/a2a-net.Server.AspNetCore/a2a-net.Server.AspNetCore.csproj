@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<OutputType>Library</OutputType>
+	<RootNamespace>A2A.Server.AspNetCore</RootNamespace>
     <VersionPrefix>0.1.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>

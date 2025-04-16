@@ -17,11 +17,10 @@ namespace A2A.Requests;
 /// Represents the request used to create a Task and to stream its updates
 /// </summary>
 [DataContract]
-public record SendTaskStreamingRequest
-    : RpcRequest<TaskSendParameters>
+public record SendTaskStreamingRequest()
+    : RpcRequest<TaskSendParameters>("tasks/sendSubscribe")
 {
 
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/sendSubscribe";
+
 
 }

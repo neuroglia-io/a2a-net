@@ -24,19 +24,17 @@ public record CancelTaskRequest
     /// <summary>
     /// Initializes a new <see cref="CancelTaskRequest"/>
     /// </summary>
-    public CancelTaskRequest() { }
+    public CancelTaskRequest() : base("tasks/cancel") { }
 
     /// <summary>
     /// Initializes a new <see cref="CancelTaskRequest"/>
     /// </summary>
     /// <param name="params">The request's parameters</param>
     public CancelTaskRequest(TaskIdParameters @params)
+        : this()
     {
         ArgumentNullException.ThrowIfNull(@params);
         Params = @params;
     }
-
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/cancel";
 
 }

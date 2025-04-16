@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using A2A.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using A2A.Server.AspNetCore;
 
 namespace A2A.IntegrationTests;
 
@@ -28,6 +28,9 @@ public class A2AWebServerStartup
         services.AddA2AProtocolServer(builder =>
         {
             builder
+                .SupportsStreaming()
+                .SupportsPushNotifications()
+                .SupportsStateTransitionHistory()
                 .UseAgentRuntime<MockAgentRuntime>()
                 .UseDistributedCacheTaskRepository();
         });
@@ -35,7 +38,12 @@ public class A2AWebServerStartup
 
     public override void Configure(IApplicationBuilder app)
     {
-        app.MapA2AEndpoint();
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapA2AAgentHttpEndpoint("/a2a");
+            endpoints.MapA2AAgentWebSocketEndpoint("/a2a/ws");
+        });
     }
 
 }

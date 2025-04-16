@@ -14,12 +14,20 @@
 namespace A2A.Server.Infrastructure.Services;
 
 /// <summary>
-/// Defines the fundamentals of an <see cref="IA2AProtocol"/> server
+/// Defines the fundamentals of an <see cref="IA2AProtocolService"/> server
 /// </summary>
 public interface IA2AProtocolServer
-    : IA2AProtocol
+    : IA2AProtocolService
 {
 
+    /// <summary>
+    /// Gets the server's name
+    /// </summary>
+    string Name { get; }
 
+    /// <summary>
+    /// Gets an object that describes the A2A server's capabilities
+    /// </summary>
+    AgentCapabilities Capabilities { get; }
 
 }

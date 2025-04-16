@@ -32,7 +32,7 @@ public interface IAgentRuntime
     /// </summary>
     /// <param name="task">The task to cancel.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
+    /// <returns>A new awaitable <see cref=" System.Threading.Tasks.Task"/></returns>
     System.Threading.Tasks.Task CancelAsync(Models.Task task, CancellationToken cancellationToken = default);
 
 }

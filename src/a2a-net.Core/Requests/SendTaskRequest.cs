@@ -17,11 +17,10 @@ namespace A2A.Requests;
 /// Represents the request used to create, continue or restart a task
 /// </summary>
 [DataContract]
-public record SendTaskRequest
-    : RpcRequest<TaskSendParameters>
+public record SendTaskRequest()
+    : RpcRequest<TaskSendParameters>("tasks/send")
 {
 
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/send";
+
 
 }

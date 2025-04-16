@@ -16,13 +16,26 @@ namespace A2A.Server.Infrastructure.Services;
 /// <summary>
 /// Represents the default <see cref="IA2AProtocolServer"/> implementation
 /// </summary>
+/// <param name="name">The server's name</param>
+/// <param name="capabilities">The server's capabilities</param>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="tasks">The service used to persist <see cref="Models.Task"/>s</param>
 /// <param name="taskHandler">The service used to handle <see cref="Models.Task"/>s</param>
 /// <param name="taskEventStream">The service used to stream task events</param>
-public class A2AProtocolServer(ILogger<A2AProtocolServer> logger, ITaskRepository tasks, ITaskHandler taskHandler, ITaskEventStream taskEventStream)
+public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILogger<A2AProtocolServer> logger, ITaskRepository tasks, ITaskHandler taskHandler, ITaskEventStream taskEventStream)
     : IA2AProtocolServer
 {
+
+    /// <summary>
+    /// Gets the <see cref="IA2AProtocolServer"/> service name
+    /// </summary>
+    public const string DefaultName = "Default";
+
+    /// <inheritdoc/>
+    public string Name { get; } = name;
+
+    /// <inheritdoc/>
+    public AgentCapabilities Capabilities { get; } = capabilities;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -95,7 +108,7 @@ public class A2AProtocolServer(ILogger<A2AProtocolServer> logger, ITaskRepositor
                 Logger.LogError("An error occurred while (re)submitting the task with id '{taskId}': {ex}", task.Id, ex);
             }
         }, cancellationToken);
-        await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
+        await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).TakeUntil(e => e is TaskStatusUpdateEvent statusUpdate && statusUpdate.Final).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
         {
             Id = request.Id,
             Result = e
@@ -107,7 +120,7 @@ public class A2AProtocolServer(ILogger<A2AProtocolServer> logger, ITaskRepositor
     {
         ArgumentNullException.ThrowIfNull(request);
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? throw new LocalRpcException($"Failed to find a task with the specified id '{request.Params.Id}'");
-        if (task.Status.State == TaskState.Working) yield break; 
+        if (task.Status.State != TaskState.Working) yield break; 
         await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
         {
             Id = request.Id,

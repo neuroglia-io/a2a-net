@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging;
 global using A2A.Errors;
 global using A2A.Events;
 global using A2A.Models;
 global using A2A.Requests;
 global using A2A.Server.Infrastructure;
 global using A2A.Server.Infrastructure.Services;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using Microsoft.Extensions.Logging;
 global using StreamJsonRpc;
 global using System.Reactive.Linq;
 global using System.Runtime.CompilerServices;

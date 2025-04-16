@@ -17,11 +17,10 @@ namespace A2A.Requests;
 /// Represents the request used to retrieve the generated Artifacts for a Task 
 /// </summary>
 [DataContract]
-public record GetTaskRequest
-    : RpcRequest<TaskQueryParameters>
+public record GetTaskRequest()
+    : RpcRequest<TaskQueryParameters>("tasks/get")
 {
 
-    /// <inheritdoc/>
-    public override string Method { get; } = "tasks/get";
+
 
 }

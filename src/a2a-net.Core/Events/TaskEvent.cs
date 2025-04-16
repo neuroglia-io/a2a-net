@@ -17,6 +17,7 @@ namespace A2A.Events;
 /// Represents the base class for all task-related RPC events
 /// </summary>
 [DataContract]
+[JsonConverter(typeof(TaskEventJsonConverter))]
 public abstract record TaskEvent
     : RpcEvent
 {
