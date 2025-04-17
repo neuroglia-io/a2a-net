@@ -24,6 +24,6 @@ public interface IA2AProtocolServerProvider
     /// </summary>
     /// <param name="name">The name of the <see cref="IA2AProtocolServer"/> to get</param>
     /// <returns>The <see cref="IA2AProtocolServer"/> with the specified name</returns>
-    IA2AProtocolServer Get(string name);
+    IA2AProtocolServer? Get(string name);
 
 }

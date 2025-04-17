@@ -48,6 +48,11 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     protected Type? AgentRuntimeType { get; set; }
 
     /// <summary>
+    /// Gets a <see cref="Func{T, TResult}"/> used to create the <see cref="IAgentRuntime"/> to use
+    /// </summary>
+    protected Func<IServiceProvider, IAgentRuntime>? AgentRuntimeFactory { get; set; }
+
+    /// <summary>
     /// Gets the type of the <see cref="ITaskEventStream"/> to use
     /// </summary>
     protected Type TaskEventStreamType { get; set; } = typeof(TaskEventStream);
@@ -104,6 +109,13 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     }
 
     /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder UseAgentRuntime(Func<IServiceProvider, IAgentRuntime> factory)
+    {
+        AgentRuntimeFactory = factory;
+        return this;
+    }
+
+    /// <inheritdoc/>
     public virtual IA2AProtocolServerBuilder UseTaskEventStream<TStream>() 
         where TStream : class, ITaskEventStream
     {
@@ -138,11 +150,11 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     /// <inheritdoc/>
     public virtual IServiceCollection Build()
     {
-        if (AgentRuntimeType == null) throw new NullReferenceException("The agent runtime type must be configured");
+        if (AgentRuntimeType == null && AgentRuntimeFactory == null) throw new NullReferenceException("The agent runtime must be configured");
         if (TaskRepositoryType == null) throw new NullReferenceException("The task repository type must be configured");
         Func<IServiceProvider, object?, object> factory = (provider, key) =>
         {
-            var agentRuntime = ActivatorUtilities.CreateInstance(provider, AgentRuntimeType);
+            var agentRuntime = AgentRuntimeType == null ? AgentRuntimeFactory!.Invoke(provider) : ActivatorUtilities.CreateInstance(provider, AgentRuntimeType);
             var taskEventStream = ActivatorUtilities.CreateInstance(provider, TaskEventStreamType);
             var taskRepository = ActivatorUtilities.CreateInstance(provider, TaskRepositoryType);
             var taskHandler = ActivatorUtilities.CreateInstance(provider, TaskHandlerType, agentRuntime, taskEventStream, taskRepository);

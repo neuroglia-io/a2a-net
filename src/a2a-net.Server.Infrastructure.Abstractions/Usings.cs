@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using Microsoft.Extensions.DependencyInjection;
 global using A2A.Events;
 global using A2A.Models;
-global using A2A.Requests;
-global using StreamJsonRpc;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.ComponentModel.DataAnnotations;
 global using System.Runtime.Serialization;
 global using System.Text.Json.Serialization;
 global using YamlDotNet.Serialization;

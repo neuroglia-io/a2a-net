@@ -53,6 +53,13 @@ public interface IA2AProtocolServerBuilder
         where TRuntime : class, IAgentRuntime;
 
     /// <summary>
+    /// Configures the server to use the specified <see cref="IAgentRuntime"/>
+    /// </summary>
+    /// <param name="factory">A <see cref="Func{T, TResult}"/> used to create the <see cref="IAgentRuntime"/> to use</param>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder UseAgentRuntime(Func<IServiceProvider, IAgentRuntime> factory);
+
+    /// <summary>
     /// Configures the server to use the specified <see cref="ITaskEventStream"/>
     /// </summary>
     /// <typeparam name="TStream">The type of <see cref="ITaskEventStream"/> to use</typeparam>

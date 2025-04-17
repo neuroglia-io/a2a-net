@@ -25,14 +25,14 @@ public interface IAgentRuntime
     /// <param name="task">The task to execute</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to stream the content produced by the agent during the task's execution</returns>
-    IAsyncEnumerable<AgentResponseContent> ExecuteAsync(Models.Task task, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<AgentResponseContent> ExecuteAsync(TaskRecord task, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Cancels the specified task's execution
     /// </summary>
-    /// <param name="task">The task to cancel.</param>
+    /// <param name="taskId">The id of the task to cancel.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref=" System.Threading.Tasks.Task"/></returns>
-    System.Threading.Tasks.Task CancelAsync(Models.Task task, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task CancelAsync(string taskId, CancellationToken cancellationToken = default);
 
 }

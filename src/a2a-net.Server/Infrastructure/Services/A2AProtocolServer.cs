@@ -70,6 +70,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
                 Timestamp = DateTimeOffset.Now,
                 State = TaskState.Submitted
             },
+            Message = request.Params.Message,
             Notifications = request.Params.PushNotification
         },
         cancellationToken).ConfigureAwait(false);
@@ -94,6 +95,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
                 Timestamp = DateTimeOffset.Now,
                 State = TaskState.Submitted
             },
+            Message = request.Params.Message,
             Notifications = request.Params.PushNotification
         },
         cancellationToken).ConfigureAwait(false);
