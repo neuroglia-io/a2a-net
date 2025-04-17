@@ -25,7 +25,7 @@ public record TaskSendParameters
     /// </summary>
     [Required, MinLength(1)]
     [DataMember(Name = "id", Order = 1), JsonPropertyName("id"), JsonPropertyOrder(1), YamlMember(Alias = "id", Order = 1)]
-    public virtual string Id { get; set; } = null!;
+    public virtual string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
     /// Gets/sets the unique identifier of the session the task belongs to<para></para>

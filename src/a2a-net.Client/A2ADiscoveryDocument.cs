@@ -11,14 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Client.Services;
-global using A2A.IntegrationTests.Services;
-global using A2A.Models;
-global using A2A.Requests;
-global using A2A.Server;
-global using A2A.Server.Infrastructure;
-global using A2A.Server.Infrastructure.Services;
-global using A2A.Client;
-global using FluentAssertions;
-global using Microsoft.Extensions.DependencyInjection;
-global using System.Net.Http.Json;
+namespace A2A.Client;
+
+/// <summary>
+/// Represents the result of an A2A agent discovery operation
+/// </summary>
+public class A2ADiscoveryDocument
+{
+
+    /// <summary>
+    /// Gets the endpoint from which the discovery document was retrieved
+    /// </summary>
+    public virtual required Uri Endpoint { get; init; }
+
+    /// <summary>
+    /// Gets a list contained the discovered <see cref="AgentCard"/> entries returned by the remote agent
+    /// </summary>
+    public virtual required IReadOnlyList<AgentCard> Agents { get; init; }
+
+}

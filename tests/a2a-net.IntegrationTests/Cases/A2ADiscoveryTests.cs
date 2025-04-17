@@ -37,4 +37,19 @@ public class A2ADiscoveryTests
         agents.Should().NotBeNullOrEmpty();
     }
 
+    [Fact]
+    public async System.Threading.Tasks.Task Get_AgentsDocumentation_Using_DiscoveryClient_Should_Work()
+    {
+        //arrange
+        using var httpClient = WebServerFactory.CreateClient();
+
+        //act
+        var document = await httpClient.GetA2ADiscoveryDocumentAsync();
+
+        //assert
+        document.Should().NotBeNull();
+        document.Endpoint.OriginalString.Should().Be($"{WebServerFactory.Server.BaseAddress}.well-known/agents.json");
+        document.Agents.Should().NotBeNullOrEmpty();
+    }
+
 }

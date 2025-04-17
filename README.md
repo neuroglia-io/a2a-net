@@ -18,11 +18,18 @@ This repository provides a complete set of libraries and components for building
 
 ### 📡 Client
 
-- **`a2a-net.Client`**  
-  Provides the default implementation of an A2A client for sending tasks and interacting with agents via JSON-RPC.
+- **`a2a-net.Client.Abstractions`**  
+  Contains core interfaces and contracts for implementing A2A clients.
 
-- **`a2a-net.Client.Transport.WebSocket`**  
-  Implements the WebSocket transport for `a2a-net.Client`.  
+- **`a2a-net.Client`**  
+  Includes client-side functionality for A2A agent discovery and metadata resolution.
+
+- **`a2a-net.Client.Http`**  
+  Implements the HTTP transport for `IA2AProtocolClient`
+  Allows establishing persistent agent-to-agent communication over HTTP connections.
+
+- **`a2a-net.Client.WebSocket`**  
+  Implements the WebSocket transport for `IA2AProtocolClient`
   Allows establishing persistent agent-to-agent communication over WebSocket connections.
 
 ---
@@ -57,21 +64,50 @@ This repository provides a complete set of libraries and components for building
 
 ```
 dotnet add package a2a-net.Client
-dotnet add package a2a-net.Client.Transport.WebSocket
-dotnet add package a2a-net.Server
+dotnet add package a2a-net.Client.Http
+dotnet add package a2a-net.Client.WebSocket
+dotnet add package a2a-net.Server.Infrastructure.DistributedCache
 dotnet add package a2a-net.Server.AspNetCore
 ```
 
-### Configure the client
+### Discover a remote agent
 
 ```csharp
-services.AddA2ProtocolClient(builder =>
+ var discoveryDocument = await httpClient.GetA2ADiscoveryDocumentAsync(new Uri("http://localhost"));
+```
+
+### Configure and use a client
+
+```csharp
+services.AddA2ProtocolHttpClient(options => 
 {
-    builder.UseWebSocketTransport(options => 
-    {
-        options.Endpoint = new("ws://localhost/a2a");
-    });
+    options.Endpoint = new("http://localhost/a2a");
 });
+```
+
+```csharp
+services.AddA2ProtocolWebSocketClient(options => 
+{
+    options.Endpoint = new("ws://localhost/a2a");
+});
+```
+
+```csharp
+var request = new SendTaskRequest()
+{
+    Params = new()
+    {
+        Message = new()
+        {
+            Role = MessageRole.User,
+            Parts =
+            [
+                new TextPart("tell me a joke")
+            ]
+        }
+    }
+};
+var response = await Client.SendTaskAsync(request);
 ```
 
 ### Host an agent
@@ -83,7 +119,10 @@ services.AddDistributedMemoryCache();
 services.AddA2AProtocolServer(builder =>
 {
     builder
-        .UseAgentRuntime<CustomAgentRuntime>()
+        .SupportsStreaming()
+        .SupportsPushNotifications()
+        .SupportsStateTransitionHistory()
+        .UseAgentRuntime<MockAgentRuntime>()
         .UseDistributedCacheTaskRepository();
 });
 ```
@@ -91,7 +130,8 @@ services.AddA2AProtocolServer(builder =>
 #### Map A2A Endpoints
 
 ```csharp
-app.MapA2AEndpoint();
+app.MapA2AAgentHttpEndpoint("/a2a");
+app.MapA2AAgentWebSocketEndpoint("/a2a/ws")
 ```
 
 ---

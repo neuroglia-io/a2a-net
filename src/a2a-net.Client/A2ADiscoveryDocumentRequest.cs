@@ -11,14 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Client.Services;
-global using A2A.IntegrationTests.Services;
-global using A2A.Models;
-global using A2A.Requests;
-global using A2A.Server;
-global using A2A.Server.Infrastructure;
-global using A2A.Server.Infrastructure.Services;
-global using A2A.Client;
-global using FluentAssertions;
-global using Microsoft.Extensions.DependencyInjection;
-global using System.Net.Http.Json;
+namespace A2A.Client;
+
+/// <summary>
+/// Represents a request to retrieve an A2A discovery document from a remote server
+/// </summary>
+public class A2ADiscoveryDocumentRequest
+{
+
+    /// <summary>
+    /// Gets/sets the base URI of the remote server to query for discovery metadata
+    /// </summary>
+    public virtual Uri? Address { get; init; }
+
+}

@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\a2a-net.Client.Http\a2a-net.Client.Http.csproj" />
     <ProjectReference Include="..\..\src\a2a-net.Client.WebSocket\a2a-net.Client.WebSocket.csproj" />
+    <ProjectReference Include="..\..\src\a2a-net.Client\a2a-net.Client.csproj" />
     <ProjectReference Include="..\..\src\a2a-net.Server.AspNetCore\a2a-net.Server.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\a2a-net.Server.Infrastructure.DistributedCache\a2a-net.Server.Infrastructure.DistributedCache.csproj" />
   </ItemGroup>
