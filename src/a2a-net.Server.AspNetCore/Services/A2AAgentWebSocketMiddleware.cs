@@ -44,7 +44,7 @@ public class A2AAgentWebSocketMiddleware
             context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
             return;
         }
-        var serverName = context.Request.RouteValues.TryGetValue(A2AEndpointRouteBuilderExtensions.ServerVariableName, out var value) && value is string name && !string.IsNullOrWhiteSpace(name) ? name : A2AProtocolServer.DefaultName;
+        var serverName = context.Request.RouteValues.TryGetValue(A2AEndpointRouteBuilderExtensions.AgentVariableName, out var value) && value is string name && !string.IsNullOrWhiteSpace(name) ? name : A2AProtocolServer.DefaultName;
         var server = _serverProvider.Get(serverName);
         using var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
         using var jsonRpc = new JsonRpc(new WebSocketMessageHandler(socket, new SystemTextJsonFormatter()), server);
