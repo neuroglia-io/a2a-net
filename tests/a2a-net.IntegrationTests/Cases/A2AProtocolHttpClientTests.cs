@@ -69,6 +69,7 @@ public class A2AProtocolHttpClientTests
         response.Id.Should().Be(request.Id);
         response.Result.Should().NotBeNull();
         response.Result.Id.Should().Be(request.Params.Id);
+        response.Result.Artifacts.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
