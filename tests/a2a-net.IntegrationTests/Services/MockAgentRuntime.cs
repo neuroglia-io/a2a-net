@@ -21,6 +21,7 @@ internal class MockAgentRuntime
 
     public async IAsyncEnumerable<AgentResponseContent> ExecuteAsync(TaskRecord task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        await System.Threading.Tasks.Task.Delay(50, cancellationToken);
         yield return new(new Artifact()
         {
             Parts =
