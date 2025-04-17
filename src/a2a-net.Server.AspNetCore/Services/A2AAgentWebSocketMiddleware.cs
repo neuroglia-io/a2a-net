@@ -18,19 +18,14 @@ namespace A2A.Server.AspNetCore.Services;
 /// <summary>
 /// Represents the middleware that handles WebSocket-based JSON-RPC requests for an A2A agent
 /// </summary>
-public class A2AAgentWebSocketMiddleware
+/// <remarks>
+/// Initializes a new <see cref="A2AAgentWebSocketMiddleware"/>
+/// </remarks>
+/// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
+public class A2AAgentWebSocketMiddleware(IA2AProtocolServerProvider serverProvider)
 {
 
-    readonly IA2AProtocolServerProvider _serverProvider;
-
-    /// <summary>
-    /// Initializes a new <see cref="A2AAgentWebSocketMiddleware"/>
-    /// </summary>
-    /// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
-    public A2AAgentWebSocketMiddleware(IA2AProtocolServerProvider serverProvider)
-    {
-        _serverProvider = serverProvider;
-    }
+    readonly IA2AProtocolServerProvider _serverProvider = serverProvider;
 
     /// <summary>
     /// Invokes the <see cref="A2AAgentHttpMiddleware"/>

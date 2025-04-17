@@ -11,26 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Threading;
+using System.Net;
 
 namespace A2A.Server.AspNetCore.Services;
 
 /// <summary>
 /// Represents the middleware that handles HTTP-based JSON-RPC requests for an A2A agent
 /// </summary>
-public class A2AAgentHttpMiddleware
+/// <remarks>
+/// Initializes a new <see cref="A2AAgentHttpMiddleware"/>
+/// </remarks>
+/// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
+/// <param name="jsonOptions">The service used to access the current <see cref="JsonOptions"/></param>
+public class A2AAgentHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptions<JsonOptions> jsonOptions)
 {
 
-    readonly IA2AProtocolServerProvider _serverProvider;
-
-    /// <summary>
-    /// Initializes a new <see cref="A2AAgentHttpMiddleware"/>
-    /// </summary>
-    /// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
-    public A2AAgentHttpMiddleware(IA2AProtocolServerProvider serverProvider)
-    {
-        _serverProvider = serverProvider;
-    }
+    readonly IA2AProtocolServerProvider _serverProvider = serverProvider;
+    readonly JsonOptions _jsonOptions = jsonOptions.Value;
 
     /// <summary>
     /// Invokes the <see cref="A2AAgentHttpMiddleware"/>
@@ -39,7 +39,11 @@ public class A2AAgentHttpMiddleware
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>
     public async System.Threading.Tasks.Task InvokeAsync(HttpContext context)
     {
-        if (!HttpMethods.IsPost(context.Request.Method)) return;
+        if (!HttpMethods.IsPost(context.Request.Method))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
+            return;
+        }
         var request = await JsonSerializer.DeserializeAsync<RpcRequest>(context.Request.Body, cancellationToken: context.RequestAborted);
         if (request == null)
         {
@@ -49,6 +53,11 @@ public class A2AAgentHttpMiddleware
         }
         var serverName = context.Request.RouteValues.TryGetValue(A2AEndpointRouteBuilderExtensions.AgentVariableName, out var value) && value is string name && !string.IsNullOrWhiteSpace(name) ? name : A2AProtocolServer.DefaultName;
         var server = _serverProvider.Get(serverName);
+        if (server == null)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            return;
+        }
         switch (request.Method)
         {
             case A2AProtocol.Methods.Tasks.Send:
@@ -160,7 +169,7 @@ public class A2AAgentHttpMiddleware
         async System.Threading.Tasks.Task WriteJsonResponseAsync(object result)
         {
             context.Response.ContentType = MediaTypeNames.Application.Json;
-            await JsonSerializer.SerializeAsync(context.Response.Body, result, result.GetType(), cancellationToken: context.RequestAborted);
+            await JsonSerializer.SerializeAsync(context.Response.Body, result, result.GetType(), _jsonOptions.SerializerOptions, context.RequestAborted);
         }
 
     }

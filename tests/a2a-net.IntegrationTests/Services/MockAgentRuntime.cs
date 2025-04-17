@@ -19,12 +19,12 @@ internal class MockAgentRuntime
     : IAgentRuntime
 {
 
-    public async IAsyncEnumerable<AgentResponseContent> ExecuteAsync(Models.Task task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<AgentResponseContent> ExecuteAsync(TaskRecord task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await System.Threading.Tasks.Task.Delay(100);
+        await System.Threading.Tasks.Task.Delay(100, cancellationToken);
         yield break;
     }
 
-    public System.Threading.Tasks.Task CancelAsync(Models.Task task, CancellationToken cancellationToken = default) => System.Threading.Tasks.Task.CompletedTask;
+    public System.Threading.Tasks.Task CancelAsync(string taskId, CancellationToken cancellationToken = default) => System.Threading.Tasks.Task.CompletedTask;
 
 }

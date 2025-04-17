@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+
 namespace A2A.Server.AspNetCore;
 
 /// <summary>
@@ -36,7 +39,7 @@ public static class IApplicationBuilderExtensions
                 app.Use(async (HttpContext context, RequestDelegate next) =>
                 {
                     context.Response.ContentType = MediaTypeNames.Application.Json;
-                    await context.Response.WriteAsJsonAsync(agents[0]);
+                    await context.Response.WriteAsJsonAsync(agents[0], context.RequestServices.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions, context.RequestAborted);
                 });
             });
         }
@@ -47,7 +50,7 @@ public static class IApplicationBuilderExtensions
                 app.Use(async (HttpContext context, RequestDelegate next) =>
                 {
                     context.Response.ContentType = MediaTypeNames.Application.Json;
-                    await context.Response.WriteAsJsonAsync(agents);
+                    await context.Response.WriteAsJsonAsync(agents, context.RequestServices.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions, context.RequestAborted);
                 });
             });
         }

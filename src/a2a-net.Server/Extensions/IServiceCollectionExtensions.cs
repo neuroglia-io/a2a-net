@@ -38,12 +38,15 @@ public static class IServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
     /// <param name="setup">An <see cref="Action{T}"/> used to setup the <see cref="AgentCard"/> that describes the well known A2A agent to add</param>
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
-    public static IServiceCollection AddA2AWellKnownAgent(this IServiceCollection services, Action<IAgentCardBuilder> setup)
+    public static IServiceCollection AddA2AWellKnownAgent(this IServiceCollection services, Action<IServiceProvider, IAgentCardBuilder> setup)
     {
         ArgumentNullException.ThrowIfNull(setup);
-        var builder = new AgentCardBuilder();
-        setup(builder);
-        return services.AddA2AWellKnownAgent(builder.Build());
+        return services.AddSingleton(provider =>
+        {
+            var builder = new AgentCardBuilder();
+            setup(provider, builder);
+            return builder.Build();
+        });
     }
 
     /// <summary>
