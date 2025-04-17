@@ -21,15 +21,15 @@ namespace A2A.Server.AspNetCore;
 public static class A2AEndpointRouteBuilderExtensions
 {
 
-    internal const string ServerVariableName = "server";
+    internal const string AgentVariableName = "agent";
 
     /// <summary>
     /// Maps the A2A agent middleware to a specified route pattern.
-    /// If the pattern includes a <c>{server}</c> route variable, the middleware will resolve the server by key.
+    /// If the pattern includes a <c>{agent}</c> route variable, the middleware will resolve the agent by key.
     /// </summary>
     /// <param name="endpoints">The endpoint route builder</param>
-    /// <param name="pattern">The route pattern to map (e.g., <c>/a2a</c> or '<c>/a2a/{server}</c>')</param>
-    public static void MapA2AAgentHttpEndpoint(this IEndpointRouteBuilder endpoints, string pattern = $"/a2a/{{{ServerVariableName}}}")
+    /// <param name="pattern">The route pattern to map (e.g., <c>/a2a</c> or '<c>/a2a/{agent}</c>')</param>
+    public static void MapA2AAgentHttpEndpoint(this IEndpointRouteBuilder endpoints, string pattern = $"/a2a/{{{AgentVariableName}}}")
     {
         endpoints.Map(pattern, async context =>
         {
@@ -40,11 +40,11 @@ public static class A2AEndpointRouteBuilderExtensions
 
     /// <summary>
     /// Maps the A2A agent middleware to a specified route pattern.
-    /// If the pattern includes a <c>{server}</c> route variable, the middleware will resolve the server by key.
+    /// If the pattern includes a <c>{agent}</c> route variable, the middleware will resolve the agent by key.
     /// </summary>
     /// <param name="endpoints">The endpoint route builder</param>
-    /// <param name="pattern">The route pattern to map (e.g., <c>/a2a</c> or '<c>/a2a/{server}</c>')</param>
-    public static void MapA2AAgentWebSocketEndpoint(this IEndpointRouteBuilder endpoints, string pattern = $"/a2a/{{{ServerVariableName}}}")
+    /// <param name="pattern">The route pattern to map (e.g., <c>/a2a</c> or '<c>/a2a/{agent}</c>')</param>
+    public static void MapA2AAgentWebSocketEndpoint(this IEndpointRouteBuilder endpoints, string pattern = $"/a2a/{{{AgentVariableName}}}")
     {
         endpoints.Map(pattern, async context =>
         {

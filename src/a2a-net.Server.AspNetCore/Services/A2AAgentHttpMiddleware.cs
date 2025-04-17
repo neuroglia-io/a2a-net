@@ -47,7 +47,7 @@ public class A2AAgentHttpMiddleware
             await WriteJsonResponseAsync(new InvalidRequestError()).ConfigureAwait(false);
             return;
         }
-        var serverName = context.Request.RouteValues.TryGetValue(A2AEndpointRouteBuilderExtensions.ServerVariableName, out var value) && value is string name && !string.IsNullOrWhiteSpace(name) ? name : A2AProtocolServer.DefaultName;
+        var serverName = context.Request.RouteValues.TryGetValue(A2AEndpointRouteBuilderExtensions.AgentVariableName, out var value) && value is string name && !string.IsNullOrWhiteSpace(name) ? name : A2AProtocolServer.DefaultName;
         var server = _serverProvider.Get(serverName);
         switch (request.Method)
         {
