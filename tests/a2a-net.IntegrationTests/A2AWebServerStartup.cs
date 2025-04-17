@@ -24,7 +24,7 @@ public class A2AWebServerStartup
     public override void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging();
-        services.AddA2AWellKnownAgent(agent => agent
+        services.AddA2AWellKnownAgent((provider, agent) => agent
             .WithName("fake-agent-1")
             .WithDescription("fake-agent-1-description")
             .WithVersion("1.0.0")
@@ -36,7 +36,7 @@ public class A2AWebServerStartup
                 .WithId("fake-skill-id")
                 .WithName("fake-skill-name")
                 .WithDescription("fake-skill-description")));
-        services.AddA2AWellKnownAgent(agent => agent
+        services.AddA2AWellKnownAgent((provider, agent) => agent
             .WithName("fake-agent-2")
             .WithDescription("fake-agent-2-description")
             .WithVersion("1.0.0")

@@ -21,22 +21,16 @@ namespace A2A.Server.AspNetCore.Services;
 /// <summary>
 /// Represents the middleware that handles HTTP-based JSON-RPC requests for an A2A agent
 /// </summary>
-public class A2AAgentHttpMiddleware
+/// <remarks>
+/// Initializes a new <see cref="A2AAgentHttpMiddleware"/>
+/// </remarks>
+/// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
+/// <param name="jsonOptions">The service used to access the current <see cref="JsonOptions"/></param>
+public class A2AAgentHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptions<JsonOptions> jsonOptions)
 {
 
-    readonly IA2AProtocolServerProvider _serverProvider;
-    readonly JsonOptions _jsonOptions;
-
-    /// <summary>
-    /// Initializes a new <see cref="A2AAgentHttpMiddleware"/>
-    /// </summary>
-    /// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
-    /// <param name="jsonOptions">The service used to access the current <see cref="JsonOptions"/></param>
-    public A2AAgentHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptions<JsonOptions> jsonOptions)
-    {
-        _serverProvider = serverProvider;
-        _jsonOptions = jsonOptions.Value;
-    }
+    readonly IA2AProtocolServerProvider _serverProvider = serverProvider;
+    readonly JsonOptions _jsonOptions = jsonOptions.Value;
 
     /// <summary>
     /// Invokes the <see cref="A2AAgentHttpMiddleware"/>
