@@ -78,7 +78,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
         return new()
         {
             Id = request.Id,
-            Result = task.AsTask()
+            Result = task.AsTask(Capabilities.StateTransitionHistory, request.Params.HistoryLength)
         };
     }
 
@@ -134,7 +134,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     public virtual async Task<RpcResponse<Models.Task>> GetTaskAsync(GetTaskRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var task = (await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false))?.AsTask();
+        var task = (await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false))?.AsTask(Capabilities.StateTransitionHistory);
         if (task == null) return new()
         {
             Id = request.Id,
@@ -173,7 +173,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
         return new()
         {
             Id = request.Id,
-            Result = task.AsTask()
+            Result = task.AsTask(Capabilities.StateTransitionHistory)
         };
     }
 

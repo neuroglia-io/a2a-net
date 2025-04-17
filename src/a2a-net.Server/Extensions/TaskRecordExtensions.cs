@@ -23,13 +23,16 @@ public static class TaskRecordExtensions
     /// Converts the <see cref="TaskRecord"/> into a new <see cref="Models.Task"/>
     /// </summary>
     /// <param name="taskRecord">The <see cref="TaskRecord"/> to convert</param>
+    /// <param name="stateTransitionHistory">A boolean indicating whether or not the agent exposes status change history for tasks</param>
+    /// <param name="historyLength">The maximum length number of state transitions, if any, to be retrieved</param>
     /// <returns>A new <see cref="Models.Task"/></returns>
-    public static Models.Task AsTask(this TaskRecord taskRecord) => new()
+    public static Models.Task AsTask(this TaskRecord taskRecord, bool stateTransitionHistory = false, uint? historyLength = null) => new()
     {
         Id = taskRecord.Id,
         SessionId = taskRecord.SessionId,
         Status = taskRecord.Status,
-        History = taskRecord.History,
+        Artifacts = taskRecord.Artifacts,
+        History = stateTransitionHistory ? historyLength.HasValue && taskRecord.History != null ? [..taskRecord.History.TakeLast((int)historyLength.Value)] : taskRecord.History : null,
         Metadata = taskRecord.Metadata,
     };
 
