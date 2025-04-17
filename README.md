@@ -2,7 +2,11 @@
 
 **Agent-to-Agent (A2A)** is a lightweight, extensible protocol and framework for orchestrating tasks and exchanging structured content between autonomous agents using JSON-RPC 2.0.
 
-This repository provides a complete set of libraries and components for building, hosting, and communicating with A2A-compliant agents across various transport layers.
+[![Build Status](https://img.shields.io/github/actions/workflow/status/neuroglia-io/a2a-net/test.yml?branch=main)](https://github.com/neuroglia-io/a2a-net/actions)
+[![Release](https://img.shields.io/github/v/release/neuroglia-io/a2a-net?include_prereleases)](https://github.com/neuroglia-io/a2a-net/releases)
+[![NuGet](https://img.shields.io/nuget/v/a2a-net.Core.svg)](https://nuget.org/packages/a2a-net.Core)
+[![License](https://img.shields.io/github/license/neuroglia-io/a2a-net)](LICENSE)
+---
 
 ---
 
