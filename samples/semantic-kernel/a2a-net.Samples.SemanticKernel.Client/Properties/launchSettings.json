@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "a2a-net.Samples.SemanticKernel.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "--server http://localhost:5079/a2a"
+    }
+  }
+}

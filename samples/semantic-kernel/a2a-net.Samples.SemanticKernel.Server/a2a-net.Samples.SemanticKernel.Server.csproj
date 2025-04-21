@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>A2A.Samples.SemanticKernel.Server</RootNamespace>
+    <UserSecretsId>7ae06787-a72b-4029-abe1-4afcad6ccdcb</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA2007;IDE1006;SKEXP0001;SKEXP0010;SKEXP0070;SKEXP0110;OPENAI001</NoWarn>
+  </PropertyGroup>
+	
+  <ItemGroup>
+	<PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.46.0" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.46.0" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.46.0-alpha" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.HuggingFace" Version="1.46.0-preview" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.MistralAI" Version="1.46.0-alpha" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.46.0-alpha" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.Onnx" Version="1.46.0-alpha" />
+	<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.46.0-preview" />
+	<PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi.Extensions" Version="1.46.0-alpha" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\a2a-net.Server.AspNetCore\a2a-net.Server.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\src\a2a-net.Server.Infrastructure.DistributedCache\a2a-net.Server.Infrastructure.DistributedCache.csproj" />
+  </ItemGroup>
+	
+</Project>
