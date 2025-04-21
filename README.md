@@ -146,6 +146,14 @@ For a full overview of the A2A protocol, see [google.github.io/A2A](https://goog
 
 ---
 
+## 🧪 Samples
+
+Explore sample projects demonstrating how to use the [a2a-net](#) solution:
+
+- [Semantic Kernel](/samples/semantic-kernel/):  Demonstrates how to build and host an A2A-compatible agent using [Microsoft's Semantic Kernel](https://aka.ms/semantic-kernel) and OpenAI. Includes both a server that exposes the agent and a client that interacts with it over HTTP using the JSON-RPC protocol.
+
+---
+
 ## 🛡 License
 
 This project is licensed under the [Apache-2.0 License](LICENSE).

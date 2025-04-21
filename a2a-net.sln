@@ -57,6 +57,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Client.WebSocket", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Client", "src\a2a-net.Client\a2a-net.Client.csproj", "{DBF98B98-D0C2-46C3-93A8-F42CB3CF0E97}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{889361E4-EDC0-46F1-8A0F-E390418939BB}"
+	ProjectSection(SolutionItems) = preProject
+		samples\README.md = samples\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "semantic-kernel", "semantic-kernel", "{614D5E64-63BF-4DAE-8A80-E07FB1C2462F}"
+	ProjectSection(SolutionItems) = preProject
+		samples\semantic-kernel\README.md = samples\semantic-kernel\README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Samples.SemanticKernel.Server", "samples\semantic-kernel\a2a-net.Samples.SemanticKernel.Server\a2a-net.Samples.SemanticKernel.Server.csproj", "{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Samples.SemanticKernel.Client", "samples\semantic-kernel\a2a-net.Samples.SemanticKernel.Client\a2a-net.Samples.SemanticKernel.Client.csproj", "{2C78A491-5476-3A37-4591-BB876B59E903}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +121,14 @@ Global
 		{DBF98B98-D0C2-46C3-93A8-F42CB3CF0E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBF98B98-D0C2-46C3-93A8-F42CB3CF0E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBF98B98-D0C2-46C3-93A8-F42CB3CF0E97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C78A491-5476-3A37-4591-BB876B59E903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C78A491-5476-3A37-4591-BB876B59E903}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C78A491-5476-3A37-4591-BB876B59E903}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C78A491-5476-3A37-4591-BB876B59E903}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -125,6 +147,9 @@ Global
 		{D83DCD5A-67A0-752D-711A-54F244C6100A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{1A8D202B-4921-1974-FB12-7811F4BDEA47} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{DBF98B98-D0C2-46C3-93A8-F42CB3CF0E97} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{614D5E64-63BF-4DAE-8A80-E07FB1C2462F} = {889361E4-EDC0-46F1-8A0F-E390418939BB}
+		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2} = {614D5E64-63BF-4DAE-8A80-E07FB1C2462F}
+		{2C78A491-5476-3A37-4591-BB876B59E903} = {614D5E64-63BF-4DAE-8A80-E07FB1C2462F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {698C2979-1A16-437B-8C04-1357EB80CC7F}
