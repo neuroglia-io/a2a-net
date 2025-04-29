@@ -84,6 +84,14 @@ public interface IA2AProtocolServerBuilder
         where THandler : class, ITaskHandler;
 
     /// <summary>
+    /// Configures the server to use the specified <see cref="IA2AProtocolServerBuilder"/>
+    /// </summary>
+    /// <typeparam name="TSender">The type of <see cref="IA2AProtocolServerBuilder"/> to use</typeparam>
+    /// <returns>The configured <see cref="IA2AProtocolServerBuilder"/></returns>
+    IA2AProtocolServerBuilder UsePushNotificationSender<TSender>()
+        where TSender : class, IPushNotificationSender;
+
+    /// <summary>
     /// Configures the type of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
     /// <typeparam name="TServer">The type of <see cref="IA2AProtocolServer"/> to build</typeparam>

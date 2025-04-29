@@ -19,22 +19,22 @@ namespace A2A.Server.AspNetCore.Services;
 /// Represents the middleware that handles WebSocket-based JSON-RPC requests for an A2A agent
 /// </summary>
 /// <remarks>
-/// Initializes a new <see cref="A2AAgentWebSocketMiddleware"/>
+/// Initializes a new <see cref="A2AWebSocketMiddleware"/>
 /// </remarks>
 /// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
-public class A2AAgentWebSocketMiddleware(IA2AProtocolServerProvider serverProvider)
+public class A2AWebSocketMiddleware(IA2AProtocolServerProvider serverProvider)
 {
 
     readonly IA2AProtocolServerProvider _serverProvider = serverProvider;
 
     /// <summary>
-    /// Invokes the <see cref="A2AAgentHttpMiddleware"/>
+    /// Invokes the <see cref="A2AHttpMiddleware"/>
     /// </summary>
     /// <param name="context">The current <see cref="HttpContext"/></param>
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>
     public async System.Threading.Tasks.Task InvokeAsync(HttpContext context)
     {
-        if (context.WebSockets.IsWebSocketRequest)
+        if (!context.WebSockets.IsWebSocketRequest)
         {
             context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
             return;

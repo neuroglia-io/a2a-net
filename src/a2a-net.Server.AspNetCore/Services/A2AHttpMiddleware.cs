@@ -11,10 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Threading;
-using System.Net;
 
 namespace A2A.Server.AspNetCore.Services;
 
@@ -22,18 +19,18 @@ namespace A2A.Server.AspNetCore.Services;
 /// Represents the middleware that handles HTTP-based JSON-RPC requests for an A2A agent
 /// </summary>
 /// <remarks>
-/// Initializes a new <see cref="A2AAgentHttpMiddleware"/>
+/// Initializes a new <see cref="A2AHttpMiddleware"/>
 /// </remarks>
 /// <param name="serverProvider">The service used to provide <see cref="IA2AProtocolServer"/>s</param>
 /// <param name="jsonOptions">The service used to access the current <see cref="JsonOptions"/></param>
-public class A2AAgentHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptions<JsonOptions> jsonOptions)
+public class A2AHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptions<JsonOptions> jsonOptions)
 {
 
     readonly IA2AProtocolServerProvider _serverProvider = serverProvider;
     readonly JsonOptions _jsonOptions = jsonOptions.Value;
 
     /// <summary>
-    /// Invokes the <see cref="A2AAgentHttpMiddleware"/>
+    /// Invokes the <see cref="A2AHttpMiddleware"/>
     /// </summary>
     /// <param name="context">The current <see cref="HttpContext"/></param>
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>

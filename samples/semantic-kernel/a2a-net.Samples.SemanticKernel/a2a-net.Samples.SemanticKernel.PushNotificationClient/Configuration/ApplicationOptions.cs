@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Errors;
-global using A2A.Events;
-global using A2A.Models;
-global using A2A.Requests;
-global using A2A.Server.Infrastructure.Services;
-global using Microsoft.AspNetCore.Http.Json;
-global using Microsoft.Extensions.Options;
-global using StreamJsonRpc;
-global using System.Net;
-global using System.Net.Mime;
-global using System.Text;
-global using System.Text.Json;
+namespace a2a_net.Samples.SemanticKernel.PushNotificationClient.Configuration;
+
+/// <summary>
+/// Represents the options used to configure the application
+/// </summary>
+public class ApplicationOptions
+{
+
+    /// <summary>
+    /// Gets/sets the remote server's URI
+    /// </summary>
+    public required Uri Server { get; set; }
+
+}

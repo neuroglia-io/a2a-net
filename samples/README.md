@@ -10,3 +10,4 @@ This folder contains example projects that demonstrate how to use [a2a-net](#) t
   Includes:
   - a server that hosts the agent and exposes it via A2A and HTTP endpoints
   - a client that connects to the agent using the JSON-RPC protocol over HTTP
+  - a clientt used to consume push notifications
