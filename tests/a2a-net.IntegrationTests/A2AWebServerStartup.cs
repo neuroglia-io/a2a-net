@@ -56,7 +56,8 @@ public class A2AWebServerStartup
                 .SupportsPushNotifications()
                 .SupportsStateTransitionHistory()
                 .UseAgentRuntime<MockAgentRuntime>()
-                .UseDistributedCacheTaskRepository();
+                .UseDistributedCacheTaskRepository()
+                .UsePushNotificationSender<TestPushNotificationSender>();
         });
     }
 

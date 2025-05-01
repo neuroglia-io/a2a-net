@@ -239,7 +239,7 @@ public class A2AProtocolHttpClientTests
                 Id = sendRequest.Params.Id,
                 PushNotificationConfig = new()
                 {
-                    Url = new("http://fake-url.com")
+                    Url = new(WebServerFactory.Server.BaseAddress, "/callback")
                 }
             }
         };
