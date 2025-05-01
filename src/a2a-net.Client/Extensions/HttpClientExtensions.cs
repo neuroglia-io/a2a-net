@@ -20,6 +20,40 @@ public static class HttpClientExtensions
 {
 
     /// <summary>
+    /// Sends a GET request to the specified URL and returns the HTTP response message
+    /// </summary>
+    /// <param name="client">The HttpClient instance</param>
+    /// <param name="url">The request URL</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The HTTP response message</returns>
+    public static HttpResponseMessage Get(this HttpClient client, Uri url, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        return client.Send(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a GET request to the specified URL, expecting a JSON response, and deserializes it into the specified type
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the JSON response to</typeparam>
+    /// <param name="client">The HttpClient instance</param>
+    /// <param name="url">The request URL</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The deserialized response object</returns>
+    public static T? GetFromJson<T>(this HttpClient client, Uri url, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
+        var response = client.Send(request, cancellationToken);
+        if (response.IsSuccessStatusCode)
+        {
+            using var reader = new StreamReader(response.Content.ReadAsStream(cancellationToken), Encoding.UTF8, leaveOpen: true);
+            return JsonSerializer.Deserialize<T>(reader.ReadToEnd());
+        }
+        else throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
+    }
+
+    /// <summary>
     /// Retrieves the A2A discovery document from a remote agent
     /// </summary>
     /// <param name="httpClient">The <see cref="HttpClient"/> to use to perform the request</param>
@@ -83,6 +117,72 @@ public static class HttpClientExtensions
         ArgumentNullException.ThrowIfNull(httpClient);
         var request = new A2ADiscoveryDocumentRequest(); ;
         return httpClient.GetA2ADiscoveryDocumentAsync(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves the A2A discovery document from a remote agent
+    /// </summary>
+    /// <param name="httpClient">The <see cref="HttpClient"/> to use to perform the request</param>
+    /// <param name="request">The discovery request containing the base URI and optional configuration</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The retrieved <see cref="A2ADiscoveryDocument"/></returns>
+    public static A2ADiscoveryDocument GetA2ADiscoveryDocument(this HttpClient httpClient, A2ADiscoveryDocumentRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(request);
+        try
+        {
+            var path = "/.well-known/agent.json";
+            var endpoint = request.Address == null ? new Uri(path, UriKind.Relative) : new Uri(request.Address, path);
+            var agentCard = httpClient.GetFromJson<AgentCard>(endpoint, cancellationToken);
+            return new()
+            {
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, path),
+                Agents = agentCard == null ? [] : [agentCard]
+            };
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            var path = "/.well-known/agents.json";
+            var endpoint = request.Address == null ? new Uri(path, UriKind.Relative) : new Uri(request.Address, path);
+            var agentCards = httpClient.GetFromJson<List<AgentCard>>(endpoint, cancellationToken);
+            return new()
+            {
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, path),
+                Agents = agentCards ?? []
+            };
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the A2A discovery document from a remote agent
+    /// </summary>
+    /// <param name="httpClient">The <see cref="HttpClient"/> to use to perform the request</param>
+    /// <param name="address">The base URI of the remote server to query for discovery metadata</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The retrieved <see cref="A2ADiscoveryDocument"/></returns>
+    public static A2ADiscoveryDocument GetA2ADiscoveryDocument(this HttpClient httpClient, Uri address, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(address);
+        var request = new A2ADiscoveryDocumentRequest()
+        {
+            Address = address
+        };
+        return httpClient.GetA2ADiscoveryDocument(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves the A2A discovery document from a remote agent
+    /// </summary>
+    /// <param name="httpClient">The <see cref="HttpClient"/> to use to perform the request</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The retrieved <see cref="A2ADiscoveryDocument"/></returns>
+    public static A2ADiscoveryDocument GetA2ADiscoveryDocument(this HttpClient httpClient, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        var request = new A2ADiscoveryDocumentRequest();
+        return httpClient.GetA2ADiscoveryDocument(request, cancellationToken);
     }
 
 }
