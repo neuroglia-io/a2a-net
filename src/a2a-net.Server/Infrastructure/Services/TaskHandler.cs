@@ -19,7 +19,9 @@ namespace A2A.Server.Infrastructure.Services;
 /// <param name="tasks">The service used to persist <see cref="Models.Task"/>s</param>
 /// <param name="taskEventStream">The service used to stream task events</param>
 /// <param name="agent">The service used to interact with an AI agent to execute tasks</param>
-public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream, IAgentRuntime agent)
+/// <param name="pushNotificationSender">The service used to send push notifications</param>
+/// <param name="httpClient">The service used to perform HTTP requests</param>
+public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream, IAgentRuntime agent, IPushNotificationSender pushNotificationSender, HttpClient httpClient)
     : ITaskHandler
 {
 
@@ -37,6 +39,16 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
     /// Gets the service used to interact with an AI agent to execute tasks
     /// </summary>
     protected IAgentRuntime AgentRuntime { get; } = agent;
+
+    /// <summary>
+    /// Gets the service used to send push notifications
+    /// </summary>
+    protected IPushNotificationSender PushNotificationSender { get; } = pushNotificationSender;
+
+    /// <summary>
+    /// Gets the service used to perform HTTP requests
+    /// </summary>
+    protected HttpClient HttpClient { get; } = httpClient;
 
     /// <inheritdoc/>
     public virtual async Task<TaskRecord> SubmitAsync(TaskRecord task, CancellationToken cancellationToken = default)
@@ -219,7 +231,7 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
     /// <param name="task">The task whose status has been updated</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>
-    protected virtual System.Threading.Tasks.Task NotifyTaskStatusUpdateAsync(TaskRecord task, CancellationToken cancellationToken = default)
+    protected virtual async System.Threading.Tasks.Task NotifyTaskStatusUpdateAsync(TaskRecord task, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         TaskEventStream.OnNext(new TaskStatusUpdateEvent()
@@ -228,8 +240,7 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
             Status = task.Status,
             Final = task.Status.State == TaskState.Completed || task.Status.State == TaskState.Cancelled || task.Status.State == TaskState.Failed
         });
-        //todo: send push notification
-        return System.Threading.Tasks.Task.CompletedTask;
+        if (task.Notifications != null) await PushNotificationSender.SendPushNotificationAsync(task.Notifications.Url, task, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -239,7 +250,7 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
     /// <param name="artifact">The newly produced artifact</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>
-    protected virtual System.Threading.Tasks.Task NotifyTaskArtifactUpdateAsync(TaskRecord task, Artifact artifact, CancellationToken cancellationToken = default)
+    protected virtual async System.Threading.Tasks.Task NotifyTaskArtifactUpdateAsync(TaskRecord task, Artifact artifact, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(artifact);
@@ -248,8 +259,7 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
             Id = task.Id,
             Artifact = artifact
         });
-        // todo: send push notification
-        return System.Threading.Tasks.Task.CompletedTask;
+        if (task.Notifications != null) await PushNotificationSender.SendPushNotificationAsync(task.Notifications.Url, task, cancellationToken).ConfigureAwait(false);
     }
 
 }

@@ -56,7 +56,8 @@ public class A2AWebServerStartup
                 .SupportsPushNotifications()
                 .SupportsStateTransitionHistory()
                 .UseAgentRuntime<MockAgentRuntime>()
-                .UseDistributedCacheTaskRepository();
+                .UseDistributedCacheTaskRepository()
+                .UsePushNotificationSender<TestPushNotificationSender>();
         });
     }
 
@@ -66,8 +67,8 @@ public class A2AWebServerStartup
         app.MapA2AWellKnownAgentEndpoint();
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapA2AAgentHttpEndpoint("/a2a");
-            endpoints.MapA2AAgentWebSocketEndpoint("/a2a/ws");
+            endpoints.MapA2AHttpEndpoint("/a2a");
+            endpoints.MapA2AWebSocketEndpoint("/a2a/ws");
         });
     }
 

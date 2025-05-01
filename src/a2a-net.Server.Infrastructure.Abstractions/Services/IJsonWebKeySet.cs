@@ -11,23 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Samples.SemanticKernel.Client.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
+namespace A2A.Server.Infrastructure.Services;
 
 /// <summary>
-/// Represents the options used to configure the application
+/// Defines the fundamentals of a service used to manage the application's JSON Web Key Set (JWKS)
 /// </summary>
-public class ApplicationOptions
+public interface IJsonWebKeySet
 {
 
     /// <summary>
-    /// Gets/sets the URI of the A2A server to interact with
+    /// Adds the specified public key to the application's JSON Web Key Set 
     /// </summary>
-    [Required]
-    public Uri Server { get; set; } = null!;
+    /// <param name="key">The public key to add</param>
+    void AddPublicKey(JsonWebKey key);
 
     /// <summary>
-    /// Gets/sets the URI, if any, of the endpoint to send push notifications to
+    /// Exports the application's JSON Web Key Set (JWKS)
     /// </summary>
-    public Uri? PushNotificationClient { get; set; }
+    /// <returns>The JSON representation of the application's JWKS</returns>
+    string Export();
 
 }

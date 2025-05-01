@@ -63,9 +63,14 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     protected Type TaskHandlerType { get; set; } = typeof(TaskHandler);
 
     /// <summary>
-    /// Gets a <see cref="ServiceDescriptor"/> used to describe the <see cref="ITaskRepository"/> to use
+    /// Gets the type of <see cref="ITaskRepository"/> to use
     /// </summary>
     protected Type? TaskRepositoryType { get; set; }
+
+    /// <summary>
+    /// Gets the type of <see cref="IPushNotificationSender"/> to use
+    /// </summary>
+    protected Type PushNotificationSenderType { get; set; } = typeof(PushNotificationSender);
 
     /// <summary>
     /// Gets the type of the <see cref="IA2AProtocolServer"/> to build
@@ -140,6 +145,14 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     }
 
     /// <inheritdoc/>
+    public virtual IA2AProtocolServerBuilder UsePushNotificationSender<TSender>()
+        where TSender : class, IPushNotificationSender
+    {
+        PushNotificationSenderType = typeof(TSender);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public virtual IA2AProtocolServerBuilder OfType<TServer>() 
         where TServer : class, IA2AProtocolServer
     {
@@ -157,8 +170,9 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
             var agentRuntime = AgentRuntimeType == null ? AgentRuntimeFactory!.Invoke(provider) : ActivatorUtilities.CreateInstance(provider, AgentRuntimeType);
             var taskEventStream = ActivatorUtilities.CreateInstance(provider, TaskEventStreamType);
             var taskRepository = ActivatorUtilities.CreateInstance(provider, TaskRepositoryType);
-            var taskHandler = ActivatorUtilities.CreateInstance(provider, TaskHandlerType, agentRuntime, taskEventStream, taskRepository);
-            return ActivatorUtilities.CreateInstance(provider, ServerType, Name, Capabilities, taskEventStream, taskHandler, taskRepository);
+            var pushNotificationSender = ActivatorUtilities.CreateInstance(provider, PushNotificationSenderType);
+            var taskHandler = ActivatorUtilities.CreateInstance(provider, TaskHandlerType, agentRuntime, taskEventStream, taskRepository, pushNotificationSender);
+            return ActivatorUtilities.CreateInstance(provider, ServerType, Name, Capabilities, taskEventStream, taskHandler, taskRepository, pushNotificationSender);
         };
         Services.Add(new(typeof(IA2AProtocolServer), Name, factory, Lifetime));
         return Services;

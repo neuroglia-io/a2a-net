@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Errors;
-global using A2A.Events;
-global using A2A.Models;
-global using A2A.Requests;
-global using A2A.Server.Infrastructure.Services;
-global using Microsoft.AspNetCore.Http.Json;
-global using Microsoft.Extensions.Options;
-global using StreamJsonRpc;
-global using System.Net;
-global using System.Net.Mime;
-global using System.Text;
-global using System.Text.Json;
+namespace A2A.IntegrationTests.Services;
+
+public class TestPushNotificationSender
+    : IPushNotificationSender
+{
+
+    public System.Threading.Tasks.Task SendPushNotificationAsync(Uri url, object payload, CancellationToken cancellationToken = default) => System.Threading.Tasks.Task.CompletedTask;
+
+    public virtual Task<bool> VerifyPushNotificationUrlAsync(Uri url, CancellationToken cancellationToken = default) => System.Threading.Tasks.Task.FromResult(true);
+
+}

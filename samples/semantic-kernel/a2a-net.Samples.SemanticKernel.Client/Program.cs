@@ -19,10 +19,13 @@ var configuration = new ConfigurationBuilder()
     .Build();
 var applicationOptions = new ApplicationOptions();
 configuration.Bind(applicationOptions);
+using var httpClient = new HttpClient();
+var discoveryDocument = await httpClient.GetA2ADiscoveryDocumentAsync(applicationOptions.Server);
+var agent = discoveryDocument.Agents[0];
 var services = new ServiceCollection();
 services.AddA2AProtocolHttpClient(options =>
 {
-    options.Endpoint = applicationOptions.Server;
+    options.Endpoint = agent.Url.IsAbsoluteUri ? agent.Url : new(applicationOptions.Server, agent.Url);
 });
 var provider = services.BuildServiceProvider();
 var client = provider.GetRequiredService<IA2AProtocolClient>();
@@ -45,13 +48,21 @@ while (true)
             {
                 Role = MessageRole.User,
                 Parts = [new TextPart(prompt)]
+            },
+            PushNotification = applicationOptions.PushNotificationClient == null ? null : new()
+            {
+                Url = applicationOptions.PushNotificationClient
             }
         }
     };
     try
     {
         var response = await client.SendTaskAsync(request, cancellationSource.Token);
-        if (response.Result?.Artifacts is { Count: > 0 })
+        if (response.Error != null)
+        {
+            AnsiConsole.MarkupLine($"[italic red]Agent>[/] [bold red]Error {response.Error.Code}:[/] {response.Error.Message}");
+        }
+        else if (response.Result?.Artifacts is { Count: > 0 })
         {
             foreach (var artifact in response.Result.Artifacts)
             {

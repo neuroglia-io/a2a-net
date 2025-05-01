@@ -56,6 +56,6 @@ builder.Services.AddA2AProtocolServer(builder =>
 var app = builder.Build();
 
 app.MapA2AWellKnownAgentEndpoint();
-app.MapA2AAgentHttpEndpoint("/a2a");
+app.MapA2AHttpEndpoint("/a2a");
 
 await app.RunAsync();

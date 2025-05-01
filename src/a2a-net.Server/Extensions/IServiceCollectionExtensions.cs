@@ -59,6 +59,8 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddA2AProtocolServer(this IServiceCollection services, string name, Action<IA2AProtocolServerBuilder> setup)
     {
         ArgumentNullException.ThrowIfNull(setup);
+        services.AddHttpClient();
+        services.TryAddSingleton<IJsonWebKeySet, JsonWebKeySet>();
         services.TryAddTransient<IA2AProtocolServerProvider, A2AProtocolServerProvider>();
         var builder = new A2AProtocolServerBuilder(name, services);
         setup(builder);
