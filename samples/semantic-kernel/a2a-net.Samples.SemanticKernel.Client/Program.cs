@@ -102,17 +102,27 @@ while (true)
         continue;
     }
 
+    var filePath = AnsiConsole.Ask<string>("[blue]File path (optional, <enter> to skip)>[/]", string.Empty).TrimStart('"').TrimEnd('"');
+    string? filename = !string.IsNullOrWhiteSpace(filePath) ? Path.GetFileName(filePath) : null;
+    var fileBytes = !string.IsNullOrWhiteSpace(filePath) ? System.IO.File.ReadAllBytes(filePath) : null;
+	
     spinnerCts = new();
 
     try
     {
+            var parts = new List<Part>() { new TextPart(prompt) };
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                parts.Add(new FilePart { File = new() { Bytes = Convert.ToBase64String(fileBytes!), Name = filename } });
+            }
+			
         var taskParams = new TaskSendParameters
         {
             SessionId = session,
             Message = new()
             {
                 Role = MessageRole.User,
-                Parts = [new TextPart(prompt)]
+                Parts = [.. parts]
             }
         };
 
