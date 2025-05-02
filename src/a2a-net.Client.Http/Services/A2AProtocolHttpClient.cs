@@ -70,7 +70,16 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
             var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
-            var e = JsonSerializer.Deserialize<RpcResponse<TaskEvent>>(json)!;
+            RpcResponse<TaskEvent>? e = null;
+            try
+            {
+                e = JsonSerializer.Deserialize<RpcResponse<TaskEvent>>(json)!;
+            }
+            catch(Exception ex)
+            {
+                continue;
+            }
+
             yield return e;
         }
     }
@@ -145,7 +154,7 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
         {
             if (disposing)
             {
-                
+
             }
             _disposed = true;
         }
