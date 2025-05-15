@@ -16,23 +16,34 @@ namespace A2A.Client.Services;
 /// <summary>
 /// Represents the default HTTP implementation of the <see cref="IA2AProtocolClient"/> interface
 /// </summary>
-/// <param name="options">The service used to access the current <see cref="A2AProtocolClientOptions"/></param>
-/// <param name="httpClient">The service used to perform HTTP requests</param>
-public class A2AProtocolHttpClient(IOptions<A2AProtocolClientOptions> options, HttpClient httpClient)
-    : IA2AProtocolClient, IDisposable
+public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
 {
 
     bool _disposed;
 
+    /// <param name="options">The service used to access the current <see cref="A2AProtocolClientOptions"/></param>
+    /// <param name="httpClient">The service used to perform HTTP requests</param>
+    public A2AProtocolHttpClient(IOptions<A2AProtocolClientOptions> options, HttpClient httpClient)
+    {
+        this.Options = options.Value;
+        this.HttpClient = httpClient;
+
+        if (this.Options.Authorization is not null)
+        {
+            var (scheme, token) = this.Options.Authorization();
+            this.HttpClient.DefaultRequestHeaders.Authorization = new(scheme, token);
+        }
+    }
+
     /// <summary>
     /// Gets the current <see cref="A2AProtocolClientOptions"/>
     /// </summary>
-    protected A2AProtocolClientOptions Options { get; } = options.Value;
+    protected A2AProtocolClientOptions Options { get; }
 
     /// <summary>
     /// Gets the service used to perform HTTP requests
     /// </summary>
-    protected HttpClient HttpClient { get; } = httpClient;
+    protected HttpClient HttpClient { get; }
 
     /// <inheritdoc/>
     public virtual async Task<RpcResponse<Models.Task>> SendTaskAsync(SendTaskRequest request, CancellationToken cancellationToken = default)
