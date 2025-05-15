@@ -24,4 +24,5 @@ public class A2AProtocolClientOptions
     /// </summary>
     public virtual Uri Endpoint { get; set; } = null!;
 
+    public virtual Func<(string Scheme, string Token)>? Authorization { get; set; } = null;
 }
