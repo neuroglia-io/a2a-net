@@ -147,7 +147,7 @@ while (true)
                             Console.WriteLine();
                         }
 
-                        PrintArtifact(artifactEvent.Artifact);
+                        await PrintArtifactAsync(artifactEvent.Artifact);
 
                         if (artifactEvent.Artifact.LastChunk is true)
                         {
@@ -211,7 +211,7 @@ while (true)
                     AnsiConsole.Markup($"[bold green]Agent>[/] ");
                     foreach (var a in task.Result?.Artifacts ?? [])
                     {
-                        PrintArtifact(a);
+                        await PrintArtifactAsync(a);
                     }
                 }
                 else
@@ -235,10 +235,40 @@ while (true)
     }
 }
 
-static void PrintArtifact(Artifact artifact)
+static async System.Threading.Tasks.Task PrintArtifactAsync(Artifact artifact)
 {
     foreach (var p in artifact.Parts ?? [])
     {
-        AnsiConsole.Markup(p.ToText()?.EscapeMarkup() ?? string.Empty);
+        if (p is TextPart t)
+        {
+            AnsiConsole.Markup(p.ToText()?.EscapeMarkup() ?? string.Empty);
+        }
+        else if (p is FilePart f)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[darkgreen]File: {f.File.Name}[/]");
+            if (f.File.Uri is not null)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[darkgreen]URI: {f.File.Uri}[/]");
+            }
+
+            if (f.File.Bytes is not null)
+            {
+                var filename = Path.Combine(Path.GetTempPath(), f.File.Name!);
+                await System.IO.File.WriteAllBytesAsync(filename, Convert.FromBase64String(f.File.Bytes!));
+                AnsiConsole.MarkupLineInterpolated($"[darkgreen]Downloaded to: {filename}[/]");
+            }
+        }
+        else if (p is DataPart d)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[darkgreen]Data: {(d.Type is null ? "Unknown" : d.Type)}[/]");
+            foreach (var i in d.Metadata ?? [])
+            {
+                AnsiConsole.MarkupLineInterpolated($"[darkgreen]{i.Key}: {i.Value}[/]");
+            }
+        }
+        else
+        {
+            AnsiConsole.MarkupLineInterpolated($"[red]Unknown part type: {p.Type}[/]");
+        }
     }
 }
