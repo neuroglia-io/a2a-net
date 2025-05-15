@@ -24,7 +24,7 @@ public record AgentAuthentication
     /// Gets/sets the list of authentication schemes supported
     /// </summary>
     [Required, MinLength(1)]
-    [DataMember(Name = "role", Order = 1), JsonPropertyName("role"), JsonPropertyOrder(1), YamlMember(Alias = "role", Order = 1)]
+    [DataMember(Name = "schemes", Order = 1), JsonPropertyName("schemes"), JsonPropertyOrder(1), YamlMember(Alias = "schemes", Order = 1)]
     public virtual EquatableList<string> Schemes { get; set; } = null!;
 
     /// <summary>
