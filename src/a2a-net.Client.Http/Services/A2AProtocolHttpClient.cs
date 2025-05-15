@@ -61,16 +61,25 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
         using var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, MediaTypeNames.Application.Json);
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, Options.Endpoint) { Content = content };
         httpRequest.EnableWebAssemblyStreamingResponse();
-        using var httpResponse = await HttpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        using var httpResponse = await HttpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
-        var httpResponseStream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
         using var streamReader = new StreamReader(await httpResponse.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
         while (!streamReader.EndOfStream)
         {
             var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
-            var e = JsonSerializer.Deserialize<RpcResponse<TaskEvent>>(json)!;
+            RpcResponse<TaskEvent>? e = null;
+            try
+            {
+                e = JsonSerializer.Deserialize<RpcResponse<TaskEvent>>(json)!;
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
             yield return e;
         }
     }
@@ -145,7 +154,7 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
         {
             if (disposing)
             {
-                
+
             }
             _disposed = true;
         }
