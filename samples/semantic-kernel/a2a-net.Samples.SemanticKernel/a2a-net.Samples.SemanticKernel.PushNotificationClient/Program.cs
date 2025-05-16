@@ -28,11 +28,11 @@ app.MapPost("/", async (HttpRequest request, HttpClient httpClient, IOptions<App
     var jwksUri = new UriBuilder(options.Value.Server);
     if (jwksUri.Uri.IsAbsoluteUri)
     {
-        jwksUri.Query = request?.QueryString.Value ?? httpClient.BaseAddress?.Query;
+        jwksUri.Query = request.QueryString.Value ?? httpClient.BaseAddress?.Query;
         jwksUri.Path = $"{jwksUri.Path.TrimEnd('/')}/{jwksPath}";
     }
 
-    var json = await httpClient.GetStringAsync(jwksUri.Uri, request?.HttpContext.RequestAborted ?? default);
+    var json = await httpClient.GetStringAsync(jwksUri.Uri, request.HttpContext.RequestAborted);
     var jwks = new JsonWebKeySet(json);
     using var reader = new StreamReader(request.Body);
     var payload = await reader.ReadToEndAsync(request.HttpContext.RequestAborted);
