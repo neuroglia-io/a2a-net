@@ -17,6 +17,7 @@ using A2A.Samples.SemanticKernel.Client;
 using Microsoft.VisualStudio.Threading;
 
 using Spectre.Console.Extensions;
+using Spectre.Console.Json;
 
 using System.Text;
 
@@ -67,6 +68,17 @@ var client = provider.GetRequiredService<IA2AProtocolClient>();
 
 var agentCts = new CancellationTokenSource();
 AnsiConsole.Write(new FigletText("A2A Protocol Chat").Color(Color.Blue));
+
+var menu = new Grid()
+    .AddColumn(new GridColumn().LeftAligned())
+    .AddColumn(new GridColumn().Centered())
+    .AddColumn(new GridColumn().LeftAligned())
+    .AddRow([new Text(string.Empty), new Text("Menu", new(Color.Purple_2, decoration: Decoration.Underline | Decoration.Bold))])
+    .AddRow("[bold yellow]/agent | /agents | /card | /cards[/]", string.Empty, "Display Card for targeted Agent")
+    .AddRow("[bold yellow]/reset[/]", string.Empty, "Resets the chat session (erases history)");
+AnsiConsole.Write(menu);
+Console.WriteLine();
+
 AnsiConsole.MarkupLine("[gray]Type your prompts below. Press [bold]Ctrl+C[/] to exit.[/]\n");
 var responseSoFar = new StringBuilder();
 var session = Guid.NewGuid().ToString("N");
@@ -269,16 +281,52 @@ while (true)
 
 void printAgentCards()
 {
-    AnsiConsole.MarkupLine("[bold green]Available Agents:[/]");
     foreach (var agent in agents)
     {
-        AnsiConsole.MarkupLineInterpolated($"[green]{agent.Name} - {agent.Description} - v{(string.IsNullOrWhiteSpace(agent.Version) ? "??" : agent.Version)}[/]");
-        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Url)} - {agent.Url}[/]");
-        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Authentication)} - {(agent.Authentication is null ? "None" : string.Join(", ", agent.Authentication!.Schemes))}[/]");
-        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Capabilities)} - {nameof(agent.Capabilities.Streaming)}: {(agent.Capabilities.Streaming ? "✅" : "❌")} | {nameof(agent.Capabilities.PushNotifications)}: {(agent.Capabilities.PushNotifications ? "✅" : "❌")} | {nameof(agent.Capabilities.StateTransitionHistory)}: {(agent.Capabilities.StateTransitionHistory ? "✅" : "❌")}[/]");
-        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.DocumentationUrl)} - {agent.DocumentationUrl}[/]");
-        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Skills)} - {(agent.Skills.Count is 0 ? "None" : string.Join(", ", agent.Skills.Select(s => s.Name)))}[/]");
+        printCard(agent);
     }
+}
+
+void printCard(AgentCard card)
+{
+    var detailsTable = new Table().AddColumn(string.Empty, c => c.RightAligned()).AddColumn(string.Empty).HideHeaders().NoBorder();
+    if (card.Authentication is null)
+    {
+        detailsTable
+            .AddRow($"[bold]{nameof(card.Authentication)}:[/]", "None");
+    }
+    else
+    {
+        var authDetailsTable = new Table().AddColumn("[underline]Schemes[/]", c => c.NoWrap().Centered()).AddColumn(new TableColumn(new Markup("[underline]Credentials[/]").Centered())).NoBorder().RoundedBorder()
+            .AddRow(new Text(card.Authentication!.Schemes?.Count is null or 0 ? "None" : string.Join('\n', card.Authentication!.Schemes)),
+                !string.IsNullOrWhiteSpace(card.Authentication.Credentials) ? new JsonText(card.Authentication.Credentials) : new Text("None"));
+
+        detailsTable.AddRow(new Markup($"\n[bold]{nameof(card.Authentication)}:[/]"), authDetailsTable);
+    }
+
+    detailsTable
+        .AddRow($"[bold]{nameof(card.Capabilities.Streaming)}:[/]", card.Capabilities.Streaming ? Emoji.Known.CheckMarkButton : Emoji.Known.CrossMarkButton)
+        .AddRow($"[bold]{nameof(card.Capabilities.PushNotifications)}:[/]", card.Capabilities.PushNotifications ? Emoji.Known.CheckMarkButton : Emoji.Known.CrossMarkButton)
+        .AddRow($"[bold]{nameof(card.Capabilities.StateTransitionHistory)}:[/]", card.Capabilities.StateTransitionHistory ? Emoji.Known.CheckMarkButton : Emoji.Known.CrossMarkButton)
+        .AddRow(new Markup($"[bold]{nameof(card.Skills)}:[/]"), new Text(card.Skills.Count is 0 ? "None" : string.Join("\n", card.Skills.OrderBy(s => s.Name).Select(s => $"{Emoji.Known.Wrench} {s.Name}{(string.IsNullOrWhiteSpace(s.Description) ? string.Empty : $" - {s.Description}")}"))));
+
+    var table = new Table().AddColumn(new(string.Empty) { Width = 50 }).AddColumn(string.Empty).HideHeaders().NoBorder();
+    table.AddRow(new Markup($"[blue]{card.Provider?.Organization ?? string.Empty}\n{card.Provider?.Url}[/]"), new Markup($"[bold blue]{card.Name}[/]\n[blue]v{card.Version}[/]").RightJustified());
+    table.AddRow(
+        new Table().AddColumn(string.Empty).HideHeaders().NoBorder()
+            .AddRow(new Markup($"[blue]{card.Description}[/]").RightJustified())
+            .AddRow(new Text(card.DocumentationUrl?.ToString() ?? string.Empty).RightJustified()),
+        detailsTable
+    );
+
+    table = new Table().AddColumn(string.Empty).HideHeaders().RoundedBorder()
+        .AddRow(table);
+
+    table = new Table().AddColumn(string.Empty).HideHeaders().HorizontalBorder()
+        .AddRow(new Markup(card.Url.ToString(), new Style(Color.Green, decoration: Decoration.Underline | Decoration.Bold, link: card.Url.ToString())))
+        .AddRow(table);
+
+    AnsiConsole.Write(table);
 }
 
 static async System.Threading.Tasks.Task PrintArtifactAsync(Artifact artifact)
