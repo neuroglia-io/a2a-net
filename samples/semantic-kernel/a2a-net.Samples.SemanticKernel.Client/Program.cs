@@ -32,6 +32,13 @@ ArgumentNullException.ThrowIfNull(applicationOptions.Server);
 
 using var httpClient = new HttpClient();
 var discoveryDocument = await httpClient.GetA2ADiscoveryDocumentAsync(applicationOptions.Server);
+var agents = discoveryDocument.Agents;
+if (agents is null || agents.Count == 0)
+{
+    AnsiConsole.MarkupLineInterpolated($"[red]❌ No agent(s) found at {applicationOptions.Server}[/]");
+    return;
+}
+
 var agent = discoveryDocument.Agents[0];
 
 // Allow `--streaming` to be a flag or a value
@@ -108,6 +115,11 @@ while (true)
         responseSoFar.Clear();
 
         AnsiConsole.MarkupLine("[yellow]⚠️ Chat history reset.[/]");
+        continue;
+    }
+    else if (prompt is "/agent" or "/agents" or "/card" or "/cards")
+    {
+        printAgentCards();
         continue;
     }
 
@@ -252,6 +264,20 @@ while (true)
     catch (Exception ex)
     {
         spinStopThen(() => AnsiConsole.MarkupLineInterpolated($"[red]❌ Error: {ex.Message}[/]"));
+    }
+}
+
+void printAgentCards()
+{
+    AnsiConsole.MarkupLine("[bold green]Available Agents:[/]");
+    foreach (var agent in agents)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[green]{agent.Name} - {agent.Description} - v{(string.IsNullOrWhiteSpace(agent.Version) ? "??" : agent.Version)}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Url)} - {agent.Url}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Authentication)} - {(agent.Authentication is null ? "None" : string.Join(", ", agent.Authentication!.Schemes))}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Capabilities)} - {nameof(agent.Capabilities.Streaming)}: {(agent.Capabilities.Streaming ? "✅" : "❌")} | {nameof(agent.Capabilities.PushNotifications)}: {(agent.Capabilities.PushNotifications ? "✅" : "❌")} | {nameof(agent.Capabilities.StateTransitionHistory)}: {(agent.Capabilities.StateTransitionHistory ? "✅" : "❌")}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.DocumentationUrl)} - {agent.DocumentationUrl}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[green]  {nameof(agent.Skills)} - {(agent.Skills.Count is 0 ? "None" : string.Join(", ", agent.Skills.Select(s => s.Name)))}[/]");
     }
 }
 
