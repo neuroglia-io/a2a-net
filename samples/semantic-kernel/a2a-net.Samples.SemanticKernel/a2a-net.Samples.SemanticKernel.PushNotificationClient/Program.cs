@@ -16,14 +16,23 @@ builder.Services.AddOptions<ApplicationOptions>().Bind(builder.Configuration).Va
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
+const string jwksPath = ".well-known/jwks.json";
+
 app.MapGet("/", (HttpRequest request) =>
 {
-    if (request.Query.TryGetValue("validationToken", out var token))  return Results.Text(token);
+    if (request.Query.TryGetValue("validationToken", out var token)) return Results.Text(token);
     else return Results.BadRequest("Missing validationToken query param");
 });
 app.MapPost("/", async (HttpRequest request, HttpClient httpClient, IOptions<ApplicationOptions> options) =>
 {
-    var json = await httpClient.GetStringAsync(new Uri(options.Value.Server, "/.well-known/jwks.json"), request.HttpContext.RequestAborted);
+    var jwksUri = new UriBuilder(options.Value.Server);
+    if (jwksUri.Uri.IsAbsoluteUri)
+    {
+        jwksUri.Query = request?.QueryString.Value ?? httpClient.BaseAddress?.Query;
+        jwksUri.Path = $"{jwksUri.Path.TrimEnd('/')}/{jwksPath}";
+    }
+
+    var json = await httpClient.GetStringAsync(jwksUri.Uri, request?.HttpContext.RequestAborted ?? default);
     var jwks = new JsonWebKeySet(json);
     using var reader = new StreamReader(request.Body);
     var payload = await reader.ReadToEndAsync(request.HttpContext.RequestAborted);
