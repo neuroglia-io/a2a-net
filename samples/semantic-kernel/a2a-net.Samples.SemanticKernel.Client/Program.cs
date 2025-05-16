@@ -119,6 +119,7 @@ while (true)
         var taskParams = new TaskSendParameters
         {
             SessionId = session,
+            PushNotification = applicationOptions.PushNotificationClient is null ? null : new() { Url = applicationOptions.PushNotificationClient },
             Message = new()
             {
                 Role = MessageRole.User,
