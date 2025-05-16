@@ -11,25 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Samples.SemanticKernel.Client.Configuration;
-
-/// <summary>
-/// Represents the options used to configure the application
-/// </summary>
-public class ApplicationOptions
+namespace A2A.Samples.SemanticKernel.Client.Configuration
 {
-
     /// <summary>
-    /// Gets/sets the URI of the A2A server to interact with
+    /// Represents the options used to configure the application
     /// </summary>
-    [Required]
-    public Uri? Server { get; set; } = null;
+    public class ApplicationOptions
+    {
+        /// <summary>
+        /// Gets/sets the URI of the A2A server to interact with
+        /// </summary>
+        [Required]
+        public Uri? Server { get; set; } = null;
 
-    /// <summary>
-    /// Gets/sets the URI, if any, of the endpoint to send push notifications to
-    /// </summary>
-    public Uri? PushNotificationClient { get; set; }
+        /// <summary>
+        /// Gets/sets the URI, if any, of the endpoint to send push notifications to
+        /// </summary>
+        public Uri? PushNotificationClient { get; set; }
 
-    public bool Streaming { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether streaming is enabled
+        /// </summary>
+        public bool Streaming { get; set; }
 
+        /// <summary>
+        /// Gets or sets the authentication token or mechanism
+        /// </summary>
+        public string? Auth { get; set; }
+    }
 }

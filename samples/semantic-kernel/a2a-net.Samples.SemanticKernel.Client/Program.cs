@@ -18,6 +18,7 @@ using Microsoft.VisualStudio.Threading;
 
 using Spectre.Console.Extensions;
 
+using System.Net.Http.Headers;
 using System.Text;
 
 var configuration = new ConfigurationBuilder()
@@ -31,6 +32,20 @@ configuration.Bind(applicationOptions);
 ArgumentNullException.ThrowIfNull(applicationOptions.Server);
 
 using var httpClient = new HttpClient();
+AuthenticationHeaderValue? auth = null;
+if (applicationOptions.Auth is not null)
+{
+    var authParts = applicationOptions.Auth.Split('=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    if (authParts.Length is not 2)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[red]❌ Invalid auth format. Expected: <scheme>=<credentials>[/]");
+        return;
+    }
+
+    auth = new AuthenticationHeaderValue(authParts[0], authParts[1]);
+    httpClient.DefaultRequestHeaders.Authorization = auth;
+}
+
 var discoveryDocument = await httpClient.GetA2ADiscoveryDocumentAsync(applicationOptions.Server);
 var agent = discoveryDocument.Agents[0];
 
@@ -53,6 +68,7 @@ if (Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") is "Development")
 services.AddA2AProtocolHttpClient(options =>
 {
     options.Endpoint = agent.Url.IsAbsoluteUri ? agent.Url : new(applicationOptions.Server, agent.Url);
+    options.Authorization = auth is null ? null : () => (auth.Scheme, auth.Parameter!);
 });
 
 var provider = services.BuildServiceProvider();
