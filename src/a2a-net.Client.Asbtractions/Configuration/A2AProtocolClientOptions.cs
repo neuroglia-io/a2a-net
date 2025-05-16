@@ -14,15 +14,29 @@
 namespace A2A.Client.Configuration;
 
 /// <summary>
-/// Represents the options used to configure an A2A client
+/// Represents the options used to configure an A2A client.
 /// </summary>
 public class A2AProtocolClientOptions
 {
-
     /// <summary>
-    /// Gets/sets the <see cref="Uri"/> that references the endpoint of the A2A server to use
+    /// Gets or sets the <see cref="Uri"/> that references the endpoint of the A2A server to use.
     /// </summary>
     public virtual Uri Endpoint { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets a function that produces the authorization scheme and token used to authenticate requests.
+    /// </summary>
+    /// <remarks>
+    /// The returned tuple should contain:
+    /// <list type="bullet">
+    ///     <item>
+    ///         <description><c>Scheme</c> (e.g., "Bearer")</description>
+    ///     </item>
+    ///     <item>
+    ///         <description><c>Token</c> (the corresponding token string)</description>
+    ///     </item>
+    /// </list>
+    /// If this property is null, no authorization header is applied.
+    /// </remarks>
     public virtual Func<(string Scheme, string Token)>? Authorization { get; set; } = null;
 }
