@@ -48,8 +48,7 @@ public class A2ADiscoveryTests
 
         //assert
         document.Should().NotBeNull();
-        document.Endpoint.OriginalString.Should().Be($"{WebServerFactory.Server.BaseAddress}.well-known/agents.json");
+        document.Endpoint.AbsoluteUri.Should().Be($"{WebServerFactory.Server.BaseAddress}.well-known/agents.json");
         document.Agents.Should().NotBeNullOrEmpty();
     }
-
 }
