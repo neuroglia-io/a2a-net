@@ -34,7 +34,20 @@ builder.Services.AddA2AWellKnownAgent((provider, builder) =>
         .WithProvider(provider => provider
             .WithOrganization("a2a-net")
             .WithUrl(new("https://github.com/neuroglia-io/a2a-net")))
-        .WithUrl(new("/a2a", UriKind.Relative));
+        .WithUrl(new("/a2a", UriKind.Relative)) 
+        .SupportsStreaming()
+        .WithSkill(skill => skill
+            .WithId("text-generation")
+            .WithName("Text Generation")
+            .WithDescription("Generate freeform or guided text."))
+        .WithSkill(skill => skill
+            .WithId("structured-text-generation")
+            .WithName("Structured Text Generation")
+            .WithDescription("Generate structured output conforming to a schema."))
+        .WithSkill(skill => skill
+            .WithId("general-question-answering")
+            .WithName("General Question Answering")
+            .WithDescription("Answers general knowledge and factual questions across a wide range of topics."));
     if (applicationOptions.Agent.Skills != null)
     {
         foreach (var skill in applicationOptions.Agent.Skills)
@@ -51,7 +64,8 @@ builder.Services.AddA2AProtocolServer(builder =>
 {
     builder
         .UseAgentRuntime(provider => provider.GetRequiredService<IAgentRuntime>())
-        .UseDistributedCacheTaskRepository();
+        .UseDistributedCacheTaskRepository()
+        .SupportsStreaming();
 });
 var app = builder.Build();
 
