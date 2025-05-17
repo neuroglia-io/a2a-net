@@ -13,15 +13,13 @@
 
 using A2A.Events;
 using A2A.Samples.SemanticKernel.Client;
-
 using Microsoft.VisualStudio.Threading;
-
 using Spectre.Console.Extensions;
 using Spectre.Console.Json;
-
 using System.Net.Http.Headers;
 using System.Text;
 
+Console.OutputEncoding = Encoding.UTF8;
 var configuration = new ConfigurationBuilder()
     .AddCommandLine(args)
     .AddEnvironmentVariables()

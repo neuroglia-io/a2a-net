@@ -23,7 +23,10 @@ public class AgentCardBuilder
     /// <summary>
     /// Gets the card to build and configure
     /// </summary>
-    protected AgentCard Card { get; } = new();
+    protected AgentCard Card { get; } = new()
+    {
+        Capabilities = new()
+    };
 
     /// <inheritdoc/>
     public virtual IAgentCardBuilder WithName(string name)
