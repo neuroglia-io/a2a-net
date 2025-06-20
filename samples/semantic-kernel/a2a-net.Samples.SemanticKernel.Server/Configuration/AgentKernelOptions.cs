@@ -20,13 +20,13 @@ public class AgentKernelOptions
 {
 
     /// <summary>
-    /// Gets/sets the id of the model used by the application's <see cref="Kernel"/>
+    /// Gets or sets the id of the model used by the application's <see cref="Kernel"/>
     /// </summary>
     [Required, MinLength(1)]
     public virtual string Model { get; set; } = "gpt-4o";
 
     /// <summary>
-    /// Gets/sets the API key used to authenticate on the chat completion API used by the application's <see cref="Kernel"/>
+    /// Gets or sets the API key used to authenticate on the chat completion API used by the application's <see cref="Kernel"/>
     /// </summary>
     [Required, MinLength(1)]
     public virtual string ApiKey { get; set; } = null!;

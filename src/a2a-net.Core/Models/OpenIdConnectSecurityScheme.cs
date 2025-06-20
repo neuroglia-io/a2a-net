@@ -11,19 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A;
+namespace A2A.Models;
 
 /// <summary>
-/// Represents the base class for all A2A events
+/// Represents an OpenID Connect security scheme as defined by the OpenAPI Specification.
 /// </summary>
 [DataContract]
-public abstract record RpcEvent
+public record OpenIdConnectSecurityScheme 
+    : SecurityScheme
 {
 
+    /// <inheritdoc/>
+    [IgnoreDataMember, JsonIgnore, YamlIgnore]
+    public override string Type => SecuritySchemeType.OpenIdConnect;
+
     /// <summary>
-    /// Gets or sets a key/value mapping that contains the event's additional properties, if any
+    /// Gets or sets the OpenID Connect URL to discover OAuth2 configuration values.
     /// </summary>
-    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
-    public virtual EquatableDictionary<string, object>? Metadata { get; set; }
+    [Required, MinLength(1)]
+    [DataMember(Name = "openIdConnectUrl", Order = 1), JsonPropertyName("openIdConnectUrl"), JsonPropertyOrder(1), YamlMember(Alias = "openIdConnectUrl", Order = 1)]
+    public virtual Uri OpenIdConnectUrl { get; set; } = null!;
 
 }

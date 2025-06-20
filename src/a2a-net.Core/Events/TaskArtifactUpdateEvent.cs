@@ -22,7 +22,7 @@ public record TaskArtifactUpdateEvent
 {
 
     /// <summary>
-    /// Gets/sets the updated artifact
+    /// Gets or sets the updated artifact
     /// </summary>
     [Required]
     [DataMember(Name = "artifact", Order = 1), JsonPropertyName("artifact"), JsonPropertyOrder(1), YamlMember(Alias = "artifact", Order = 1)]

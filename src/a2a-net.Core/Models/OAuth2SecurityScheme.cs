@@ -11,19 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A;
+namespace A2A.Models;
 
 /// <summary>
-/// Represents the base class for all A2A events
+/// Represents an OAuth2 security scheme.
 /// </summary>
 [DataContract]
-public abstract record RpcEvent
+public record OAuth2SecurityScheme
+    : SecurityScheme
 {
 
+    /// <inheritdoc/>
+    [IgnoreDataMember, JsonIgnore, YamlIgnore]
+    public override string Type => SecuritySchemeType.OAuth2;
+
     /// <summary>
-    /// Gets or sets a key/value mapping that contains the event's additional properties, if any
+    /// Gets or sets the OAuth2 flow definitions for this security scheme.
     /// </summary>
-    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
-    public virtual EquatableDictionary<string, object>? Metadata { get; set; }
+    [Required]
+    [DataMember(Name = "flows", Order = 1), JsonPropertyName("flows"), JsonPropertyOrder(1), YamlMember(Alias = "flows", Order = 1)]
+    public virtual OAuthFlows Flows { get; set; } = default!;
 
 }

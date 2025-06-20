@@ -20,7 +20,7 @@ public class A2ADiscoveryDocumentRequest
 {
 
     /// <summary>
-    /// Gets/sets the base URI of the remote server to query for discovery metadata
+    /// Gets or sets the base URI of the remote server to query for discovery metadata
     /// </summary>
     public virtual Uri? Address { get; init; }
 

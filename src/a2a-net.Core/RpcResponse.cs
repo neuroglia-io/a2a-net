@@ -22,7 +22,7 @@ public abstract record RpcResponse
 {
 
     /// <summary>
-    /// Gets/sets the error, if any, that has occurred during the request's execution
+    /// Gets or sets the error, if any, that has occurred during the request's execution
     /// </summary>
     [DataMember(Name = "error", Order = 2), JsonPropertyName("error"), JsonPropertyOrder(2), YamlMember(Alias = "error", Order = 2)]
     public virtual RpcError? Error { get; set; } = null!;
@@ -40,7 +40,7 @@ public record RpcResponse<TResult>
 {
 
     /// <summary>
-    /// Gets/sets the response's content
+    /// Gets or sets the response's content
     /// </summary>
     [Required]
     [DataMember(Name = "result", Order = 2), JsonInclude, JsonPropertyName("result"), JsonPropertyOrder(2), YamlMember(Alias = "result", Order = 2)]

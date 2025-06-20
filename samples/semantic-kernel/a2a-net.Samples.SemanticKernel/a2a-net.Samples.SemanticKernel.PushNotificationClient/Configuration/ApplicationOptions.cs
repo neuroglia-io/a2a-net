@@ -20,7 +20,7 @@ public class ApplicationOptions
 {
 
     /// <summary>
-    /// Gets/sets the remote server's URI
+    /// Gets or sets the remote server's URI
     /// </summary>
     public required Uri Server { get; set; }
 

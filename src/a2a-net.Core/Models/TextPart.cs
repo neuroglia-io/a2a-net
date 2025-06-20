@@ -41,7 +41,7 @@ public record TextPart
     public override string Type => PartType.Text;
 
     /// <summary>
-    /// Gets/sets the part's text
+    /// Gets or sets the part's text
     /// </summary>
     [Required]
     [DataMember(Name = "text", Order = 1), JsonPropertyName("text"), JsonPropertyOrder(1), YamlMember(Alias = "text", Order = 1)]

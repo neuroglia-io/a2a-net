@@ -38,7 +38,7 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     protected AgentCapabilities Capabilities { get; } = new();
 
     /// <summary>
-    /// Gets/sets the lifetime of the <see cref="IA2AProtocolServer"/> to build
+    /// Gets or sets the lifetime of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
     protected ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 

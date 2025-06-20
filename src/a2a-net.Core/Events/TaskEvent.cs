@@ -23,7 +23,7 @@ public abstract record TaskEvent
 {
 
     /// <summary>
-    /// Gets/sets the task's unique identifier
+    /// Gets or sets the task's unique identifier
     /// </summary>
     [Required, MinLength(1)]
     [DataMember(Name = "id", Order = 0), JsonPropertyName("id"), JsonPropertyOrder(0), YamlMember(Alias = "id", Order = 0)]

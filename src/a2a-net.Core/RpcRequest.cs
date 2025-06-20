@@ -40,14 +40,14 @@ public record RpcRequest
     }
 
     /// <summary>
-    /// Gets/sets the name of the RPC method to invoke
+    /// Gets or sets the name of the RPC method to invoke
     /// </summary>
     [Required, MinLength(1)]
     [DataMember(Name = "method", Order = 2), JsonInclude, JsonPropertyName("method"), JsonPropertyOrder(2), YamlMember(Alias = "method", Order = 2)]
     public virtual string Method { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets a key/value mapping, if any, containing extension properties
+    /// Gets or sets a key/value mapping, if any, containing extension properties
     /// </summary>
     [JsonExtensionData]
     public virtual IDictionary<string, object>? ExtensionData { get; set; }
@@ -76,7 +76,7 @@ public record RpcRequest<TParams>
     public RpcRequest(string method): base(method) { }
 
     /// <summary>
-    /// Gets/sets the request's parameters
+    /// Gets or sets the request's parameters
     /// </summary>
     [Required]
     [DataMember(Name = "params", Order = 3), JsonInclude, JsonPropertyName("params"), JsonPropertyOrder(3), YamlMember(Alias = "params", Order = 3)]

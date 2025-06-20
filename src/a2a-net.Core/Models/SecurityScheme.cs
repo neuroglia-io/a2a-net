@@ -11,19 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A;
+namespace A2A.Models;
 
 /// <summary>
-/// Represents the base class for all A2A events
+/// Represents the base class for security schemes.
 /// </summary>
 [DataContract]
-public abstract record RpcEvent
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(APIKeySecurityScheme), SecuritySchemeType.ApiKey)]
+[JsonDerivedType(typeof(HttpSecurityScheme), SecuritySchemeType.Http)]
+[JsonDerivedType(typeof(OAuth2SecurityScheme), SecuritySchemeType.OAuth2)]
+[JsonDerivedType(typeof(OpenIdConnectSecurityScheme), SecuritySchemeType.OpenIdConnect)]
+public abstract record SecurityScheme
 {
 
     /// <summary>
-    /// Gets or sets a key/value mapping that contains the event's additional properties, if any
+    /// Gets the security scheme type.
     /// </summary>
-    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
-    public virtual EquatableDictionary<string, object>? Metadata { get; set; }
+    [IgnoreDataMember, JsonIgnore, YamlIgnore]
+    public abstract string Type { get; }
 
 }

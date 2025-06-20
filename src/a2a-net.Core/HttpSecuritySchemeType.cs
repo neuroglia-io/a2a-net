@@ -14,16 +14,28 @@
 namespace A2A;
 
 /// <summary>
-/// Represents the base class for all A2A events
+/// Enumerates all supported HTTP security scheme types.
 /// </summary>
-[DataContract]
-public abstract record RpcEvent
+public static class HttpSecuritySchemeType
 {
 
     /// <summary>
-    /// Gets or sets a key/value mapping that contains the event's additional properties, if any
+    /// The HTTP Basic authentication scheme.
     /// </summary>
-    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
-    public virtual EquatableDictionary<string, object>? Metadata { get; set; }
+    public const string Basic = "basic";
+    /// <summary>
+    /// The HTTP Bearer authentication scheme.
+    /// </summary>
+    public const string Bearer = "bearer";
+
+    /// <summary>
+    /// Gets an <see cref="IEnumerable{T}"/> containing all supported values.
+    /// </summary>
+    /// <returns>A new <see cref="IEnumerable{T}"/> containing all supported values.</returns>
+    public static IEnumerable<string> AsEnumerable()
+    {
+        yield return Basic;
+        yield return Bearer;
+    }
 
 }

@@ -26,7 +26,7 @@ public record DataPart
     public override string Type => PartType.Data;
 
     /// <summary>
-    /// Gets/sets the part's data
+    /// Gets or sets the part's data
     /// </summary>
     [Required]
     [DataMember(Name = "data", Order = 1), JsonPropertyName("data"), JsonPropertyOrder(1), YamlMember(Alias = "data", Order = 1)]

@@ -22,14 +22,14 @@ public record TaskRecord
 {
 
     /// <summary>
-    /// Gets/sets the task's message
+    /// Gets or sets the task's message
     /// </summary>
     [Required]
     [DataMember(Name = "message", Order = 5), JsonPropertyName("message"), JsonPropertyOrder(5), YamlMember(Alias = "message", Order = 5)]
     public virtual Message Message { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the push notification configuration associated with the task, used to notify external systems about task updates
+    /// Gets or sets the push notification configuration associated with the task, used to notify external systems about task updates
     /// </summary>
     [DataMember(Name = "notifications", Order = 6), JsonPropertyName("notifications"), JsonPropertyOrder(6), YamlMember(Alias = "notifications", Order = 6)]
     public virtual PushNotificationConfiguration? Notifications { get; set; }

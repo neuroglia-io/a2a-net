@@ -12,7 +12,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Title>A2A-NET Protocol Client</Title>
+    <Title>A2A-NET Protocol Client - Abstractions</Title>
     <Description>Contains the A2A Protocol client abstractions</Description>
     <PackageTags>a2a;client;abstractions</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

@@ -26,7 +26,7 @@ public record FilePart
     public override string Type => PartType.File;
 
     /// <summary>
-    /// Gets/sets the part's text
+    /// Gets or sets the part's text
     /// </summary>
     [Required]
     [DataMember(Name = "file", Order = 1), JsonPropertyName("file"), JsonPropertyOrder(1), YamlMember(Alias = "file", Order = 1)]

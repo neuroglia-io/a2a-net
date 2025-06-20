@@ -30,7 +30,7 @@ public abstract record Part
     public abstract string Type { get; }
 
     /// <summary>
-    /// Gets/sets a key/value mapping that contains the message's additional properties, if any
+    /// Gets or sets a key/value mapping that contains the message's additional properties, if any
     /// </summary>
     [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
     public virtual EquatableDictionary<string, object>? Metadata { get; set; }
