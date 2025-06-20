@@ -18,7 +18,7 @@ namespace A2A.Models;
 /// </summary>
 [Description("An API key security scheme.")]
 [DataContract]
-public record APIKeySecurityScheme 
+public record ApiKeySecurityScheme 
     : SecurityScheme
 {
 

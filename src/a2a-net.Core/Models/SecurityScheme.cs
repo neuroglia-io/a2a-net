@@ -19,7 +19,7 @@ namespace A2A.Models;
 [Description("The base class for security schemes.")]
 [DataContract]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(APIKeySecurityScheme), SecuritySchemeType.ApiKey)]
+[JsonDerivedType(typeof(ApiKeySecurityScheme), SecuritySchemeType.ApiKey)]
 [JsonDerivedType(typeof(HttpSecurityScheme), SecuritySchemeType.Http)]
 [JsonDerivedType(typeof(OAuth2SecurityScheme), SecuritySchemeType.OAuth2)]
 [JsonDerivedType(typeof(OpenIdConnectSecurityScheme), SecuritySchemeType.OpenIdConnect)]
