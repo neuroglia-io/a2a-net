@@ -14,23 +14,26 @@
 namespace A2A.Events;
 
 /// <summary>
-/// Represents the event used to notify about a status update
+/// Represents the event used to notify about a status update.
 /// </summary>
+[Description("Represents the event used to notify about a status update.")]
 [DataContract]
 public record TaskStatusUpdateEvent
     : TaskEvent
 {
 
     /// <summary>
-    /// Gets or sets the task's status
+    /// Gets or sets the task's status.
     /// </summary>
+    [Description("The task's status.")]
     [Required]
     [DataMember(Name = "status", Order = 1), JsonPropertyName("status"), JsonPropertyOrder(1), YamlMember(Alias = "status", Order = 1)]
     public virtual Models.TaskStatus Status { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets a boolean indicating whether or not the event is the last of the stream it belongs to
+    /// Gets or sets a boolean indicating whether or not the event is the last of the stream it belongs to.
     /// </summary>
+    [Description("A boolean indicating whether or not the event is the last of the stream it belongs to.")]
     [DataMember(Name = "final", Order = 2), JsonPropertyName("final"), JsonPropertyOrder(2), YamlMember(Alias = "final", Order = 2)]
     public virtual bool Final { get; set; }
 

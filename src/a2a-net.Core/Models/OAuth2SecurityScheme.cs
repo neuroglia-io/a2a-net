@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models.SecuritySchemes;
+namespace A2A.Models;
 
 /// <summary>
 /// Represents an OAuth2 security scheme.

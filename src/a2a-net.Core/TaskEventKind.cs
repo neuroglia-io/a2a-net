@@ -11,27 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models.Parts;
+namespace A2A;
 
 /// <summary>
-/// Represents a structured data segment within a message part.
+/// Enumerates all kinds of task events.
 /// </summary>
-[Description("A structured data segment within a message part.")]
-[DataContract]
-public record DataPart
-    : Part
+public static class TaskEventKind
 {
 
-    /// <inheritdoc/>
-    [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Kind => PartType.Data;
+    /// <summary>
+    /// The kind of event used to notify about a task's artifact update.
+    /// </summary>
+    public const string ArtifactUpdate = "artifact-update";
 
     /// <summary>
-    /// Gets or sets the part's data.
+    /// Gets a new <see cref="IEnumerable{T}"/> containing all supported values.
     /// </summary>
-    [Description("The part's data.")]
-    [Required]
-    [DataMember(Name = "data", Order = 1), JsonPropertyName("data"), JsonPropertyOrder(1), YamlMember(Alias = "data", Order = 1)]
-    public virtual EquatableDictionary<string, object> Data { get; set; } = null!;
+    /// <returns>An <see cref="IEnumerable{T}"/> containing all supported values.</returns>
+    public static IEnumerable<string> AsEnumerable()
+    {
+        yield return ArtifactUpdate;
+    }
 
 }

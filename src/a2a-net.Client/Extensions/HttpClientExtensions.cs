@@ -19,6 +19,10 @@ namespace A2A.Client;
 public static class HttpClientExtensions
 {
 
+    const string WellKnownPath = ".well-known/";
+    const string AgentDiscoveryPath = WellKnownPath + "agent.json";
+    const string AgentRegistryDiscoveryPath = WellKnownPath + "agents.json";
+
     /// <summary>
     /// Sends a GET request to the specified URL and returns the HTTP response message
     /// </summary>
@@ -66,21 +70,21 @@ public static class HttpClientExtensions
         ArgumentNullException.ThrowIfNull(request);
         try
         {
-            var endpoint = MakeSingleAgentDiscoveryEndpointUri(httpClient, request.Address);
+            var endpoint = BuildAgentDiscoveryEndpointUri(request.Address);
             var agentCard = await httpClient.GetFromJsonAsync<AgentCard>(endpoint, cancellationToken).ConfigureAwait(false);
             return new()
             {
-                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, endpoint.PathAndQuery),
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, AgentDiscoveryPath),
                 Agents = agentCard == null ? [] : [agentCard]
             };
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
-            var endpoint = MakeRegistryDiscoveryEndpointUri(httpClient, request.Address);
+            var endpoint = BuildAgentRegistryDiscoveryEndpointUri(request.Address);
             var agentCards = await httpClient.GetFromJsonAsync<List<AgentCard>>(endpoint, cancellationToken).ConfigureAwait(false);
             return new()
             {
-                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, endpoint.PathAndQuery),
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, AgentRegistryDiscoveryPath),
                 Agents = agentCards ?? []
             };
         }
@@ -130,21 +134,21 @@ public static class HttpClientExtensions
         ArgumentNullException.ThrowIfNull(request);
         try
         {
-            var endpoint = MakeSingleAgentDiscoveryEndpointUri(httpClient, request.Address);
+            var endpoint = BuildAgentDiscoveryEndpointUri(request.Address);
             var agentCard = httpClient.GetFromJson<AgentCard>(endpoint, cancellationToken);
             return new()
             {
-                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, endpoint.PathAndQuery),
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, AgentDiscoveryPath),
                 Agents = agentCard == null ? [] : [agentCard]
             };
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
-            var endpoint = MakeRegistryDiscoveryEndpointUri(httpClient, request.Address);
+            var endpoint = BuildAgentRegistryDiscoveryEndpointUri(request.Address);
             var agentCards = httpClient.GetFromJson<List<AgentCard>>(endpoint, cancellationToken);
             return new()
             {
-                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, endpoint.PathAndQuery),
+                Endpoint = endpoint.IsAbsoluteUri ? endpoint : new(httpClient.BaseAddress!, AgentRegistryDiscoveryPath),
                 Agents = agentCards ?? []
             };
         }
@@ -181,27 +185,8 @@ public static class HttpClientExtensions
         return httpClient.GetA2ADiscoveryDocument(request, cancellationToken);
     }
 
-    private static Uri MakeSingleAgentDiscoveryEndpointUri(HttpClient client, Uri? requestAddress, string discoveryPath = ".well-known/agent.json")
-    {
-        var builder = new UriBuilder(requestAddress?.ToString() ?? client.BaseAddress?.ToString() ?? $"/{discoveryPath}");
-        if (builder.Uri.IsAbsoluteUri)
-        {
-            builder.Query = requestAddress?.Query ?? client.BaseAddress?.Query;
-            builder.Path = builder.Path.TrimEnd('/') + $"/{discoveryPath}";
-        }
+    static Uri BuildAgentDiscoveryEndpointUri(Uri? address) => address == null ? new Uri(AgentDiscoveryPath, UriKind.Relative) : new Uri(address, AgentDiscoveryPath);
 
-        return builder.Uri;
-    }
+    static Uri BuildAgentRegistryDiscoveryEndpointUri(Uri? address) => address == null ? new Uri(AgentRegistryDiscoveryPath, UriKind.Relative) : new Uri(address, AgentRegistryDiscoveryPath);
 
-    private static Uri MakeRegistryDiscoveryEndpointUri(HttpClient client, Uri? requestAddress, string discoveryPath = ".well-known/agents.json")
-    {
-        var builder = new UriBuilder(requestAddress?.ToString() ?? client.BaseAddress?.ToString() ?? $"/{discoveryPath}");
-        if (builder.Uri.IsAbsoluteUri)
-        {
-            builder.Query = requestAddress?.Query ?? client.BaseAddress?.Query;
-            builder.Path = builder.Path.TrimEnd('/') + $"/{discoveryPath}";
-        }
-
-        return builder.Uri;
-    }
 }

@@ -36,10 +36,17 @@ public record SendMessageRequestConfiguration
     public virtual uint? HistoryLength { get; set; }
 
     /// <summary>
+    /// Gets or sets the push notification configuration, if any, to be used for the request.
+    /// </summary>
+    [Description("The push notification configuration, if any, to be used for the request.")]
+    [DataMember(Name = "pushNotificationConfig", Order = 3), JsonPropertyName("pushNotificationConfig"), JsonPropertyOrder(3), YamlMember(Alias = "pushNotificationConfig", Order = 3)]
+    public virtual PushNotificationConfiguration? PushNotificationConfig { get; set; }
+
+    /// <summary>
     /// Gets or sets a boolean indicating whether or not the server should block the request until a response is available.
     /// </summary>
     [Description("A boolean indicating whether or not the server should block the request until a response is available.")]
-    [DataMember(Name = "blocking", Order = 3), JsonPropertyName("blocking"), JsonPropertyOrder(3), YamlMember(Alias = "blocking", Order = 3)]
+    [DataMember(Name = "blocking", Order = 4), JsonPropertyName("blocking"), JsonPropertyOrder(4), YamlMember(Alias = "blocking", Order = 4)]
     public virtual bool Blocking { get; set; }
 
 }

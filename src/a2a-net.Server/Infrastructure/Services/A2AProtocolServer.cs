@@ -64,46 +64,46 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     protected IPushNotificationSender PushNotificationSender { get; } = pushNotificationSender;
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<Models.Task>> SendTaskAsync(SendTaskRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<Models.Task>> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (request.Params.PushNotification != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.PushNotification.Url, cancellationToken).ConfigureAwait(false))
+        if (request.Params.Configuration?.PushNotificationConfig != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.Configuration.PushNotificationConfig.Url, cancellationToken).ConfigureAwait(false))
         {
-            Logger.LogError("Failed to validate the specified push notification url '{url}'", request.Params.PushNotification.Url);
+            Logger.LogError("Failed to validate the specified push notification url '{url}'", request.Params.Configuration.PushNotificationConfig.Url);
             return new()
             {
                 Id = request.Id,
                 Error = new InvalidParamsError()
             };
         }
-        var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? await Tasks.AddAsync(new()
+        var task = (string.IsNullOrWhiteSpace(request.Params.Message.TaskId) ? null : await Tasks.GetAsync(request.Params.Message.TaskId, cancellationToken).ConfigureAwait(false)) ?? await Tasks.AddAsync(new()
         {
-            Id = request.Params.Id,
-            ContextId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
+            Id = request.Params.Message.TaskId ?? Guid.NewGuid().ToString("N"),
+            ContextId = request.Params.Message.ContextId ?? Guid.NewGuid().ToString("N"),
             Status = new()
             {
                 Timestamp = DateTimeOffset.Now,
                 State = TaskState.Submitted
             },
             Message = request.Params.Message,
-            Notifications = request.Params.PushNotification
+            Notifications = request.Params.Configuration?.PushNotificationConfig
         },
         cancellationToken).ConfigureAwait(false);
         task = await TaskHandler.SubmitAsync(task, cancellationToken).ConfigureAwait(false);
         return new()
         {
             Id = request.Id,
-            Result = task.AsTask(Capabilities.StateTransitionHistory, request.Params.HistoryLength)
+            Result = task.AsTask(Capabilities.StateTransitionHistory, request.Params.Configuration?.HistoryLength)
         };
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> SendTaskStreamingAsync(SendTaskStreamingRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> StreamMessageAsync(StreamMessageRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (request.Params.PushNotification != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.PushNotification.Url, cancellationToken).ConfigureAwait(false))
+        if (request.Params.Configuration?.PushNotificationConfig != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.Configuration.PushNotificationConfig.Url, cancellationToken).ConfigureAwait(false))
         {
-            Logger.LogError("Failed to validate the specified push notification url '{url}'", request.Params.PushNotification.Url);
+            Logger.LogError("Failed to validate the specified push notification url '{url}'", request.Params.Configuration.PushNotificationConfig.Url);
             yield return new()
             {
                 Id = request.Id,
@@ -111,17 +111,17 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
             };
             yield break;
         }
-        var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? await Tasks.AddAsync(new()
+        var task = (string.IsNullOrWhiteSpace(request.Params.Message.TaskId) ? null : await Tasks.GetAsync(request.Params.Message.TaskId, cancellationToken).ConfigureAwait(false)) ?? await Tasks.AddAsync(new()
         {
-            Id = request.Params.Id,
-            ContextId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
+            Id = request.Params.Message.TaskId ?? Guid.NewGuid().ToString("N"),
+            ContextId = request.Params.Message.ContextId ?? Guid.NewGuid().ToString("N"),
             Status = new()
             {
                 Timestamp = DateTimeOffset.Now,
                 State = TaskState.Submitted
             },
             Message = request.Params.Message,
-            Notifications = request.Params.PushNotification
+            Notifications = request.Params.Configuration?.PushNotificationConfig
         },
         cancellationToken).ConfigureAwait(false);
         _ = System.Threading.Tasks.Task.Run(async () =>
@@ -135,7 +135,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
                 Logger.LogError("An error occurred while (re)submitting the task with id '{taskId}': {ex}", task.Id, ex);
             }
         }, cancellationToken);
-        await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).TakeUntil(e => e is TaskStatusUpdateEvent statusUpdate && statusUpdate.Final).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
+        await foreach (var e in TaskEventStream.Where(e => e.TaskId == task.Id).TakeUntil(e => e is TaskStatusUpdateEvent statusUpdate && statusUpdate.Final).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
         {
             Id = request.Id,
             Result = e
@@ -148,7 +148,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
         ArgumentNullException.ThrowIfNull(request);
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? throw new LocalRpcException($"Failed to find a task with the specified id '{request.Params.Id}'");
         if (task.Status.State != TaskState.Working) yield break; 
-        await foreach (var e in TaskEventStream.Where(e => e.Id == request.Params.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
+        await foreach (var e in TaskEventStream.Where(e => e.TaskId == task.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return new()
         {
             Id = request.Id,
             Result = e
@@ -203,7 +203,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (request.Params.PushNotificationConfig != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.PushNotificationConfig.Url, cancellationToken).ConfigureAwait(false))
@@ -235,7 +235,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false);

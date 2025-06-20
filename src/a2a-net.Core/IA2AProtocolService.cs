@@ -71,7 +71,7 @@ public interface IA2AProtocolService
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.PushNotifications.Set)]
-    Task<RpcResponse<PushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
+    Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the currently configured push notification configuration for a Task.
@@ -80,6 +80,6 @@ public interface IA2AProtocolService
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.PushNotifications.Get)]
-    Task<RpcResponse<PushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
+    Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
 
 }

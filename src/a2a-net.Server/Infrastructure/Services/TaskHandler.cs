@@ -93,13 +93,13 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
                     await NotifyTaskStatusUpdateAsync(task, cancellationToken).ConfigureAwait(false);
                     working = true;
                 }
-                switch (content.Type)
+                switch (content)
                 {
-                    case AgentResponseContentType.Artifact:
-                        task = await StreamArtifactAsync(task, content.Artifact!, cancellationToken).ConfigureAwait(false);
+                    case ArtifactResponseContent artifactContent:
+                        task = await StreamArtifactAsync(task, artifactContent.Artifact!, artifactContent.Append, artifactContent.LastChunk, cancellationToken).ConfigureAwait(false);
                         break;
-                    case AgentResponseContentType.Message:
-                        task = await WaitForInputAsync(task, content.Message!, cancellationToken).ConfigureAwait(false);
+                    case MessageResponseContent responseContent:
+                        task = await WaitForInputAsync(task, responseContent.Message!, cancellationToken).ConfigureAwait(false);
                         return task;
                     default:
                         throw new NotSupportedException($"The specified agent response content type '{content.Type}' is not supported");
@@ -168,16 +168,18 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
     /// </summary>
     /// <param name="task">The task being processed</param>
     /// <param name="artifact">The artifact to stream</param>
+    /// <param name="append">Whether to append the artifact to the existing artifacts of the task</param>
+    /// <param name="lastChunk">Whether this is the last chunk of the artifact</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The updated task</returns>
-    protected virtual async Task<TaskRecord> StreamArtifactAsync(TaskRecord task, Artifact artifact, CancellationToken cancellationToken = default)
+    protected virtual async Task<TaskRecord> StreamArtifactAsync(TaskRecord task, Artifact artifact, bool append, bool lastChunk, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(artifact);
         task.Artifacts ??= [];
         task.Artifacts.Add(artifact);
         task = await Tasks.UpdateAsync(task, cancellationToken).ConfigureAwait(false);
-        await NotifyTaskArtifactUpdateAsync(task, artifact, cancellationToken).ConfigureAwait(false);
+        await NotifyTaskArtifactUpdateAsync(task, artifact, append, lastChunk, cancellationToken).ConfigureAwait(false);
         return task;
     }
 
@@ -236,7 +238,8 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
         ArgumentNullException.ThrowIfNull(task);
         TaskEventStream.OnNext(new TaskStatusUpdateEvent()
         {
-            Id = task.Id,
+            TaskId = task.Id,
+            ContextId = task.ContextId,
             Status = task.Status,
             Final = task.Status.State == TaskState.Completed || task.Status.State == TaskState.Cancelled || task.Status.State == TaskState.Failed
         });
@@ -248,16 +251,21 @@ public class TaskHandler(ITaskRepository tasks, ITaskEventStream taskEventStream
     /// </summary>
     /// <param name="task">The task the artifact has been produced for</param>
     /// <param name="artifact">The newly produced artifact</param>
+    /// <param name="append">Whether to append the artifact to the existing artifacts of the task</param>
+    /// <param name="lastChunk">Whether this is the last chunk of the artifact</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="System.Threading.Tasks.Task"/></returns>
-    protected virtual async System.Threading.Tasks.Task NotifyTaskArtifactUpdateAsync(TaskRecord task, Artifact artifact, CancellationToken cancellationToken = default)
+    protected virtual async System.Threading.Tasks.Task NotifyTaskArtifactUpdateAsync(TaskRecord task, Artifact artifact, bool append, bool lastChunk, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(artifact);
         TaskEventStream.OnNext(new TaskArtifactUpdateEvent
         {
-            Id = task.Id,
-            Artifact = artifact
+            TaskId = task.Id,
+            ContextId = task.ContextId,
+            Artifact = artifact,
+            Append = append,
+            LastChunk = lastChunk
         });
         if (task.Notifications != null) await PushNotificationSender.SendPushNotificationAsync(task.Notifications.Url, task, cancellationToken).ConfigureAwait(false);
     }

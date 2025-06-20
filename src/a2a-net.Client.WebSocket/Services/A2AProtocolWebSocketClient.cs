@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+
 namespace A2A.Client.Transport.WebSocket.Services;
 
 /// <summary>
@@ -37,19 +39,19 @@ public class A2AProtocolWebSocketClient(ILogger<A2AProtocolWebSocketClient> logg
     protected A2AProtocolClientOptions Options { get; } = options.Value;
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<Models.Task>> SendTaskAsync(SendTaskRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<Models.Task>> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var transport = await GetOrCreateTransportAsync(cancellationToken).ConfigureAwait(false);
-        return await transport.InvokeWithCancellationAsync<RpcResponse<Models.Task>>(A2AProtocol.Methods.Tasks.Send, [request], cancellationToken).ConfigureAwait(false);
+        return await transport.InvokeWithCancellationAsync<RpcResponse<Models.Task>>(A2AProtocol.Methods.Messages.Send, [request], cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> SendTaskStreamingAsync(SendTaskStreamingRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> StreamMessageAsync(StreamMessageRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var transport = await GetOrCreateTransportAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var e in await transport.InvokeWithCancellationAsync<IAsyncEnumerable<RpcResponse<TaskEvent>>>(A2AProtocol.Methods.Tasks.SendSubscribe, [request], cancellationToken).ConfigureAwait(false)) yield return e;
+        await foreach (var e in await transport.InvokeWithCancellationAsync<IAsyncEnumerable<RpcResponse<TaskEvent>>>(A2AProtocol.Methods.Messages.Stream, [request], cancellationToken).ConfigureAwait(false)) yield return e;
     }
 
     /// <inheritdoc/>
@@ -77,19 +79,19 @@ public class A2AProtocolWebSocketClient(ILogger<A2AProtocolWebSocketClient> logg
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var transport = await GetOrCreateTransportAsync(cancellationToken).ConfigureAwait(false);
-        return await transport.InvokeWithCancellationAsync<RpcResponse<PushNotificationConfiguration>>(A2AProtocol.Methods.Tasks.PushNotifications.Set, [request], cancellationToken).ConfigureAwait(false);
+        return await transport.InvokeWithCancellationAsync<RpcResponse<TaskPushNotificationConfiguration>>(A2AProtocol.Methods.Tasks.PushNotifications.Set, [request], cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var transport = await GetOrCreateTransportAsync(cancellationToken).ConfigureAwait(false);
-        return await transport.InvokeWithCancellationAsync<RpcResponse<PushNotificationConfiguration>>(A2AProtocol.Methods.Tasks.PushNotifications.Get, [request], cancellationToken).ConfigureAwait(false);
+        return await transport.InvokeWithCancellationAsync<RpcResponse<TaskPushNotificationConfiguration>>(A2AProtocol.Methods.Tasks.PushNotifications.Get, [request], cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

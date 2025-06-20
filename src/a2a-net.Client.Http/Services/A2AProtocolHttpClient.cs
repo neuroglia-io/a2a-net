@@ -16,7 +16,8 @@ namespace A2A.Client.Services;
 /// <summary>
 /// Represents the default HTTP implementation of the <see cref="IA2AProtocolClient"/> interface
 /// </summary>
-public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
+public class A2AProtocolHttpClient 
+    : IA2AProtocolClient, IDisposable
 {
 
     bool _disposed;
@@ -46,7 +47,7 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
     protected HttpClient HttpClient { get; }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<Models.Task>> SendTaskAsync(SendTaskRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<Models.Task>> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         using var httpResponse = await HttpClient.PostAsJsonAsync(Options.Endpoint, request, cancellationToken).ConfigureAwait(false);
@@ -55,7 +56,7 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> SendTaskStreamingAsync(SendTaskStreamingRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> StreamMessageAsync(StreamMessageRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         using var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, MediaTypeNames.Application.Json);
@@ -70,7 +71,7 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
             var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
-            RpcResponse<TaskEvent>? e = null;
+            RpcResponse<TaskEvent>? e;
             try
             {
                 e = JsonSerializer.Deserialize<RpcResponse<TaskEvent>>(json)!;
@@ -79,7 +80,6 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
             {
                 continue;
             }
-
             yield return e;
         }
     }
@@ -125,23 +125,23 @@ public class A2AProtocolHttpClient : IA2AProtocolClient, IDisposable
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request);
         using var httpResponse = await HttpClient.PostAsJsonAsync(Options.Endpoint, request, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
-        return (await httpResponse.Content.ReadFromJsonAsync<RpcResponse<PushNotificationConfiguration>>(cancellationToken).ConfigureAwait(false))!;
+        return (await httpResponse.Content.ReadFromJsonAsync<RpcResponse<TaskPushNotificationConfiguration>>(cancellationToken).ConfigureAwait(false))!;
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<PushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request);
         using var httpResponse = await HttpClient.PostAsJsonAsync(Options.Endpoint, request, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
-        return (await httpResponse.Content.ReadFromJsonAsync<RpcResponse<PushNotificationConfiguration>>(cancellationToken).ConfigureAwait(false))!;
+        return (await httpResponse.Content.ReadFromJsonAsync<RpcResponse<TaskPushNotificationConfiguration>>(cancellationToken).ConfigureAwait(false))!;
     }
 
     /// <summary>

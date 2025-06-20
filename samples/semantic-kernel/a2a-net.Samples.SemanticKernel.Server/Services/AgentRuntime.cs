@@ -85,7 +85,6 @@ public class AgentRuntime
         string? currentRole = null;
         var currentContent = new StringBuilder();
         EquatableDictionary<string, object>? metadata = null;
-        uint index = 0;
         await foreach (var (content, next) in ChatCompletionService.GetStreamingChatMessageContentsAsync(session, executionSettings, Kernel, cancellationTokenSource.Token).PeekingAsync(cancellationTokenSource.Token))
         {
             var role = content.Role?.ToString();
@@ -93,13 +92,11 @@ public class AgentRuntime
             {
                 if (currentContent.Length > 0 && currentRole != null)
                 {
-                    yield return new AgentResponseContent(new Artifact
+                    yield return new ArtifactResponseContent(new Artifact
                     {
-                        Index = index++,
                         Metadata = metadata,
-                        Parts = [new TextPart(currentContent.ToString())],
-                        LastChunk = true
-                    });
+                        Parts = [new TextPart(currentContent.ToString())]
+                    }, false, true);
                     currentContent.Clear();
                     metadata = null;
                 }
@@ -113,13 +110,11 @@ public class AgentRuntime
             }
             if (next == null || (!string.IsNullOrWhiteSpace(next?.Role?.ToString()) && next?.Role?.ToString() != currentRole && currentContent.Length > 0 && currentRole != null))
             {
-                yield return new AgentResponseContent(new Artifact
+                yield return new ArtifactResponseContent(new Artifact
                 {
-                    Index = index++,
                     Metadata = metadata,
-                    Parts = [new TextPart(currentContent.ToString())],
-                    LastChunk = true
-                });
+                    Parts = [new TextPart(currentContent.ToString())]
+                }, false, true);
                 currentContent.Clear();
                 metadata = null;
             }

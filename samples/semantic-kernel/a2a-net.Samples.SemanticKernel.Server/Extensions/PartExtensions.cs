@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using A2A.Models.Parts;
-
 namespace A2A.Samples.SemanticKernel.Server;
 
 /// <summary>

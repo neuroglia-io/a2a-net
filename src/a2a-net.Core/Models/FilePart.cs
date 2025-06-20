@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models.Parts;
+namespace A2A.Models;
 
 /// <summary>
 /// Represents a file segment within parts.

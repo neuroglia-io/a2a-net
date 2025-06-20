@@ -22,27 +22,27 @@ internal class MockAgentRuntime
     public async IAsyncEnumerable<AgentResponseContent> ExecuteAsync(TaskRecord task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await System.Threading.Tasks.Task.Delay(50, cancellationToken);
-        yield return new(new Artifact()
+        yield return new ArtifactResponseContent(new Artifact()
         {
             Parts =
-                [
-                    new TextPart("Foo")
-                ]
-        });
-        yield return new(new Artifact()
+            [
+                new TextPart("Foo")
+            ]
+        }, false, true);
+        yield return new ArtifactResponseContent(new Artifact()
         {
             Parts =
-           [
-               new TextPart("Bar")
-           ]
-        });
-        yield return new(new Artifact()
+            [
+                new TextPart("Bar")
+            ]
+        }, false, true);
+        yield return new ArtifactResponseContent(new Artifact()
         {
             Parts =
-           [
-               new TextPart("Baz")
-           ]
-        });
+            [
+                new TextPart("Baz")
+            ]
+        }, false, true);
     }
 
     public System.Threading.Tasks.Task CancelAsync(string taskId, CancellationToken cancellationToken = default) => System.Threading.Tasks.Task.CompletedTask;

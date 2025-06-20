@@ -57,27 +57,27 @@ public class A2AHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptio
         }
         switch (request.Method)
         {
-            case A2AProtocol.Methods.Tasks.Send:
-                if (!TryConvertTo(request, out SendTaskRequest sendTaskRequest))
+            case A2AProtocol.Methods.Messages.Send:
+                if (!TryConvertTo(request, out SendMessageRequest sendMessageRequest))
                 {
                     await InvalidParams().ConfigureAwait(false);
                     return;
                 }
-                await WriteJsonResponseAsync(await server.SendTaskAsync(sendTaskRequest, context.RequestAborted).ConfigureAwait(false)).ConfigureAwait(false);
+                await WriteJsonResponseAsync(await server.SendMessageAsync(sendMessageRequest, context.RequestAborted).ConfigureAwait(false)).ConfigureAwait(false);
                 break;
 
-            case A2AProtocol.Methods.Tasks.SendSubscribe:
+            case A2AProtocol.Methods.Messages.Stream:
                 if (!server.Capabilities.Streaming)
                 {
                     await UnsupportedOperation();
                     return;
                 }
-                if (!TryConvertTo(request, out SendTaskStreamingRequest sendTaskStreamingRequest))
+                if (!TryConvertTo(request, out StreamMessageRequest streamMessageRequest))
                 {
                     await InvalidParams().ConfigureAwait(false);
                     return;
                 }
-                await StreamTaskEventsAsync(context, server.SendTaskStreamingAsync(sendTaskStreamingRequest, context.RequestAborted));
+                await StreamTaskEventsAsync(context, server.StreamMessageAsync(streamMessageRequest, context.RequestAborted));
                 break;
 
             case A2AProtocol.Methods.Tasks.Resubscribe:

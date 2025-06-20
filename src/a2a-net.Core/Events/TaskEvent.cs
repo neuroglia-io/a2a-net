@@ -14,19 +14,30 @@
 namespace A2A.Events;
 
 /// <summary>
-/// Represents the base class for all task-related RPC events
+/// Represents the base class for all task-related RPC events.
 /// </summary>
+[Description("Represents the base class for all task-related RPC events.")]
 [DataContract]
-[JsonConverter(typeof(TaskEventJsonConverter))]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
+[JsonDerivedType(typeof(TaskArtifactUpdateEvent), TaskEventKind.ArtifactUpdate)]
 public abstract record TaskEvent
     : RpcEvent
 {
 
     /// <summary>
-    /// Gets or sets the task's unique identifier
+    /// Gets or sets the unique identifier of the task to which the event pertains.
     /// </summary>
+    [Description("The unique identifier of the task to which the event pertains.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "id", Order = 0), JsonPropertyName("id"), JsonPropertyOrder(0), YamlMember(Alias = "id", Order = 0)]
-    public virtual string Id { get; set; } = null!;
+    [DataMember(Name = "taskId", Order = 0), JsonPropertyName("taskId"), JsonPropertyOrder(0), YamlMember(Alias = "taskId", Order = 0)]
+    public virtual string TaskId { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the unique identifier of the context the task is associated with.
+    /// </summary>
+    [Description("The unique identifier of the context the task is associated with.")]
+    [Required, MinLength(1)]
+    [DataMember(Name = "contextId", Order = 1), JsonPropertyName("contextId"), JsonPropertyOrder(1), YamlMember(Alias = "contextId", Order = 1)]
+    public virtual string ContextId { get; set; } = null!;
 
 }

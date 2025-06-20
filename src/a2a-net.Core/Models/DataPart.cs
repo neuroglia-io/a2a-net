@@ -11,41 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models.Parts;
+namespace A2A.Models;
 
 /// <summary>
-/// Represents a text part.
+/// Represents a structured data segment within a message part.
 /// </summary>
+[Description("A structured data segment within a message part.")]
 [DataContract]
-public record TextPart
+public record DataPart
     : Part
 {
 
-    /// <summary>
-    /// Initializes a new <see cref="TextPart"/>.
-    /// </summary>
-    public TextPart() { }
-
-    /// <summary>
-    /// Initializes a new <see cref="TextPart"/>.
-    /// </summary>
-    /// <param name="text">The part's text.</param>
-    public TextPart(string text) 
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(text);
-        Text = text;
-    }
-
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Kind => PartType.Text;
+    public override string Kind => PartType.Data;
 
     /// <summary>
-    /// Gets or sets the part's text.
+    /// Gets or sets the part's data.
     /// </summary>
-    [Description("The part's text.")]
+    [Description("The part's data.")]
     [Required]
-    [DataMember(Name = "text", Order = 1), JsonPropertyName("text"), JsonPropertyOrder(1), YamlMember(Alias = "text", Order = 1)]
-    public virtual string Text { get; set; } = null!;
+    [DataMember(Name = "data", Order = 1), JsonPropertyName("data"), JsonPropertyOrder(1), YamlMember(Alias = "data", Order = 1)]
+    public virtual EquatableDictionary<string, object> Data { get; set; } = null!;
 
 }

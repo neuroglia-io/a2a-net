@@ -16,3 +16,4 @@ global using A2A.Requests;
 global using A2A.UnitTests.Services;
 global using FluentAssertions;
 global using Neuroglia;
+global using System.Text.Json;
