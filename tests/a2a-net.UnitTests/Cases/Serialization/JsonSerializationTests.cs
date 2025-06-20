@@ -176,7 +176,7 @@ public class JsonSerializationTests
 
         //act
         var json = JsonSerializer.Serialize(toSerialize);
-        var deserialized = JsonSerializer.Deserialize<PushNotificationConfiguration>(json);
+        var deserialized = JsonSerializer.Deserialize<TaskPushNotificationConfiguration>(json);
 
         //assert
         deserialized.Should().NotBeNull();

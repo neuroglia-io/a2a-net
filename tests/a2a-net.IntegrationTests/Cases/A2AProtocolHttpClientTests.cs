@@ -177,7 +177,7 @@ public class A2AProtocolHttpClientTests
 
         //assert
         response.Should().NotBeNull();
-        response.Id.Should().Be(sendRequest.Id);
+        response.Id.Should().Be(getRequest.Id);
         response.Result.Should().NotBeNull();
         response.Result.Id.Should().Be(sendRequest.Params.Message.TaskId);
     }
@@ -217,7 +217,7 @@ public class A2AProtocolHttpClientTests
 
         //assert
         response.Should().NotBeNull();
-        response.Id.Should().Be(sendRequest.Id);
+        response.Id.Should().Be(cancelRequest.Id);
         response.Result.Should().NotBeNull();
         response.Result.Id.Should().Be(sendRequest.Params.Message.TaskId);
     }
@@ -261,7 +261,7 @@ public class A2AProtocolHttpClientTests
 
         //assert
         response.Should().NotBeNull();
-        response.Id.Should().Be(sendRequest.Id);
+        response.Id.Should().Be(setPushNotifications.Id);
         response.Result.Should().NotBeNull();
         response.Result.Id.Should().Be(sendRequest.Params.Message.TaskId);
     }
@@ -301,7 +301,7 @@ public class A2AProtocolHttpClientTests
 
         //assert
         response.Should().NotBeNull();
-        response.Id.Should().Be(sendRequest.Id);
+        response.Id.Should().Be(setPushNotifications.Id);
         response.Result.Should().NotBeNull();
         response.Result.Id.Should().Be(sendRequest.Params.Message.TaskId);
     }

@@ -23,6 +23,10 @@ public static class TaskEventKind
     /// The kind of event used to notify about a task's artifact update.
     /// </summary>
     public const string ArtifactUpdate = "artifact-update";
+    /// <summary>
+    /// The kind of event used to notify about a task's status update.
+    /// </summary>
+    public const string StatusUpdate = "status-update";
 
     /// <summary>
     /// Gets a new <see cref="IEnumerable{T}"/> containing all supported values.
@@ -31,6 +35,7 @@ public static class TaskEventKind
     public static IEnumerable<string> AsEnumerable()
     {
         yield return ArtifactUpdate;
+        yield return StatusUpdate;
     }
 
 }

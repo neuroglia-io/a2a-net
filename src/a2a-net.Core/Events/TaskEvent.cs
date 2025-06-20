@@ -20,6 +20,7 @@ namespace A2A.Events;
 [DataContract]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(TaskArtifactUpdateEvent), TaskEventKind.ArtifactUpdate)]
+[JsonDerivedType(typeof(TaskStatusUpdateEvent), TaskEventKind.StatusUpdate)]
 public abstract record TaskEvent
     : RpcEvent
 {
