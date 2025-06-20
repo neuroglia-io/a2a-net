@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class A2AHttpMiddleware(IA2AProtocolServerProvider serverProvider, IOptio
                     await UnsupportedOperation();
                     return;
                 }
-                if (!TryConvertTo(request, out TaskResubscriptionRequest resubscribeTaskRequest))
+                if (!TryConvertTo(request, out ResubscribeToTaskRequest resubscribeTaskRequest))
                 {
                     await InvalidParams().ConfigureAwait(false);
                     return;

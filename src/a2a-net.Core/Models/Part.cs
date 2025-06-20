@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using A2A.Models.Parts;
+
 namespace A2A.Models;
 
 /// <summary>
-/// Represents a fully formed piece of content exchanged between a client and a remote agent as part of a message or an artifact
+/// Represents a fully formed piece of content exchanged between a client and a remote agent as part of a message or an artifact.
 /// </summary>
+[Description("A fully formed piece of content exchanged between a client and a remote agent as part of a message or an artifact.")]
 [DataContract]
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(DataPart), PartType.Data)]
 [JsonDerivedType(typeof(FilePart), PartType.File)]
 [JsonDerivedType(typeof(TextPart), PartType.Text)]
@@ -25,13 +28,15 @@ public abstract record Part
 {
 
     /// <summary>
-    /// Gets the part's type
+    /// Gets the part's type.
     /// </summary>
-    public abstract string Type { get; }
+    [IgnoreDataMember, JsonIgnore, YamlIgnore]
+    public abstract string Kind { get; }
 
     /// <summary>
-    /// Gets or sets a key/value mapping that contains the message's additional properties, if any
+    /// Gets or sets a key/value mapping that contains the message's additional properties, if any.
     /// </summary>
+    [Description("A key/value mapping that contains the message's additional properties, if any.")]
     [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
     public virtual EquatableDictionary<string, object>? Metadata { get; set; }
 

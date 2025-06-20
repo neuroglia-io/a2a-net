@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Requests;
+namespace A2A.Errors;
 
 /// <summary>
-/// Represents the request used to resubscribe to a remote agent
+/// Represents an error indicating that the agent response type is invalid.
 /// </summary>
+[Description("Represents an error indicating that the agent response type is invalid.")]
 [DataContract]
-public record TaskResubscriptionRequest()
-    : RpcRequest<TaskQueryParameters>("tasks/resubscribe")
+public record InvalidAgentResponseError()
+    : RpcError(ErrorCode, "Invalid agent response type")
 {
 
-
+    /// <summary>
+    /// Gets the error code associated with the <see cref="RpcError"/>.
+    /// </summary>
+    public const int ErrorCode = -32006;
 
 }

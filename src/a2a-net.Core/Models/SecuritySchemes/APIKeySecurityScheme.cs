@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models;
+namespace A2A.Models.SecuritySchemes;
 
 /// <summary>
 /// Represents an API key security scheme.
 /// </summary>
+[Description("An API key security scheme.")]
 [DataContract]
 public record APIKeySecurityScheme 
     : SecurityScheme
@@ -28,13 +29,15 @@ public record APIKeySecurityScheme
     /// <summary>
     /// Gets or sets the name of the header or query parameter to be used for the API key.
     /// </summary>
+    [Description("The name of the header or query parameter to be used for the API key.")]
     [Required, MinLength(1)]
     [DataMember(Name = "name", Order = 1), JsonPropertyName("name"), JsonPropertyOrder(1), YamlMember(Alias = "name", Order = 1)]
     public virtual string Name { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the location of the API key (header, query, etc.).
+    /// Gets or sets the location of the API key.
     /// </summary>
+    [Description("The location of the API key.")]
     [Required, MinLength(1), AllowedValues(ApiKeyLocation.Cookie, ApiKeyLocation.Header, ApiKeyLocation.Query)]
     [DataMember(Name = "in", Order = 2), JsonPropertyName("in"), JsonPropertyOrder(2), YamlMember(Alias = "in", Order = 2)]
     public virtual string In { get; set; } = null!;

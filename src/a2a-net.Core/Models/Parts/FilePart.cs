@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,25 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models;
+namespace A2A.Models.Parts;
 
 /// <summary>
-/// Represents an OAuth2 security scheme.
+/// Represents a file segment within parts.
 /// </summary>
+[Description("Represents a file segment within parts.")]
 [DataContract]
-public record OAuth2SecurityScheme
-    : SecurityScheme
+public record FilePart
+    : Part
 {
 
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => SecuritySchemeType.OAuth2;
+    public override string Kind => PartType.File;
 
     /// <summary>
-    /// Gets or sets the OAuth2 flow definitions for this security scheme.
+    /// Gets or sets the file content.
     /// </summary>
+    [Description("The file content.")]
     [Required]
-    [DataMember(Name = "flows", Order = 1), JsonPropertyName("flows"), JsonPropertyOrder(1), YamlMember(Alias = "flows", Order = 1)]
-    public virtual OAuthFlows Flows { get; set; } = default!;
+    [DataMember(Name = "file", Order = 1), JsonPropertyName("file"), JsonPropertyOrder(1), YamlMember(Alias = "file", Order = 1)]
+    public virtual File File { get; set; } = null!;
 
 }

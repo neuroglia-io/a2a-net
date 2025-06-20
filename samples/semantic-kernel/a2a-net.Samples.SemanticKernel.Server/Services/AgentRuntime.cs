@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -75,10 +75,10 @@ public class AgentRuntime
             }
             return cancellationTokenSource;
         });
-        if (!Sessions.TryGetValue(task.SessionId, out var session) || session == null)
+        if (!Sessions.TryGetValue(task.ContextId, out var session) || session == null)
         {
             session = string.IsNullOrWhiteSpace(Options.Agent.Instructions) ? [] : new ChatHistory(Options.Agent.Instructions);
-            Sessions.AddOrUpdate(task.SessionId, session, (id, existing) => existing);
+            Sessions.AddOrUpdate(task.ContextId, session, (id, existing) => existing);
         }
         session.AddUserMessage(task.Message.ToText() ?? string.Empty);
         var executionSettings = new PromptExecutionSettings();

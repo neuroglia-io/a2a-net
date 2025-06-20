@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,25 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models;
+namespace A2A;
 
 /// <summary>
-/// Represents a file part
+/// Represents the base class for all request parameters.
 /// </summary>
+[Description("Represents the base class for all request parameters.")]
 [DataContract]
-public record FilePart
-    : Part
+public abstract record RpcRequestParameters
 {
 
-    /// <inheritdoc/>
-    [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => PartType.File;
-
     /// <summary>
-    /// Gets or sets the part's text
+    /// Gets or sets request-specific metadata.
     /// </summary>
-    [Required]
-    [DataMember(Name = "file", Order = 1), JsonPropertyName("file"), JsonPropertyOrder(1), YamlMember(Alias = "file", Order = 1)]
-    public virtual File File { get; set; } = null!;
+    [Description("Request-specific metadata.")]
+    [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
+    public virtual EquatableDictionary<string, object>? Metadata { get; set; }
 
 }

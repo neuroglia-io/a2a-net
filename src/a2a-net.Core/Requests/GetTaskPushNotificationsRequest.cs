@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
 namespace A2A.Requests;
 
 /// <summary>
-/// Represents the request used to retrieve the currently configured push notification configuration for a Task
+/// Represents a request used to retrieve the currently configured push notification configuration for a task.
 /// </summary>
+[Description("Represents a request used to retrieve the currently configured push notification configuration for a task.")]
 [DataContract]
-public record GetTaskPushNotificationsRequest()
-    : RpcRequest<TaskIdParameters>("tasks/pushNotification/get")
+public record GetTaskPushNotificationsRequest
+    : RpcRequest<TaskIdParameters>
 {
 
+    /// <inheritdoc/>
+    public GetTaskPushNotificationsRequest() : base(A2AProtocol.Methods.Tasks.PushNotifications.Get) { }
 
+    /// <inheritdoc/>
+    public GetTaskPushNotificationsRequest(TaskIdParameters parameters) : base(A2AProtocol.Methods.Tasks.PushNotifications.Get, parameters) { }
 
 }

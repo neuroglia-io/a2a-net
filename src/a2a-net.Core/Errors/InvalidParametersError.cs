@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,25 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models;
+namespace A2A.Errors;
 
 /// <summary>
-/// Represents a data part
+/// Represents an error that occurs when the parameters provided to the method are invalid or do not match the expected format.
 /// </summary>
+[Description("Represents an error that occurs when the parameters provided to the method are invalid or do not match the expected format.")]
 [DataContract]
-public record DataPart
-    : Part
+public record InvalidParametersError()
+     : RpcError(ErrorCode, "Invalid method parameters")
 {
 
-    /// <inheritdoc/>
-    [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => PartType.Data;
-
     /// <summary>
-    /// Gets or sets the part's data
+    /// Gets the error code associated with the <see cref="RpcError"/>.
     /// </summary>
-    [Required]
-    [DataMember(Name = "data", Order = 1), JsonPropertyName("data"), JsonPropertyOrder(1), YamlMember(Alias = "data", Order = 1)]
-    public virtual EquatableDictionary<string, object> Data { get; set; } = null!;
+    public const int ErrorCode = -32602;
 
 }

@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,14 @@ public static class TaskState
     /// </summary>
     public const string Failed = "failed";
     /// <summary>
+    /// Indicates that the task ask terminated due to rejection by remote agent.
+    /// </summary>
+    public const string Rejected = "rejected";
+    /// <summary>
+    /// Indicates that the task requires authentication before it can be executed.
+    /// </summary>
+    public const string AuthRequired = "auth-required";
+    /// <summary>
     /// Indicates that the task is an unknown status
     /// </summary>
     public const string Unknown = "unknown";
@@ -60,6 +68,8 @@ public static class TaskState
         yield return Completed;
         yield return Cancelled;
         yield return Failed;
+        yield return Rejected;
+        yield return AuthRequired;
         yield return Unknown;
     }
 

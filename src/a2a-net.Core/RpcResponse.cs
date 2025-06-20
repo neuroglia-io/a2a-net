@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,25 +14,27 @@
 namespace A2A;
 
 /// <summary>
-/// Represents the base class for all A2A responses
+/// Represents the base class for all A2A responses.
 /// </summary>
+[Description("Represents the base class for all A2A RPC responses.")]
 [DataContract]
 public abstract record RpcResponse
     : RpcMessage
 {
 
     /// <summary>
-    /// Gets or sets the error, if any, that has occurred during the request's execution
+    /// Gets or sets the error, if any, that has occurred during the request's execution.
     /// </summary>
+    [Description("The error, if any, that has occurred during the request's execution.")]
     [DataMember(Name = "error", Order = 2), JsonPropertyName("error"), JsonPropertyOrder(2), YamlMember(Alias = "error", Order = 2)]
     public virtual RpcError? Error { get; set; } = null!;
 
 }
 
 /// <summary>
-/// Represents the base class for all A2A responses
+/// Represents the base class for all A2A responses.
 /// </summary>
-/// <typeparam name="TResult">The type of the response's content</typeparam>
+/// <typeparam name="TResult">The type of the response's content.</typeparam>
 [DataContract]
 public record RpcResponse<TResult>
     : RpcResponse
@@ -40,8 +42,9 @@ public record RpcResponse<TResult>
 {
 
     /// <summary>
-    /// Gets or sets the response's content
+    /// Gets or sets the response's content.
     /// </summary>
+    [Description("The response's content.")]
     [Required]
     [DataMember(Name = "result", Order = 2), JsonInclude, JsonPropertyName("result"), JsonPropertyOrder(2), YamlMember(Alias = "result", Order = 2)]
     public virtual TResult? Result { get; set; } = null!;

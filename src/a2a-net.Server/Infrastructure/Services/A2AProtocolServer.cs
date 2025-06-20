@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? await Tasks.AddAsync(new()
         {
             Id = request.Params.Id,
-            SessionId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
+            ContextId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
             Status = new()
             {
                 Timestamp = DateTimeOffset.Now,
@@ -114,7 +114,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? await Tasks.AddAsync(new()
         {
             Id = request.Params.Id,
-            SessionId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
+            ContextId = request.Params.SessionId ?? Guid.NewGuid().ToString("N"),
             Status = new()
             {
                 Timestamp = DateTimeOffset.Now,
@@ -143,7 +143,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> ResubscribeToTaskAsync(TaskResubscriptionRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<RpcResponse<TaskEvent>> ResubscribeToTaskAsync(ResubscribeToTaskRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false) ?? throw new LocalRpcException($"Failed to find a task with the specified id '{request.Params.Id}'");
@@ -203,7 +203,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<PushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (request.Params.PushNotificationConfig != null && !await PushNotificationSender.VerifyPushNotificationUrlAsync(request.Params.PushNotificationConfig.Url, cancellationToken).ConfigureAwait(false))
@@ -235,7 +235,7 @@ public class A2AProtocolServer(string name, AgentCapabilities capabilities, ILog
     }
 
     /// <inheritdoc/>
-    public virtual async Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
+    public virtual async Task<RpcResponse<PushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var task = await Tasks.GetAsync(request.Params.Id, cancellationToken).ConfigureAwait(false);

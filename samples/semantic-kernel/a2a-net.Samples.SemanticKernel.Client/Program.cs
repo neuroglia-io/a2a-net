@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using A2A.Events;
+using A2A.Models.Parts;
 using A2A.Samples.SemanticKernel.Client;
 using Microsoft.VisualStudio.Threading;
 using Spectre.Console.Extensions;
@@ -368,7 +369,7 @@ static async System.Threading.Tasks.Task PrintArtifactAsync(Artifact artifact)
         }
         else if (p is DataPart d)
         {
-            AnsiConsole.MarkupLineInterpolated($"[darkgreen]Data: {(d.Type is null ? "Unknown" : d.Type)}[/]");
+            AnsiConsole.MarkupLineInterpolated($"[darkgreen]Data: {(d.Kind is null ? "Unknown" : d.Kind)}[/]");
             foreach (var i in d.Metadata ?? [])
             {
                 AnsiConsole.MarkupLineInterpolated($"[darkgreen]{i.Key}: {i.Value}[/]");

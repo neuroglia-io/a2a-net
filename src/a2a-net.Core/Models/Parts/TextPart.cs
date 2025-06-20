@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Models;
+namespace A2A.Models.Parts;
 
 /// <summary>
-/// Represents a text part
+/// Represents a text part.
 /// </summary>
 [DataContract]
 public record TextPart
@@ -22,14 +22,14 @@ public record TextPart
 {
 
     /// <summary>
-    /// Initializes a new <see cref="TextPart"/>
+    /// Initializes a new <see cref="TextPart"/>.
     /// </summary>
     public TextPart() { }
 
     /// <summary>
-    /// Initializes a new <see cref="TextPart"/>
+    /// Initializes a new <see cref="TextPart"/>.
     /// </summary>
-    /// <param name="text">The part's text</param>
+    /// <param name="text">The part's text.</param>
     public TextPart(string text) 
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
@@ -38,11 +38,12 @@ public record TextPart
 
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => PartType.Text;
+    public override string Kind => PartType.Text;
 
     /// <summary>
-    /// Gets or sets the part's text
+    /// Gets or sets the part's text.
     /// </summary>
+    [Description("The part's text.")]
     [Required]
     [DataMember(Name = "text", Order = 1), JsonPropertyName("text"), JsonPropertyOrder(1), YamlMember(Alias = "text", Order = 1)]
     public virtual string Text { get; set; } = null!;
