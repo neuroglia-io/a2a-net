@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ namespace A2A.UnitTests.Services;
 internal static class AuthenticationInfoFactory
 {
 
-    internal static AuthenticationInfo Create() => new()
+    internal static PushNotificationAuthenticationInfo Create() => new()
     {
         Schemes = ["OAuth2"],
         Credentials = "fake-credentials"

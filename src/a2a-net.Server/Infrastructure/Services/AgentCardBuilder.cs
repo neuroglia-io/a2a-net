@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 namespace A2A.Server.Infrastructure.Services;
 
 /// <summary>
-/// Represents the default implementation of the <see cref="IAgentCardBuilder"/> interface
+/// Represents the default implementation of the <see cref="IAgentCardBuilder"/> interface.
 /// </summary>
 public class AgentCardBuilder
     : IAgentCardBuilder
@@ -60,6 +60,14 @@ public class AgentCardBuilder
     }
 
     /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithIconUrl(Uri url)
+    {
+        ArgumentNullException.ThrowIfNull(url);
+        Card.IconUrl = url;
+        return this;
+    }
+
+    /// <inheritdoc/>
     public virtual IAgentCardBuilder WithDocumentationUrl(Uri url)
     {
         Card.DocumentationUrl = url;
@@ -80,6 +88,40 @@ public class AgentCardBuilder
         var builder = new AgentProviderBuilder();
         setup(builder);
         Card.Provider = builder.Build();
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithSecurityScheme(string name, SecurityScheme scheme)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentNullException.ThrowIfNull(scheme);
+        Card.SecuritySchemes ??= [];
+        Card.SecuritySchemes[name] = scheme;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithSecurityScheme(string name, Action<IGenericSecuritySchemeBuilder> setup)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentNullException.ThrowIfNull(setup);
+        var builder = new GenericSecuritySchemeBuilder();
+        return WithSecurityScheme(name, builder.Build());
+    }
+
+    /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithSecurityRequirement(string schemeName, IEnumerable<string> scopes)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(schemeName);
+        ArgumentNullException.ThrowIfNull(scopes);
+        Card.Security ??= [];
+        var existing = Card.Security.FirstOrDefault(e => e.ContainsKey(schemeName));
+        if (existing != null) Card.Security.Remove(existing);
+        Card.Security.Add(new()
+        {
+            { schemeName, scopes.ToList() }
+        });
         return this;
     }
 
@@ -105,6 +147,25 @@ public class AgentCardBuilder
         Card.Capabilities ??= new();
         Card.Capabilities.Streaming = true;
         return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithExtension(AgentExtension extension)
+    {
+        ArgumentNullException.ThrowIfNull(extension);
+        Card.Capabilities ??= new();
+        Card.Capabilities.Extensions ??= [];
+        Card.Capabilities.Extensions.Add(extension);
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public virtual IAgentCardBuilder WithExtension(Action<IAgentExtensionBuilder> setup)
+    {
+        ArgumentNullException.ThrowIfNull(setup);
+        var builder = new AgentExtensionBuilder();
+        setup(builder);
+        return WithExtension(builder.Build());
     }
 
     /// <inheritdoc/>

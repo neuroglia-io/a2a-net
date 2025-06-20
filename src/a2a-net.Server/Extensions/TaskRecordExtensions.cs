@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public static class TaskRecordExtensions
     public static Models.Task AsTask(this TaskRecord taskRecord, bool stateTransitionHistory = false, uint? historyLength = null) => new()
     {
         Id = taskRecord.Id,
-        SessionId = taskRecord.SessionId,
+        ContextId = taskRecord.ContextId,
         Status = taskRecord.Status,
         Artifacts = taskRecord.Artifacts,
         History = stateTransitionHistory ? historyLength.HasValue && taskRecord.History != null ? [..taskRecord.History.TakeLast((int)historyLength.Value)] : taskRecord.History : null,

@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,85 +14,118 @@
 namespace A2A.Models;
 
 /// <summary>
-/// Represents an object used to describe an agent’s capabilities/skills and authentication mechanism
+/// Represents an object used to describe an agent’s capabilities/skills and authentication mechanism.
 /// </summary>
+[Description("An object used to describe an agent's capabilities/skills and authentication mechanism.")]
 [DataContract]
 public record AgentCard
 {
 
     /// <summary>
-    /// Gets/sets the agent's human readable name
+    /// Gets or sets the agent's human readable name.
     /// </summary>
+    [Description("The agent's human readable name.")]
     [Required, MinLength(1)]
     [DataMember(Name = "name", Order = 1), JsonPropertyName("name"), JsonPropertyOrder(1), YamlMember(Alias = "name", Order = 1)]
     public virtual string Name { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets a human-readable description of the agent, if any<para></para>
-    /// Used to assist users and other agents in understanding what the agent can do
+    /// Gets or sets a human-readable description of the agent, if any.<para></para>
+    /// Used to assist users and other agents in understanding what the agent can do.
     /// </summary>
+    [Description("A human-readable description of the agent, if any. Used to assist users and other agents in understanding what the agent can do.")]
     [DataMember(Name = "description", Order = 2), JsonPropertyName("description"), JsonPropertyOrder(2), YamlMember(Alias = "description", Order = 2)]
     public virtual string? Description { get; set; }
 
     /// <summary>
-    /// Gets/sets the URL referencing the address the agent is hosted at
+    /// Gets or sets the URL referencing the address the agent is hosted at.
     /// </summary>
+    [Description("The URL referencing the address the agent is hosted at.")]
     [Required]
     [DataMember(Name = "url", Order = 3), JsonPropertyName("url"), JsonPropertyOrder(3), YamlMember(Alias = "url", Order = 3)]
     public virtual Uri Url { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the agent's service provider, if any
+    /// Gets or sets an url, if any, referencing an icon representing the agent.
     /// </summary>
-    [DataMember(Name = "provider", Order = 4), JsonPropertyName("provider"), JsonPropertyOrder(4), YamlMember(Alias = "provider", Order = 4)]
+    [Description("An url, if any, referencing an icon representing the agent.")]
+    [DataMember(Name = "iconUrl", Order = 4), JsonPropertyName("iconUrl"), JsonPropertyOrder(4), YamlMember(Alias = "iconUrl", Order = 4)]
+    public virtual Uri? IconUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets the agent's service provider, if any.
+    /// </summary>
+    [Description("The agent's service provider, if any.")]
+    [DataMember(Name = "provider", Order = 5), JsonPropertyName("provider"), JsonPropertyOrder(5), YamlMember(Alias = "provider", Order = 5)]
     public virtual AgentProvider? Provider { get; set; }
 
     /// <summary>
-    /// Gets/sets the agent's version
+    /// Gets or sets the agent's version.
     /// </summary>
+    [Description("The agent's version.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "version", Order = 5), JsonPropertyName("version"), JsonPropertyOrder(5), YamlMember(Alias = "version", Order = 5)]
+    [DataMember(Name = "version", Order = 6), JsonPropertyName("version"), JsonPropertyOrder(6), YamlMember(Alias = "version", Order = 6)]
     public virtual string Version { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the URL, if any, referencing the agent's documentation
+    /// Gets or sets the URL, if any, referencing the agent's documentation.
     /// </summary>
-    [DataMember(Name = "documentationUrl", Order = 6), JsonPropertyName("documentationUrl"), JsonPropertyOrder(6), YamlMember(Alias = "documentationUrl", Order = 6)]
+    [Description("The URL, if any, referencing the agent's documentation.")]
+    [DataMember(Name = "documentationUrl", Order = 7), JsonPropertyName("documentationUrl"), JsonPropertyOrder(7), YamlMember(Alias = "documentationUrl", Order = 7)]
     public virtual Uri? DocumentationUrl { get; set; }
 
     /// <summary>
-    /// Gets/sets the agent's capabilities
+    /// Gets or sets the agent's capabilities.
     /// </summary>
+    [Description("The agent's capabilities.")]
     [Required]
-    [DataMember(Name = "capabilities", Order = 7), JsonPropertyName("capabilities"), JsonPropertyOrder(7), YamlMember(Alias = "capabilities", Order = 7)]
+    [DataMember(Name = "capabilities", Order = 8), JsonPropertyName("capabilities"), JsonPropertyOrder(8), YamlMember(Alias = "capabilities", Order = 8)]
     public virtual AgentCapabilities Capabilities { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the authentication  requirements for the agent
+    /// Gets or sets the security scheme details, if any, used for authenticating with the agent.
     /// </summary>
-    [DataMember(Name = "authentication", Order = 8), JsonPropertyName("authentication"), JsonPropertyOrder(8), YamlMember(Alias = "authentication", Order = 8)]
-    public virtual AgentAuthentication? Authentication { get; set; }
+    [Description("The security scheme details, if any, used for authenticating with the agent.")]
+    [DataMember(Name = "securitySchemes", Order = 9), JsonPropertyName("securitySchemes"), JsonPropertyOrder(9), YamlMember(Alias = "securitySchemes", Order = 9)]
+    public virtual EquatableDictionary<string, SecurityScheme>? SecuritySchemes { get; set; }
 
     /// <summary>
-    /// Gets/sets the set of supported mime types for input
+    /// Gets or sets security requirements, if any, that the agent requires to be met in order to access its resources.
     /// </summary>
+    [Description("Security requirements, if any, that the agent requires to be met in order to access its resources.")]
+    [DataMember(Name = "security", Order = 10), JsonPropertyName("security"), JsonPropertyOrder(10), YamlMember(Alias = "security", Order = 10)]
+    public virtual EquatableList<EquatableDictionary<string, List<string>>>? Security { get; set; }
+
+    /// <summary>
+    /// Gets or sets the set of supported mime types for input.
+    /// </summary>
+    [Description("The set of supported mime types for input.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "defaultInputModes", Order = 9), JsonPropertyName("defaultInputModes"), JsonPropertyOrder(9), YamlMember(Alias = "defaultInputModes", Order = 9)]
+    [DataMember(Name = "defaultInputModes", Order = 11), JsonPropertyName("defaultInputModes"), JsonPropertyOrder(11), YamlMember(Alias = "defaultInputModes", Order = 11)]
     public virtual EquatableList<string> DefaultInputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <summary>
-    /// Gets/sets the set of supported mime types for output
+    /// Gets or sets the set of supported mime types for output.
     /// </summary>
+    [Description("The set of supported mime types for output.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "defaultOutputModes", Order = 10), JsonPropertyName("defaultOutputModes"), JsonPropertyOrder(10), YamlMember(Alias = "defaultOutputModes", Order = 10)]
+    [DataMember(Name = "defaultOutputModes", Order = 12), JsonPropertyName("defaultOutputModes"), JsonPropertyOrder(12), YamlMember(Alias = "defaultOutputModes", Order = 12)]
     public virtual EquatableList<string> DefaultOutputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <summary>
-    /// Gets/sets the set of the agent's skills
+    /// Gets or sets the set of the agent's skills.
     /// </summary>
+    [Description("The set of the agent's skills.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "skills", Order = 11), JsonPropertyName("skills"), JsonPropertyOrder(11), YamlMember(Alias = "skills", Order = 11)]
+    [DataMember(Name = "skills", Order = 13), JsonPropertyName("skills"), JsonPropertyOrder(13), YamlMember(Alias = "skills", Order = 13)]
     public virtual EquatableList<AgentSkill> Skills { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the agent supports retrieving a detailed Agent Card via an authenticated endpoint.
+    /// </summary>
+    [Description("A value indicating whether the agent supports retrieving a detailed Agent Card via an authenticated endpoint.")]
+    [DataMember(Name = "supportsAuthenticatedExtendedCard", Order = 14), JsonPropertyName("supportsAuthenticatedExtendedCard"), JsonPropertyOrder(14), YamlMember(Alias = "supportsAuthenticatedExtendedCard", Order = 14)]
+    public virtual bool SupportsAuthenticatedExtendedCard { get; set; }
 
     /// <inheritdoc/>
     public override string ToString() => Name;

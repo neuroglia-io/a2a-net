@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
 global using A2A.Events;
 global using A2A.Models;
 global using A2A.Requests;
-global using A2A.Serialization.Json;
 global using Neuroglia;
 global using StreamJsonRpc;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Net.Mime;
 global using System.Runtime.Serialization;
-global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using YamlDotNet.Serialization;

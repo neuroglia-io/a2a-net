@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Requests;
+namespace A2A.Errors;
 
 /// <summary>
-/// Represents the request used to resubscribe to a remote agent
+/// Represents an error that occurs when the parameters provided to the method are invalid or do not match the expected format.
 /// </summary>
+[Description("Represents an error that occurs when the parameters provided to the method are invalid or do not match the expected format.")]
 [DataContract]
-public record TaskResubscriptionRequest()
-    : RpcRequest<TaskQueryParameters>("tasks/resubscribe")
+public record InvalidParametersError()
+     : RpcError(ErrorCode, "Invalid method parameters")
 {
 
-
+    /// <summary>
+    /// Gets the error code associated with the <see cref="RpcError"/>.
+    /// </summary>
+    public const int ErrorCode = -32602;
 
 }

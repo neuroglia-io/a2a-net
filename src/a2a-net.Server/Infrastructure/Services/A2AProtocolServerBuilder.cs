@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class A2AProtocolServerBuilder(string name, IServiceCollection services)
     protected AgentCapabilities Capabilities { get; } = new();
 
     /// <summary>
-    /// Gets/sets the lifetime of the <see cref="IA2AProtocolServer"/> to build
+    /// Gets or sets the lifetime of the <see cref="IA2AProtocolServer"/> to build
     /// </summary>
     protected ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 

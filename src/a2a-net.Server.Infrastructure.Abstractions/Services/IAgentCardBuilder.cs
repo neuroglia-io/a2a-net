@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,13 @@ public interface IAgentCardBuilder
     IAgentCardBuilder WithUrl(Uri url);
 
     /// <summary>
+    /// Configures the URL referencing the agent's icon.
+    /// </summary>
+    /// <param name="url">The URL referencing the agent's icon</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/>.</returns>
+    IAgentCardBuilder WithIconUrl(Uri url);
+
+    /// <summary>
     /// Configures the agent's provider
     /// </summary>
     /// <param name="provider">The agent's provider</param>
@@ -69,6 +76,30 @@ public interface IAgentCardBuilder
     IAgentCardBuilder WithDocumentationUrl(Uri url);
 
     /// <summary>
+    /// Configures the agent to support the specified security scheme.
+    /// </summary>
+    /// <param name="name"> The name of the security scheme to add</param>
+    /// <param name="scheme"> The security scheme to add</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
+    IAgentCardBuilder WithSecurityScheme(string name, SecurityScheme scheme);
+
+    /// <summary>
+    /// Configures the agent to support the specified security scheme.
+    /// </summary>
+    /// <param name="name">The name of the security scheme to add</param>
+    /// <param name="setup">An <see cref="Action{T}"/> used to build the security scheme to add</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
+    IAgentCardBuilder WithSecurityScheme(string name, Action<IGenericSecuritySchemeBuilder> setup);
+
+    /// <summary>
+    /// Adds a security requirement that must be satisfied to access the agent's resources.
+    /// </summary>
+    /// <param name="schemeName">The name of the security scheme as defined in the agent's security schemes.</param>
+    /// <param name="scopes">The scopes required for this scheme. May be empty if the scheme does not require scopes.</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/>.</returns>
+    IAgentCardBuilder WithSecurityRequirement(string schemeName, IEnumerable<string> scopes);
+
+    /// <summary>
     /// Configures the agent to support streaming
     /// </summary>
     /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
@@ -85,6 +116,20 @@ public interface IAgentCardBuilder
     /// </summary>
     /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
     IAgentCardBuilder SupportsStateTransitionHistory();
+
+    /// <summary>
+    /// Configures the agent to support the specified extension.
+    /// </summary>
+    /// <param name="extension">The extension to support.</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
+    IAgentCardBuilder WithExtension(AgentExtension extension);
+
+    /// <summary>
+    /// Configures the agent to support the specified extension.
+    /// </summary>
+    /// <param name="setup">An <see cref="Action{T}"/> used to configure the extension to support.</param>
+    /// <returns>The configured <see cref="IAgentCardBuilder"/></returns>
+    IAgentCardBuilder WithExtension(Action<IAgentExtensionBuilder> setup);
 
     /// <summary>
     /// Configures the agent to support the specified MIME type as input

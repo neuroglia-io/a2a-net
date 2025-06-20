@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,33 +14,43 @@
 namespace A2A;
 
 /// <summary>
-/// Exposes constants and static about the A2A protocol
+/// Exposes constants and static about the A2A protocol.
 /// </summary>
 public static class A2AProtocol
 {
 
     /// <summary>
-    /// Exposes the JSON-RPC method names supported by the A2A protocol
+    /// Exposes the JSON-RPC method names supported by the A2A protocol.
     /// </summary>
     public static class Methods
     {
 
         /// <summary>
-        /// Exposes method names related to task management operations
+        /// Exposes method names related to message management operations.
+        /// </summary>
+        public static class Messages
+        {
+
+            const string Prefix = "messages/";
+
+            /// <summary>
+            /// The name of the method for sending a message to an agent ("messages/send").
+            /// </summary>
+            public const string Send = Prefix + "send";
+            /// <summary>
+            /// The name of the method for streaming messages to an agent ("messages/stream").
+            /// </summary>
+            public const string Stream = Prefix + "stream";
+        }
+
+        /// <summary>
+        /// Exposes method names related to task management operations.
         /// </summary>
         public static class Tasks
         {
 
             const string Prefix = "tasks/";
 
-            /// <summary>
-            /// The name of the method for sending or resuming a task ("tasks/send").
-            /// </summary>
-            public const string Send = Prefix + "send";
-            /// <summary>
-            /// The name of the method for sending a task and subscribing to its events via streaming ("tasks/sendSubscribe").
-            /// </summary>
-            public const string SendSubscribe = Prefix + "sendSubscribe";
             /// <summary>
             /// The name of the method for resubscribing to task events from a remote agent ("tasks/resubscribe").
             /// </summary>
@@ -55,7 +65,7 @@ public static class A2AProtocol
             public const string Cancel = Prefix + "cancel";
 
             /// <summary>
-            /// Exposes method names related to task push notifications
+            /// Exposes method names related to task push notifications.
             /// </summary>
             public static class PushNotifications
             {

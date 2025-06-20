@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
 namespace A2A.Models;
 
 /// <summary>
-/// Represents a data part
+/// Represents a structured data segment within a message part.
 /// </summary>
+[Description("A structured data segment within a message part.")]
 [DataContract]
 public record DataPart
     : Part
@@ -23,11 +24,12 @@ public record DataPart
 
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => PartType.Data;
+    public override string Kind => PartType.Data;
 
     /// <summary>
-    /// Gets/sets the part's data
+    /// Gets or sets the part's data.
     /// </summary>
+    [Description("The part's data.")]
     [Required]
     [DataMember(Name = "data", Order = 1), JsonPropertyName("data"), JsonPropertyOrder(1), YamlMember(Alias = "data", Order = 1)]
     public virtual EquatableDictionary<string, object> Data { get; set; } = null!;

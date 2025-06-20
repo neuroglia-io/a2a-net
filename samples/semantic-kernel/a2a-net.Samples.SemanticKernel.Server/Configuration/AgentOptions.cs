@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -20,34 +20,34 @@ public class AgentOptions
 {
 
     /// <summary>
-    /// Gets/sets the name of the application's AI agent
+    /// Gets or sets the name of the application's AI agent
     /// </summary>
     [Required, MinLength(1)]
     public virtual string Name { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the description, if any, of the application's AI agent
+    /// Gets or sets the description, if any, of the application's AI agent
     /// </summary>
     public virtual string? Description { get; set; }
 
     /// <summary>
-    /// Gets/sets the version of the application's AI agent
+    /// Gets or sets the version of the application's AI agent
     /// </summary>
     [Required, MinLength(1)]
     public virtual string Version { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the agent's instructions, if any
+    /// Gets or sets the agent's instructions, if any
     /// </summary>
     public virtual string? Instructions { get; set; }
 
     /// <summary>
-    /// Gets/sets a list containing the skills, if any, of the application's AI agent
+    /// Gets or sets a list containing the skills, if any, of the application's AI agent
     /// </summary>
     public virtual List<AgentSkill>? Skills { get; set; }
 
     /// <summary>
-    /// Gets/sets the options used to configure the agent's <see cref="Microsoft.SemanticKernel.Kernel"/>
+    /// Gets or sets the options used to configure the agent's <see cref="Microsoft.SemanticKernel.Kernel"/>
     /// </summary>
     [Required]
     public virtual AgentKernelOptions Kernel { get; set; } = null!;

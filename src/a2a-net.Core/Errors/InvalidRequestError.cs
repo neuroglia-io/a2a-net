@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
 namespace A2A.Errors;
 
 /// <summary>
-/// Represents an error that occurs when the request payload is invalid or fails validation
+/// Represents an error that occurs when the request payload is invalid or fails validation.
 /// </summary>
+[Description("Represents an error that occurs when the request payload is invalid or fails validation.")]
 [DataContract]
 public record InvalidRequestError()
     : RpcError(ErrorCode, "Request payload validation error")

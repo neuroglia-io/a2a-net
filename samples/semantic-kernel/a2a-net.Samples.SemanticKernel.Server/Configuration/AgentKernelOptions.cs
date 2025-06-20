@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ public class AgentKernelOptions
 {
 
     /// <summary>
-    /// Gets/sets the id of the model used by the application's <see cref="Kernel"/>
+    /// Gets or sets the id of the model used by the application's <see cref="Kernel"/>
     /// </summary>
     [Required, MinLength(1)]
     public virtual string Model { get; set; } = "gpt-4o";
 
     /// <summary>
-    /// Gets/sets the API key used to authenticate on the chat completion API used by the application's <see cref="Kernel"/>
+    /// Gets or sets the API key used to authenticate on the chat completion API used by the application's <see cref="Kernel"/>
     /// </summary>
     [Required, MinLength(1)]
     public virtual string ApiKey { get; set; } = null!;

@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
 namespace A2A.Models;
 
 /// <summary>
-/// Represents a file part
+/// Represents a file segment within parts.
 /// </summary>
+[Description("Represents a file segment within parts.")]
 [DataContract]
 public record FilePart
     : Part
@@ -23,11 +24,12 @@ public record FilePart
 
     /// <inheritdoc/>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public override string Type => PartType.File;
+    public override string Kind => PartType.File;
 
     /// <summary>
-    /// Gets/sets the part's text
+    /// Gets or sets the file content.
     /// </summary>
+    [Description("The file content.")]
     [Required]
     [DataMember(Name = "file", Order = 1), JsonPropertyName("file"), JsonPropertyOrder(1), YamlMember(Alias = "file", Order = 1)]
     public virtual File File { get; set; } = null!;

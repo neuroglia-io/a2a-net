@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -75,17 +75,16 @@ public class AgentRuntime
             }
             return cancellationTokenSource;
         });
-        if (!Sessions.TryGetValue(task.SessionId, out var session) || session == null)
+        if (!Sessions.TryGetValue(task.ContextId, out var session) || session == null)
         {
             session = string.IsNullOrWhiteSpace(Options.Agent.Instructions) ? [] : new ChatHistory(Options.Agent.Instructions);
-            Sessions.AddOrUpdate(task.SessionId, session, (id, existing) => existing);
+            Sessions.AddOrUpdate(task.ContextId, session, (id, existing) => existing);
         }
         session.AddUserMessage(task.Message.ToText() ?? string.Empty);
         var executionSettings = new PromptExecutionSettings();
         string? currentRole = null;
         var currentContent = new StringBuilder();
         EquatableDictionary<string, object>? metadata = null;
-        uint index = 0;
         await foreach (var (content, next) in ChatCompletionService.GetStreamingChatMessageContentsAsync(session, executionSettings, Kernel, cancellationTokenSource.Token).PeekingAsync(cancellationTokenSource.Token))
         {
             var role = content.Role?.ToString();
@@ -93,13 +92,11 @@ public class AgentRuntime
             {
                 if (currentContent.Length > 0 && currentRole != null)
                 {
-                    yield return new AgentResponseContent(new Artifact
+                    yield return new ArtifactResponseContent(new Artifact
                     {
-                        Index = index++,
                         Metadata = metadata,
-                        Parts = [new TextPart(currentContent.ToString())],
-                        LastChunk = true
-                    });
+                        Parts = [new TextPart(currentContent.ToString())]
+                    }, false, true);
                     currentContent.Clear();
                     metadata = null;
                 }
@@ -113,13 +110,11 @@ public class AgentRuntime
             }
             if (next == null || (!string.IsNullOrWhiteSpace(next?.Role?.ToString()) && next?.Role?.ToString() != currentRole && currentContent.Length > 0 && currentRole != null))
             {
-                yield return new AgentResponseContent(new Artifact
+                yield return new ArtifactResponseContent(new Artifact
                 {
-                    Index = index++,
                     Metadata = metadata,
-                    Parts = [new TextPart(currentContent.ToString())],
-                    LastChunk = true
-                });
+                    Parts = [new TextPart(currentContent.ToString())]
+                }, false, true);
                 currentContent.Clear();
                 metadata = null;
             }

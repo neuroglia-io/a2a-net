@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,48 +14,55 @@
 namespace A2A.Models;
 
 /// <summary>
-/// Represents a task
+/// Represents a task.
 /// </summary>
+[Description("Represents a task.")]
 [DataContract]
 public record Task
 {
 
     /// <summary>
-    /// Gets/sets the task's unique identifier
+    /// Gets or sets the task's unique identifier.
     /// </summary>
+    [Description("The task's unique identifier.")]
     [Required, MinLength(1)]
     [DataMember(Name = "id", Order = 1), JsonPropertyName("id"), JsonPropertyOrder(1), YamlMember(Alias = "id", Order = 1)]
     public virtual string Id { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the unique identifier of the session holding the task
+    /// Gets or sets the server generated identifier for contextual alignment across interactions.
     /// </summary>
+    [Description("The server generated identifier for contextual alignment across interactions.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "sessionId", Order = 2), JsonPropertyName("sessionId"), JsonPropertyOrder(2), YamlMember(Alias = "sessionId", Order = 2)]
-    public virtual string SessionId { get; set; } = null!;
+    [DataMember(Name = "contextId", Order = 2), JsonPropertyName("contextId"), JsonPropertyOrder(2), YamlMember(Alias = "contextId", Order = 2)]
+    public virtual string ContextId { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the task's status
+    /// Gets or sets the task's status.
     /// </summary>
+    [Description("The task's status.")]
     [Required]
     [DataMember(Name = "status", Order = 3), JsonPropertyName("status"), JsonPropertyOrder(3), YamlMember(Alias = "status", Order = 3)]
     public virtual TaskStatus Status { get; set; } = null!;
 
     /// <summary>
-    /// Gets/sets the history of all the task's messages
+    /// Gets or sets a collection of the artifacts, if any, created by the agent.
     /// </summary>
-    [DataMember(Name = "history", Order = 4), JsonPropertyName("history"), JsonPropertyOrder(4), YamlMember(Alias = "history", Order = 4)]
-    public virtual EquatableList<Message>? History { get; set; }
-
-    /// <summary>
-    /// Gets/sets a collection of the artifacts, if any, created by the agent
-    /// </summary>
-    [DataMember(Name = "artifacts", Order = 5), JsonPropertyName("artifacts"), JsonPropertyOrder(5), YamlMember(Alias = "artifacts", Order = 5)]
+    [Description("A collection of the artifacts, if any, created by the agent.")]
+    [DataMember(Name = "artifacts", Order = 4), JsonPropertyName("artifacts"), JsonPropertyOrder(4), YamlMember(Alias = "artifacts", Order = 4)]
     public virtual EquatableList<Artifact>? Artifacts { get; set; }
 
     /// <summary>
-    /// Gets/sets a key/value mapping that contains the task's additional properties, if any
+    /// Gets or sets the history of all the task's messages.
     /// </summary>
+    [Description("The history of all the task's messages.")]
+    [DataMember(Name = "history", Order = 5), JsonPropertyName("history"), JsonPropertyOrder(5), YamlMember(Alias = "history", Order = 5)]
+    public virtual EquatableList<Message>? History { get; set; }
+
+    /// <summary>
+    /// Gets or sets a key/value mapping that contains the task's additional properties, if any.
+    /// </summary>
+    [Description("A key/value mapping that contains the task's additional properties, if any.")]
     [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
     public virtual EquatableDictionary<string, object>? Metadata { get; set; }
 

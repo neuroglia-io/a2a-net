@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -20,66 +20,65 @@ public interface IA2AProtocolService
 {
 
     /// <summary>
-    /// Sends content to a remote agent to start a new Task, resumes an interrupted Task or reopens a completed Task<para></para>
-    /// A Task interrupt may be caused due to an agent requiring additional user input or a runtime error
+    /// Sends a message to an agent to initiate a new interaction or to continue an existing one.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation</returns>
-    [JsonRpcMethod(A2AProtocol.Methods.Tasks.Send)]
-    Task<RpcResponse<Models.Task>> SendTaskAsync(SendTaskRequest request, CancellationToken cancellationToken = default);
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
+    [JsonRpcMethod(A2AProtocol.Methods.Messages.Send)]
+    Task<RpcResponse<Models.Task>> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves the currently configured push notification configuration for a Task
+    /// Sends a message to an agent to initiate/continue a task AND subscribes the client to real-time updates for that task via Server-Sent Events (SSE).
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to stream the task's events</returns>
-    [JsonRpcMethod(A2AProtocol.Methods.Tasks.SendSubscribe)]
-    IAsyncEnumerable<RpcResponse<TaskEvent>> SendTaskStreamingAsync(SendTaskStreamingRequest request, CancellationToken cancellationToken = default);
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to stream the task's events.</returns>
+    [JsonRpcMethod(A2AProtocol.Methods.Messages.Stream)]
+    IAsyncEnumerable<RpcResponse<TaskEvent>> StreamMessageAsync(StreamMessageRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Resubscribes to a remote agent
+    /// Resubscribes to a remote agent.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to stream the task's events</returns>
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to stream the task's events.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.Resubscribe)]
-    IAsyncEnumerable<RpcResponse<TaskEvent>> ResubscribeToTaskAsync(TaskResubscriptionRequest request, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<RpcResponse<TaskEvent>> ResubscribeToTaskAsync(ResubscribeToTaskRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves the generated Artifacts for a Task
+    /// Retrieves the generated Artifacts for a task.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation</returns>
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.Get)]
     Task<RpcResponse<Models.Task>> GetTaskAsync(GetTaskRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Cancels a previously submitted task
+    /// Cancels a previously submitted task.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation</returns>
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.Cancel)]
     Task<RpcResponse<Models.Task>> CancelTaskAsync(CancelTaskRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Configures a push notification URL for receiving an update on Task status change
+    /// Configures a push notification URL for receiving an update on Task status change.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation</returns>
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.PushNotifications.Set)]
     Task<RpcResponse<TaskPushNotificationConfiguration>> SetTaskPushNotificationsAsync(SetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves the currently configured push notification configuration for a Task
+    /// Retrieves the currently configured push notification configuration for a Task.
     /// </summary>
-    /// <param name="request">The request to perform</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation</returns>
+    /// <param name="request">The request to perform.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new <see cref="RpcResponse"/> that describes the result of the operation.</returns>
     [JsonRpcMethod(A2AProtocol.Methods.Tasks.PushNotifications.Get)]
     Task<RpcResponse<TaskPushNotificationConfiguration>> GetTaskPushNotificationsAsync(GetTaskPushNotificationsRequest request, CancellationToken cancellationToken = default);
 

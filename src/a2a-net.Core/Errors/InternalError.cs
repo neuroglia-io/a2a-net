@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Requests;
+namespace A2A.Errors;
 
 /// <summary>
-/// Represents the request used to create a Task and to stream its updates
+/// Represents an error that occurs when an internal server error happens while processing the request.
 /// </summary>
+[Description("Represents an error that occurs when an internal server error happens while processing the request.")]
 [DataContract]
-public record SendTaskStreamingRequest()
-    : RpcRequest<TaskSendParameters>("tasks/sendSubscribe")
+public record InternalError()
+     : RpcError(ErrorCode, "Internal server error")
 {
 
-
+    /// <summary>
+    /// Gets the error code associated with the <see cref="RpcError"/>.
+    /// </summary>
+    public const int ErrorCode = -32603;
 
 }

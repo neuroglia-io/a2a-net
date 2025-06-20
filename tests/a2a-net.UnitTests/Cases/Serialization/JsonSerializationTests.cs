@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text.Json;
-
 namespace A2A.UnitTests.Cases.Serialization;
 
 public class JsonSerializationTests
@@ -24,11 +22,9 @@ public class JsonSerializationTests
         //arrange
         var toSerialize = new Artifact()
         {
+            ArtifactId = Guid.NewGuid().ToString("N"),
             Name = "fake-name",
             Description = "fake-description",
-            Append = true,
-            LastChunk = false,
-            Index = 69,
             Parts = PartFactory.CreateCollection()
         };
 
@@ -49,7 +45,7 @@ public class JsonSerializationTests
 
         //act
         var json = JsonSerializer.Serialize(toSerialize);
-        var deserialized = JsonSerializer.Deserialize<AuthenticationInfo>(json);
+        var deserialized = JsonSerializer.Deserialize<PushNotificationAuthenticationInfo>(json);
 
         //assert
         deserialized.Should().NotBeNull();
@@ -68,7 +64,7 @@ public class JsonSerializationTests
 
         //assert
         deserialized.Should().NotBeNull();
-        deserialized.Type.Should().Be(toSerialize.Type);
+        deserialized.Kind.Should().Be(toSerialize.Kind);
         deserialized.Data.First().ToString().Should().Be(toSerialize.Data.First().ToString());
     }
 
@@ -218,26 +214,28 @@ public class JsonSerializationTests
     }
 
     [Fact]
-    public void Serialize_And_Deserialize_SendTaskRequest_Should_Work()
+    public void Serialize_And_Deserialize_SendMessageRequest_Should_Work()
     {
         //arrange
-        var toSerialize = new SendTaskRequest()
+        var toSerialize = new SendMessageRequest()
         {
             JsonRpc = JsonRpcVersion.V2,
             Id = Guid.NewGuid().ToString("N"),
             Params = new()
             {
-                Id = Guid.NewGuid().ToString("N"),
-                SessionId = Guid.NewGuid().ToString("N"),
-                HistoryLength = 69,
                 Message = MessageFactory.Create(),
-                PushNotification = PushNotificationConfigurationFactory.Create()
+                Configuration = new()
+                {
+                    AcceptedOutputModes = ["fake-output-mode"],
+                    HistoryLength = 69,
+                    Blocking = true
+                }
             }
         };
 
         //act
         var json = JsonSerializer.Serialize(toSerialize);
-        var deserialized = JsonSerializer.Deserialize<SendTaskRequest>(json);
+        var deserialized = JsonSerializer.Deserialize<SendMessageRequest>(json);
 
         //assert
         deserialized.Should().NotBeNull();

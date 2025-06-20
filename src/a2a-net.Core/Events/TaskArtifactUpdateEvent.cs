@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -14,18 +14,35 @@
 namespace A2A.Events;
 
 /// <summary>
-/// Represents the event used to notify about an artifact update
+/// Represents an event used to notify about an artifact update.
 /// </summary>
+[Description("Represents an event used to notify about an artifact update.")]
 [DataContract]
 public record TaskArtifactUpdateEvent
     : TaskEvent
 {
 
     /// <summary>
-    /// Gets/sets the updated artifact
+    /// Gets or sets the updated artifact.
     /// </summary>
+    [Description("The updated artifact.")]
     [Required]
-    [DataMember(Name = "artifact", Order = 1), JsonPropertyName("artifact"), JsonPropertyOrder(1), YamlMember(Alias = "artifact", Order = 1)]
+    [DataMember(Name = "artifact", Order = 2), JsonPropertyName("artifact"), JsonPropertyOrder(2), YamlMember(Alias = "artifact", Order = 2)]
     public virtual Artifact Artifact { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the artifact update should be appended to the existing artifact.
+    /// </summary>
+    [Description("Indicates whether the artifact update should be appended to the existing artifact.")]
+    [DataMember(Name = "append", Order = 3), JsonPropertyName("append"), JsonPropertyOrder(3), YamlMember(Alias = "append", Order = 3)]
+    public virtual bool Append { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this is the last chunk of the artifact update.
+    /// </summary>
+    [Description("Indicates whether this is the last chunk of the artifact update.")]
+    [DataMember(Name = "lastChunk", Order = 4), JsonPropertyName("lastChunk"), JsonPropertyOrder(4), YamlMember(Alias = "lastChunk", Order = 4)]
+    public virtual bool LastChunk { get; set; }
+
 }
+

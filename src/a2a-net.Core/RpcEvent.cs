@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ public abstract record RpcEvent
 {
 
     /// <summary>
-    /// Gets/sets a key/value mapping that contains the event's additional properties, if any
+    /// Gets or sets a key/value mapping that contains the event's additional properties, if any
     /// </summary>
     [DataMember(Name = "metadata", Order = 99), JsonPropertyName("metadata"), JsonPropertyOrder(99), YamlMember(Alias = "metadata", Order = 99)]
     public virtual EquatableDictionary<string, object>? Metadata { get; set; }

@@ -1,4 +1,4 @@
-﻿// Copyright � 2025-Present the a2a-net Authors
+﻿// Copyright © 2025-Present the a2a-net Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ public class ApplicationOptions
 {
 
     /// <summary>
-    /// Gets/sets the remote server's URI
+    /// Gets or sets the remote server's URI
     /// </summary>
     public required Uri Server { get; set; }
 
