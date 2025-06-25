@@ -4,8 +4,8 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<OutputType>Library</OutputType>
-	<RootNamespace>A2A.Server.AspNetCore</RootNamespace>
+	  <OutputType>Library</OutputType>
+	  <RootNamespace>A2A.Server.AspNetCore</RootNamespace>
     <VersionPrefix>0.10.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>

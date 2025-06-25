@@ -31,14 +31,14 @@ public static class A2AProtocol
         public static class Messages
         {
 
-            const string Prefix = "messages/";
+            const string Prefix = "message/";
 
             /// <summary>
-            /// The name of the method for sending a message to an agent ("messages/send").
+            /// The name of the method for sending a message to an agent ("message/send").
             /// </summary>
             public const string Send = Prefix + "send";
             /// <summary>
-            /// The name of the method for streaming messages to an agent ("messages/stream").
+            /// The name of the method for streaming messages to an agent ("message/stream").
             /// </summary>
             public const string Stream = Prefix + "stream";
         }
