@@ -11,49 +11,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Samples.SemanticKernel.Server.Services;
+namespace A2A.Server.Services;
 
 /// <summary>
-/// Represents a <see cref="Microsoft.SemanticKernel.Kernel"/> based implementation of the <see cref="IAgentRuntime"/> interface
+/// Represents a <see cref="Microsoft.SemanticKernel.Kernel"/> based implementation of the <see cref="IAgentRuntime"/> interface.
 /// </summary>
-public class AgentRuntime
+/// <param name="name">The name of the <see cref="IAgentRuntime"/>'s name, if any.</param>
+/// <param name="kernel">The <see cref="Microsoft.SemanticKernel.Kernel"/> to use.</param>
+/// <param name="options">the service used to access the current <see cref="SemanticKernelAgentRuntimeOptions"/>.</param>
+public class SemanticKernelAgentRuntime(string? name, Kernel kernel, IOptionsMonitor<SemanticKernelAgentRuntimeOptions> options)
     : IAgentRuntime
 {
 
     /// <summary>
-    /// Initializes a new <see cref="AgentRuntime"/>
+    /// Gets the <see cref="IAgentRuntime"/>'s name, if any.
     /// </summary>
-    /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-    public AgentRuntime(IOptions<ApplicationOptions> options)
-    {
-        Options = options.Value;
-        var kernelBuilder = Kernel.CreateBuilder();
-        kernelBuilder.AddOpenAIChatCompletion(Options.Agent.Kernel.Model, Options.Agent.Kernel.ApiKey);
-        Kernel = kernelBuilder.Build();
-    }
+    protected string? Name { get; } = name;
 
     /// <summary>
-    /// Gets the current <see cref="ApplicationOptions"/>
+    /// Gets the <see cref="Microsoft.SemanticKernel.Kernel"/> to use.
     /// </summary>
-    protected ApplicationOptions Options { get; set; }
+    protected Kernel Kernel { get; } = kernel;
 
     /// <summary>
-    /// Gets the <see cref="Microsoft.SemanticKernel.Kernel"/> to use
+    /// Gets the current <see cref="SemanticKernelAgentRuntimeOptions"/>.
     /// </summary>
-    protected Kernel Kernel { get; }
+    protected SemanticKernelAgentRuntimeOptions Options { get; } = options.Get(name);
 
     /// <summary>
-    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains an <see cref="ChatHistory"/> per id mapping of all active A2A sessions
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains an <see cref="ChatHistory"/> per id mapping of all active A2A sessions.
     /// </summary>
     protected ConcurrentDictionary<string, ChatHistory> Sessions { get; } = [];
 
     /// <summary>
-    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains an <see cref="CancellationTokenSource"/> per id mapping of all active A2A tasks
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains an <see cref="CancellationTokenSource"/> per id mapping of all active A2A tasks.
     /// </summary>
     protected ConcurrentDictionary<string, CancellationTokenSource> Tasks { get; } = [];
 
     /// <summary>
-    /// Gets the service used to perform chat completion
+    /// Gets the service used to perform chat completion.
     /// </summary>
     protected IChatCompletionService ChatCompletionService => Kernel.GetRequiredService<IChatCompletionService>();
 
@@ -77,7 +73,7 @@ public class AgentRuntime
         });
         if (!Sessions.TryGetValue(task.ContextId, out var session) || session == null)
         {
-            session = string.IsNullOrWhiteSpace(Options.Agent.Instructions) ? [] : new ChatHistory(Options.Agent.Instructions);
+            session = string.IsNullOrWhiteSpace(Options.Instructions) ? [] : new ChatHistory(Options.Instructions);
             Sessions.AddOrUpdate(task.ContextId, session, (id, existing) => existing);
         }
         session.AddUserMessage(task.Message.ToText() ?? string.Empty);
@@ -125,7 +121,7 @@ public class AgentRuntime
     public virtual System.Threading.Tasks.Task CancelAsync(string taskId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
-        if (Tasks.TryRemove(taskId, out var cancellationTokenSource) && cancellationTokenSource != null) return cancellationTokenSource.CancelAsync(); 
+        if (Tasks.TryRemove(taskId, out var cancellationTokenSource) && cancellationTokenSource != null) return cancellationTokenSource.CancelAsync();
         else return System.Threading.Tasks.Task.CompletedTask;
     }
 

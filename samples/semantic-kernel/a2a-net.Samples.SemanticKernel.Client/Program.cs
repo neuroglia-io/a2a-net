@@ -291,7 +291,7 @@ void PrintCard(AgentCard card)
     table.AddRow(new Markup($"[blue]{card.Provider?.Organization ?? string.Empty}\n{card.Provider?.Url}[/]"), new Markup($"[bold blue]{card.Name}[/]\n[blue]v{card.Version}[/]").RightJustified());
     table.AddRow(
         new Table().AddColumn(string.Empty).HideHeaders().NoBorder()
-            .AddRow(new Markup($"[blue]{card.Description}[/]").RightJustified())
+            .AddRow(new Markup($"[grey]{card.Description}[/]").LeftJustified())
             .AddRow(new Text(card.DocumentationUrl?.ToString() ?? string.Empty).RightJustified()),
         detailsTable
     );

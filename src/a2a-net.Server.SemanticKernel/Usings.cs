@@ -12,12 +12,16 @@
 // limitations under the License.
 
 global using A2A.Models;
-global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Server;
-global using A2A.Server.AspNetCore;
+global using A2A.Server.Configuration;
 global using A2A.Server.Infrastructure;
 global using A2A.Server.Infrastructure.Services;
-global using Microsoft.AspNetCore.Mvc;
+global using A2A.Server.Services;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using Microsoft.Extensions.Options;
 global using Microsoft.SemanticKernel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Text.Json.Serialization;
+global using Microsoft.SemanticKernel.ChatCompletion;
+global using Neuroglia;
+global using System.Collections.Concurrent;
+global using System.Runtime.CompilerServices;
+global using System.Text;

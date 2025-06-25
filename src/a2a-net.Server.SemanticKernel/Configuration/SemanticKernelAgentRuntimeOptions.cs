@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Models;
-global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Server;
-global using A2A.Server.AspNetCore;
-global using A2A.Server.Infrastructure;
-global using A2A.Server.Infrastructure.Services;
-global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.SemanticKernel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Text.Json.Serialization;
+namespace A2A.Server.Configuration;
+
+/// <summary>
+/// Represents the options used to configure a <see cref="SemanticKernelAgentRuntime"/>.
+/// </summary>
+public class SemanticKernelAgentRuntimeOptions
+{
+
+    /// <summary>
+    /// Gets or sets the agent's instructions, if any
+    /// </summary>
+    public virtual string? Instructions { get; set; }
+
+}

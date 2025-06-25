@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Samples.SemanticKer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Samples.SemanticKernel.PushNotificationClient", "samples\semantic-kernel\a2a-net.Samples.SemanticKernel\a2a-net.Samples.SemanticKernel.PushNotificationClient\a2a-net.Samples.SemanticKernel.PushNotificationClient.csproj", "{5F053B7C-80AE-4E76-A5F6-8EF9672600A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "a2a-net.Server.SemanticKernel", "src\a2a-net.Server.SemanticKernel\a2a-net.Server.SemanticKernel.csproj", "{73428DAF-CBC5-44DF-69BD-AECF3FD01104}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{5F053B7C-80AE-4E76-A5F6-8EF9672600A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F053B7C-80AE-4E76-A5F6-8EF9672600A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F053B7C-80AE-4E76-A5F6-8EF9672600A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73428DAF-CBC5-44DF-69BD-AECF3FD01104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73428DAF-CBC5-44DF-69BD-AECF3FD01104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73428DAF-CBC5-44DF-69BD-AECF3FD01104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73428DAF-CBC5-44DF-69BD-AECF3FD01104}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +163,7 @@ Global
 		{564F5A5C-D32B-CDB7-788E-9AE19EF75EC2} = {614D5E64-63BF-4DAE-8A80-E07FB1C2462F}
 		{2C78A491-5476-3A37-4591-BB876B59E903} = {614D5E64-63BF-4DAE-8A80-E07FB1C2462F}
 		{5F053B7C-80AE-4E76-A5F6-8EF9672600A7} = {614D5E64-63BF-4DAE-8A80-E07FB1C2462F}
+		{73428DAF-CBC5-44DF-69BD-AECF3FD01104} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {698C2979-1A16-437B-8C04-1357EB80CC7F}
