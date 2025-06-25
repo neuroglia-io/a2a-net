@@ -36,7 +36,10 @@ public static class IServiceCollectionExtensions
             var kernelBuilder = services.AddKernel();
             configureKernel(kernelBuilder);
         }
-        services.TryAdd(new ServiceDescriptor(typeof(IAgentRuntime), serviceKey, typeof(SemanticKernelAgentRuntime), serviceLifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(IAgentRuntime), serviceKey, (serviceProvider, key) =>
+        {
+            return new SemanticKernelAgentRuntime((string?)key, serviceProvider.GetRequiredService<Kernel>(), serviceProvider.GetRequiredService<IOptionsMonitor<SemanticKernelAgentRuntimeOptions>>());
+        }, serviceLifetime));
         return services;
     }
 

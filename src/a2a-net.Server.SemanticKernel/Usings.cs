@@ -18,6 +18,7 @@ global using A2A.Server.Infrastructure.Services;
 global using A2A.Server.Services;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using Microsoft.Extensions.Options;
 global using Microsoft.SemanticKernel;
 global using Microsoft.SemanticKernel.ChatCompletion;
 global using Neuroglia;

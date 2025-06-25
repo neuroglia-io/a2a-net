@@ -19,6 +19,9 @@ namespace A2A.Server.Configuration;
 public class SemanticKernelAgentRuntimeOptions
 {
 
-
+    /// <summary>
+    /// Gets or sets the agent's instructions, if any
+    /// </summary>
+    public virtual string? Instructions { get; set; }
 
 }

@@ -11,9 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
-
-namespace A2A.Samples.SemanticKernel.Server;
+namespace A2A.Server;
 
 /// <summary>
 /// Defines extensions for <see cref="Message"/>s

@@ -24,7 +24,15 @@ builder.Services.Configure<JsonOptions>(options =>
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
 });
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddTransient<IAgentRuntime, AgentRuntime>();
+builder.Services.AddSemanticKernelAgentRuntime(
+    options =>
+    {
+        options.Instructions = applicationOptions.Agent.Instructions;
+    }, 
+    kernel =>
+    {
+        kernel.AddOpenAIChatCompletion(applicationOptions.Agent.Kernel.Model, applicationOptions.Agent.Kernel.ApiKey);
+    });
 builder.Services.AddA2AWellKnownAgent((provider, builder) =>
 {
     builder

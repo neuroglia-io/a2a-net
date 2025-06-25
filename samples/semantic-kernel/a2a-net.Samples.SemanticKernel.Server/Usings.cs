@@ -13,19 +13,11 @@
 
 global using A2A.Models;
 global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Samples.SemanticKernel.Server.Services;
 global using A2A.Server;
 global using A2A.Server.AspNetCore;
 global using A2A.Server.Infrastructure;
 global using A2A.Server.Infrastructure.Services;
 global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.Extensions.Options;
 global using Microsoft.SemanticKernel;
-global using Microsoft.SemanticKernel.ChatCompletion;
-global using Neuroglia;
-global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
-global using System.Text;
-global using System.Text.Json;
 global using System.Text.Json.Serialization;

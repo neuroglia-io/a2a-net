@@ -16,15 +16,27 @@ namespace A2A.Server.Services;
 /// <summary>
 /// Represents a <see cref="Microsoft.SemanticKernel.Kernel"/> based implementation of the <see cref="IAgentRuntime"/> interface.
 /// </summary>
+/// <param name="name">The name of the <see cref="IAgentRuntime"/>'s name, if any.</param>
 /// <param name="kernel">The <see cref="Microsoft.SemanticKernel.Kernel"/> to use.</param>
-public class SemanticKernelAgentRuntime(Kernel kernel)
+/// <param name="options">the service used to access the current <see cref="SemanticKernelAgentRuntimeOptions"/>.</param>
+public class SemanticKernelAgentRuntime(string? name, Kernel kernel, IOptionsMonitor<SemanticKernelAgentRuntimeOptions> options)
     : IAgentRuntime
 {
+
+    /// <summary>
+    /// Gets the <see cref="IAgentRuntime"/>'s name, if any.
+    /// </summary>
+    protected string? Name { get; } = name;
 
     /// <summary>
     /// Gets the <see cref="Microsoft.SemanticKernel.Kernel"/> to use.
     /// </summary>
     protected Kernel Kernel { get; } = kernel;
+
+    /// <summary>
+    /// Gets the current <see cref="SemanticKernelAgentRuntimeOptions"/>.
+    /// </summary>
+    protected SemanticKernelAgentRuntimeOptions Options { get; } = options.Get(name);
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains an <see cref="ChatHistory"/> per id mapping of all active A2A sessions.
@@ -61,7 +73,7 @@ public class SemanticKernelAgentRuntime(Kernel kernel)
         });
         if (!Sessions.TryGetValue(task.ContextId, out var session) || session == null)
         {
-            session = string.IsNullOrWhiteSpace(Options.Agent.Instructions) ? [] : new ChatHistory(Options.Agent.Instructions);
+            session = string.IsNullOrWhiteSpace(Options.Instructions) ? [] : new ChatHistory(Options.Instructions);
             Sessions.AddOrUpdate(task.ContextId, session, (id, existing) => existing);
         }
         session.AddUserMessage(task.Message.ToText() ?? string.Empty);
