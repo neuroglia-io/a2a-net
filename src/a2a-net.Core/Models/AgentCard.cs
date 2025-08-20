@@ -68,10 +68,18 @@ public record AgentCard
     public virtual string Version { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the version of the A2A protocol this agent supports.
+    /// </summary>
+    [Description("The version of the A2A protocol this agent supports")]
+    [DataMember(Name = "protocolVersion", Order = 6), JsonPropertyName("protocolVersion"), JsonPropertyOrder(6), YamlMember(Alias = "protocolVersion", Order = 7)]
+    [Required]
+    public virtual string ProtocolVersion { get; set; } = "0.2.6";
+
+    /// <summary>
     /// Gets or sets the URL, if any, referencing the agent's documentation.
     /// </summary>
     [Description("The URL, if any, referencing the agent's documentation.")]
-    [DataMember(Name = "documentationUrl", Order = 7), JsonPropertyName("documentationUrl"), JsonPropertyOrder(7), YamlMember(Alias = "documentationUrl", Order = 7)]
+    [DataMember(Name = "documentationUrl", Order = 8), JsonPropertyName("documentationUrl"), JsonPropertyOrder(8), YamlMember(Alias = "documentationUrl", Order = 8)]
     public virtual Uri? DocumentationUrl { get; set; }
 
     /// <summary>
@@ -79,21 +87,21 @@ public record AgentCard
     /// </summary>
     [Description("The agent's capabilities.")]
     [Required]
-    [DataMember(Name = "capabilities", Order = 8), JsonPropertyName("capabilities"), JsonPropertyOrder(8), YamlMember(Alias = "capabilities", Order = 8)]
+    [DataMember(Name = "capabilities", Order = 9), JsonPropertyName("capabilities"), JsonPropertyOrder(9), YamlMember(Alias = "capabilities", Order = 9)]
     public virtual AgentCapabilities Capabilities { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the security scheme details, if any, used for authenticating with the agent.
     /// </summary>
     [Description("The security scheme details, if any, used for authenticating with the agent.")]
-    [DataMember(Name = "securitySchemes", Order = 9), JsonPropertyName("securitySchemes"), JsonPropertyOrder(9), YamlMember(Alias = "securitySchemes", Order = 9)]
+    [DataMember(Name = "securitySchemes", Order = 10), JsonPropertyName("securitySchemes"), JsonPropertyOrder(10), YamlMember(Alias = "securitySchemes", Order = 10)]
     public virtual EquatableDictionary<string, SecurityScheme>? SecuritySchemes { get; set; }
 
     /// <summary>
     /// Gets or sets security requirements, if any, that the agent requires to be met in order to access its resources.
     /// </summary>
     [Description("Security requirements, if any, that the agent requires to be met in order to access its resources.")]
-    [DataMember(Name = "security", Order = 10), JsonPropertyName("security"), JsonPropertyOrder(10), YamlMember(Alias = "security", Order = 10)]
+    [DataMember(Name = "security", Order = 11), JsonPropertyName("security"), JsonPropertyOrder(11), YamlMember(Alias = "security", Order = 11)]
     public virtual EquatableList<EquatableDictionary<string, List<string>>>? Security { get; set; }
 
     /// <summary>
@@ -101,7 +109,7 @@ public record AgentCard
     /// </summary>
     [Description("The set of supported mime types for input.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "defaultInputModes", Order = 11), JsonPropertyName("defaultInputModes"), JsonPropertyOrder(11), YamlMember(Alias = "defaultInputModes", Order = 11)]
+    [DataMember(Name = "defaultInputModes", Order = 12), JsonPropertyName("defaultInputModes"), JsonPropertyOrder(12), YamlMember(Alias = "defaultInputModes", Order = 12)]
     public virtual EquatableList<string> DefaultInputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <summary>
@@ -109,7 +117,7 @@ public record AgentCard
     /// </summary>
     [Description("The set of supported mime types for output.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "defaultOutputModes", Order = 12), JsonPropertyName("defaultOutputModes"), JsonPropertyOrder(12), YamlMember(Alias = "defaultOutputModes", Order = 12)]
+    [DataMember(Name = "defaultOutputModes", Order = 13), JsonPropertyName("defaultOutputModes"), JsonPropertyOrder(13), YamlMember(Alias = "defaultOutputModes", Order = 13)]
     public virtual EquatableList<string> DefaultOutputModes { get; set; } = [MediaTypeNames.Text.Plain];
 
     /// <summary>
@@ -117,14 +125,14 @@ public record AgentCard
     /// </summary>
     [Description("The set of the agent's skills.")]
     [Required, MinLength(1)]
-    [DataMember(Name = "skills", Order = 13), JsonPropertyName("skills"), JsonPropertyOrder(13), YamlMember(Alias = "skills", Order = 13)]
+    [DataMember(Name = "skills", Order = 14), JsonPropertyName("skills"), JsonPropertyOrder(14), YamlMember(Alias = "skills", Order = 14)]
     public virtual EquatableList<AgentSkill> Skills { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets a value indicating whether the agent supports retrieving a detailed Agent Card via an authenticated endpoint.
     /// </summary>
     [Description("A value indicating whether the agent supports retrieving a detailed Agent Card via an authenticated endpoint.")]
-    [DataMember(Name = "supportsAuthenticatedExtendedCard", Order = 14), JsonPropertyName("supportsAuthenticatedExtendedCard"), JsonPropertyOrder(14), YamlMember(Alias = "supportsAuthenticatedExtendedCard", Order = 14)]
+    [DataMember(Name = "supportsAuthenticatedExtendedCard", Order = 15), JsonPropertyName("supportsAuthenticatedExtendedCard"), JsonPropertyOrder(15), YamlMember(Alias = "supportsAuthenticatedExtendedCard", Order = 15)]
     public virtual bool SupportsAuthenticatedExtendedCard { get; set; }
 
     /// <inheritdoc/>
