@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="CODEOWNERS" />
+    <File Path="CODE_OF_CONDUCT.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="LICENSE" />
+    <File Path="MAINTAINERS.md" />
+    <File Path="README.md" />
+    <File Path="SECURITY.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/A2A.Core/A2A.Core.csproj" />
+    <Project Path="src/A2A.Server.Abstractions/A2A.Server.Abstractions.csproj" Id="9d4c091b-82aa-4d82-b77b-80f4b03a842a" />
+    <Project Path="src/A2A.Server.Scheduling.Quartz/A2A.Server.Scheduling.Quartz.csproj" Id="35cbf695-5849-4005-b18d-4b1f6add7195" />
+    <Project Path="src/A2A.Server/A2A.Server.csproj" Id="4b95a981-db8f-4da6-b32c-770734fd5963" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/A2A.UnitTests/A2A.UnitTests.csproj" Id="8713248f-c1f3-427b-967f-5f15c5b58913" />
+  </Folder>
+</Solution>
