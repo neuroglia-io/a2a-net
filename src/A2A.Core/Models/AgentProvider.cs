@@ -27,7 +27,7 @@ public sealed record AgentProvider
     [Description("The name of the provider's organization.")]
     [Required, MinLength(1)]
     [DataMember(Order = 1, Name = "organization"), JsonPropertyOrder(1), JsonPropertyName("organization")]
-    public required string Organization { get; init; }
+    public string Organization { get; set; } = null!;
 
     /// <summary>
     /// Gets an URL pointing to the agent provider's website or relevant information.
@@ -35,6 +35,6 @@ public sealed record AgentProvider
     [Description("An URL pointing to the agent provider's website or relevant information.")]
     [Required]
     [DataMember(Order = 2, Name = "url"), JsonPropertyOrder(2), JsonPropertyName("url")]
-    public required Uri Url { get; init; }
+    public Uri Url { get; set; } = null!;
 
 }

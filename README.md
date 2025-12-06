@@ -29,11 +29,11 @@
   Includes client-side functionality for A2A agent discovery and metadata resolution.
 
 - **`a2a-net.Client.Http`**  
-  Implements the HTTP transport for `IA2AProtocolClient`
+  Implements the HTTP transport for `IA2AClient`
   Allows establishing persistent agent-to-agent communication over HTTP connections.
 
 - **`a2a-net.Client.WebSocket`**  
-  Implements the WebSocket transport for `IA2AProtocolClient`
+  Implements the WebSocket transport for `IA2AClient`
   Allows establishing persistent agent-to-agent communication over WebSocket connections.
 
 ---
@@ -120,7 +120,7 @@ var response = await Client.SendTaskAsync(request);
 
 ```csharp
 services.AddDistributedMemoryCache();
-services.AddA2AProtocolServer(builder =>
+services.AddA2AServer(builder =>
 {
     builder
         .SupportsStreaming()

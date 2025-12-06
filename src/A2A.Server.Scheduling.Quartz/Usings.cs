@@ -12,3 +12,4 @@
 // limitations under the License.
 
 global using Quartz;
+global using A2A.Server.Services;

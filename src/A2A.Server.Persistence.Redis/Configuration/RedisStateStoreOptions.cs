@@ -14,16 +14,10 @@
 namespace A2A.Server.Configuration;
 
 /// <summary>
-/// Represents the options used to configure a <see cref="RedisStateStore"/>.
+/// Represents the options used to configure a <see cref="RedisStore"/>.
 /// </summary>
 public sealed class RedisStateStoreOptions
 {
-
-    /// <summary>
-    /// Gets or sets the connection string to use.
-    /// </summary>
-    [Required, MinLength(1)]
-    public string ConnectionString { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the prefix to use for all keys stored in the Redis state store.

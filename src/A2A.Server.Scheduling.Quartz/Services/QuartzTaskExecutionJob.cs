@@ -17,7 +17,7 @@ namespace A2A.Server.Services;
 /// Represents a Quartz job used to execute an A2A task.
 /// </summary>
 /// <param name="server">The current A2A protocol server.</param>
-public sealed class QuartzTaskExecutionJob(IA2AProtocolServer server)
+public sealed class QuartzTaskExecutionJob(IA2AServer server)
     : IJob
 {
 

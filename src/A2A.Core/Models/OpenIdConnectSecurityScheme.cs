@@ -32,6 +32,6 @@ public sealed record OpenIdConnectSecurityScheme
     [Description("The OpenID Connect URL to discover OAuth2 configuration values.")]
     [Required, MinLength(1)]
     [DataMember(Order = 1, Name = "openIdConnectUrl"), JsonPropertyOrder(1), JsonPropertyName("openIdConnectUrl")]
-    public required Uri OpenIdConnectUrl { get; init; }
+    public Uri OpenIdConnectUrl { get; set; } = null!;
 
 }

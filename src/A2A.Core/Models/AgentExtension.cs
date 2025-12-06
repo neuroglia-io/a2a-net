@@ -26,27 +26,27 @@ public sealed record AgentExtension
     /// </summary>
     [Description("The URI, if any, used to uniquely identify the extension.")]
     [DataMember(Order = 1, Name = "uri"), JsonPropertyOrder(1), JsonPropertyName("uri")]
-    public Uri? Uri { get; init; }
+    public Uri? Uri { get; set; }
 
     /// <summary>
     /// Gets a human readable description of the extension, if any.
     /// </summary>
     [Description("A human readable description of the extension, if any.")]
     [DataMember(Order = 2, Name = "description"), JsonPropertyOrder(2), JsonPropertyName("description")]
-    public string? Description { get; init; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// Gets a boolean indicating whether the client must understand and comply with the extension's requirements.
     /// </summary>
     [Description("A boolean indicating whether the client must understand and comply with the extension's requirements.")]
     [DataMember(Order = 3, Name = "required"), JsonPropertyOrder(3), JsonPropertyName("required")]
-    public bool? Required { get; init; }
+    public bool? Required { get; set; }
 
     /// <summary>
     /// Gets optional, extension-specific configuration parameters.
     /// </summary>
     [Description("Optional, extension-specific configuration parameters.")]
     [DataMember(Order = 4, Name = "params"), JsonPropertyOrder(4), JsonPropertyName("params")]
-    public IReadOnlyDictionary<string, JsonNode>? Params { get; init; }
+    public IDictionary<string, JsonNode>? Params { get; set; }
 
 }

@@ -23,17 +23,17 @@ public sealed class A2AException
     /// <summary>
     /// Initializes a new instance of the <see cref="A2AException"/> class.
     /// </summary>
-    /// <param name="code">The error code associated with the exception.</param>
+    /// <param name="errorCode">The error code associated with the exception.</param>
     /// <param name="message">The error message, if any, associated with the exception.</param>
-    public A2AException(int code, string? message = null)
+    public A2AException(int errorCode, string? message = null)
         : base(message)
     {
-
+        ErrorCode = errorCode;
     }
 
     /// <summary>
     /// Gets the error code associated with the exception.
     /// </summary>
-    public int Code { get; }
+    public int ErrorCode { get; }
 
 }

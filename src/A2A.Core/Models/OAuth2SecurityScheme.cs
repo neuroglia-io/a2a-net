@@ -32,6 +32,6 @@ public sealed record OAuth2SecurityScheme
     [Description("The OAuth2 flow definitions for this security scheme.")]
     [Required]
     [DataMember(Order = 1, Name = "flows"), JsonPropertyOrder(1), JsonPropertyName("flows")]
-    public required OAuthFlows Flows { get; set; } = default!;
+    public OAuthFlows Flows { get; set; } = null!;
 
 }

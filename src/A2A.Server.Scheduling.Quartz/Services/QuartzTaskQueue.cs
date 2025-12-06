@@ -14,10 +14,10 @@
 namespace A2A.Server.Services;
 
 /// <summary>
-/// Represents the Quartz implementation of the <see cref="ITaskQueue"/> interface.
+/// Represents the Quartz implementation of the <see cref="IA2ATaskQueue"/> interface.
 /// </summary>
 public sealed class QuartzTaskQueue(ISchedulerFactory schedulerFactory)
-    : ITaskQueue
+    : IA2ATaskQueue
 {
 
     /// <inheritdoc/>

@@ -32,13 +32,13 @@ public sealed record HttpSecurityScheme
     [Description("The HTTP authentication scheme.")]
     [Required, MinLength(1), AllowedValues(HttpSecuritySchemeType.Basic, HttpSecuritySchemeType.Bearer)]
     [DataMember(Order = 1, Name = "scheme"), JsonPropertyOrder(1), JsonPropertyName("scheme")]
-    public required string Scheme { get; init; }
+    public string Scheme { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets a hint to the client to identify how the bearer token is formatted. Applies only when scheme is 'bearer'.
     /// </summary>
     [Description("A hint to the client to identify how the bearer token is formatted. Applies only when scheme is 'bearer'.")]
     [DataMember(Order = 2, Name = "bearerFormat"), JsonPropertyOrder(2), JsonPropertyName("bearerFormat")]
-    public string? BearerFormat { get; init; }
+    public string? BearerFormat { get; set; }
 
 }

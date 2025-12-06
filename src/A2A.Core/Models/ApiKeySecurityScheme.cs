@@ -32,7 +32,7 @@ public sealed record ApiKeySecurityScheme
     [Description("The name of the header or query parameter to be used for the API key.")]
     [Required, MinLength(1)]
     [DataMember(Order = 1, Name = "name"), JsonPropertyOrder(1), JsonPropertyName("name")]
-    public required string Name { get; init; }
+    public string Name { get; set; } = null!;
 
     /// <summary>
     /// Gets the location of the API key.
@@ -40,6 +40,6 @@ public sealed record ApiKeySecurityScheme
     [Description("The location of the API key.")]
     [Required, AllowedValues(ApiKeyLocation.Cookie, ApiKeyLocation.Header, ApiKeyLocation.Query)]
     [DataMember(Order = 2, Name = "in"), JsonPropertyOrder(2), JsonPropertyName("in")]
-    public required string In { get; set; }
+    public string In { get; set; } = null!;
 
 }

@@ -8,12 +8,20 @@
     <File Path="README.md" />
     <File Path="SECURITY.md" />
   </Folder>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/semantic-kernel/">
+    <Project Path="samples/semantic-kernel/A2A.Samples.SemanticKernel.Server/A2A.Samples.SemanticKernel.Server.csproj" Id="7a682161-1b8e-4e7e-84e7-087c59bc47c8" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/A2A.Core/A2A.Core.csproj" />
     <Project Path="src/A2A.Server.Abstractions/A2A.Server.Abstractions.csproj" Id="9d4c091b-82aa-4d82-b77b-80f4b03a842a" />
+    <Project Path="src/A2A.Server.AspNetCore/A2A.Server.csproj" />
+    <Project Path="src/A2A.Server.Persistence.Memory/A2A.Server.Persistence.Memory.csproj" Id="42f60b02-fa31-4431-8735-f1e56f738f27" />
     <Project Path="src/A2A.Server.Persistence.Redis/A2A.Server.Persistence.Redis.csproj" />
+    <Project Path="src/A2A.Server.Scheduling.Memory/A2A.Server.Scheduling.Memory.csproj" Id="33db1d8e-497b-484c-9e5c-3015193bbd3d" />
     <Project Path="src/A2A.Server.Scheduling.Quartz/A2A.Server.Scheduling.Quartz.csproj" Id="35cbf695-5849-4005-b18d-4b1f6add7195" />
-    <Project Path="src/A2A.Server/A2A.Server.csproj" Id="4b95a981-db8f-4da6-b32c-770734fd5963" />
+    <Project Path="src/A2A.Server.Transports.Http/A2A.Server.Transports.Http.csproj" />
+    <Project Path="src/A2A.Server.Transports.JsonRpc/A2A.Server.Transports.JsonRpc.csproj" Id="c1c64372-c4d1-4833-b271-425aff936cb4" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/A2A.UnitTests/A2A.UnitTests.csproj" Id="8713248f-c1f3-427b-967f-5f15c5b58913" />
