@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace A2A.Server.Services;
 
 /// <summary>
@@ -31,7 +29,8 @@ public sealed class MemoryTaskQueue(IServiceProvider serviceProvider)
         ArgumentNullException.ThrowIfNull(task);
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         runningTasks.TryAdd(task.Id, cancellationTokenSource);
-        return serviceProvider.GetRequiredService<IA2AServer>().ExecuteTaskAsync(task.Id, cancellationTokenSource.Token);
+        _ = serviceProvider.GetRequiredService<IA2AServer>().ExecuteTaskAsync(task.Id, cancellationTokenSource.Token);
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>

@@ -13,6 +13,8 @@
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 
+using A2A.Server.Transports.Serialization;
+
 namespace A2A.Server;
 
 /// <summary>
@@ -33,6 +35,7 @@ public static class IServiceCollectionExtensions
         services.Configure<JsonOptions>(options =>
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, JsonSerializationContext.Default);
+            options.SerializerOptions.TypeInfoResolverChain.Insert(0, JsonRpcSerializationContext.Default);
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });

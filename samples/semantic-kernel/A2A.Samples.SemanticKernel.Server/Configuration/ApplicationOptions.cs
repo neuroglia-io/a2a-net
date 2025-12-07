@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Samples.SemanticKernel.Server;
-global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Server;
-global using A2A.Server.Services;
-global using Microsoft.Extensions.AI;
-global using Microsoft.SemanticKernel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
+namespace A2A.Samples.SemanticKernel.Server.Configuration;
+
+public sealed class ApplicationOptions
+{
+
+    [Required]
+    public OpenAIApiClientOptions OpenAI { get; set; } = null!;
+
+}

@@ -11,12 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using A2A.Models;
+using A2A.Server.Transports.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+
 namespace A2A.Server.Transports;
 
 /// <summary>
 /// Represents the JSON-RPC implementation of the <see cref="IA2ATransport"/> interface.
 /// </summary>
-public sealed class A2AJsonRpcTransport
+/// <param name="server">The A2A server.</param>
+public sealed class A2AJsonRpcTransport(IA2AServer server)
     : IA2ATransport
 {
 
@@ -28,16 +34,16 @@ public sealed class A2AJsonRpcTransport
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         if (string.IsNullOrWhiteSpace(httpContext.Request.ContentType) || !httpContext.Request.ContentType.StartsWith(MediaTypeNames.Application.Json, StringComparison.OrdinalIgnoreCase))return TypedResults.StatusCode(StatusCodes.Status415UnsupportedMediaType);
-        JsonRpcRequest? request;
+        JsonRpcRequest? parameters;
         try
         {
-            request = await httpContext.Request.ReadFromJsonAsync<JsonRpcRequest>(httpContext.RequestAborted).ConfigureAwait(false);
+            parameters = await httpContext.Request.ReadFromJsonAsync<JsonRpcRequest>(httpContext.RequestAborted).ConfigureAwait(false);
         }
         catch (JsonException ex)
         {
             return Results.Ok(new JsonRpcResponse()
             {
-                JsonRpc = "2.0",
+                Version = "2.0",
                 Error = new()
                 {
                     Code = JsonRpcErrorCode.ParseError,
@@ -45,265 +51,575 @@ public sealed class A2AJsonRpcTransport
                 }
             });
         }
-        if (request is null) return Results.Ok(new JsonRpcResponse()
+        if (parameters is null) return Results.Ok(new JsonRpcResponse()
         {
-            JsonRpc = "2.0",
+            Version = "2.0",
             Error = new()
             {
                 Code = JsonRpcErrorCode.ParseError,
                 Message = "Request body is null or could not be deserialized."
             }
         });
-        if (!string.Equals(request.JsonRpc, "2.0", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(request.Method)) return Results.Ok(new JsonRpcResponse()
+        if (!string.Equals(parameters.Version, JsonRpcVersion.V2, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(parameters.Method)) return Results.Ok(new JsonRpcResponse()
         {
-            Id = request.Id,
-            JsonRpc = request.JsonRpc,
+            Id = parameters.Id,
+            Version = parameters.Version,
             Error = new()
             {
                 Code = JsonRpcErrorCode.InvalidRequest,
                 Message = "Unsupported JSON-RPC version."
             }
         });
-        return request.Method switch
+        return parameters.Method switch
         {
-            A2AJsonRpcMethod.Message.Send => await SendMessageAsync(request).ConfigureAwait(false),
-            A2AJsonRpcMethod.Message.SendStreaming => await SendMessageStreamingAsync(request).ConfigureAwait(false),
+            A2AJsonRpcMethod.Message.Send => await SendMessageAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Message.SendStreaming => await SendStreamingMessageAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.Get => await GetTaskAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.List => await ListTasksAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.Cancel => await CancelTaskAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.Subscribe => await SubscribeToTaskAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.PushNotificationConfig.Set => await SetOrUpdatePushNotificationConfigAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.PushNotificationConfig.Get => await GetPushNotificationConfigAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.PushNotificationConfig.List => await ListPushNotificationConfigsAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
+            A2AJsonRpcMethod.Task.PushNotificationConfig.Delete => await DeletePushNotificationConfigAsync(parameters, httpContext.RequestAborted).ConfigureAwait(false),
             _ => Results.Ok(new JsonRpcResponse()
             {
-                Id = request.Id,
-                JsonRpc = request.JsonRpc,
+                Id = parameters.Id,
+                Version = parameters.Version,
                 Error = new()
                 {
                     Code = JsonRpcErrorCode.MethodNotFound,
-                    Message = $"The requested method '{request.Method}' does not exist or is not available."
+                    Message = $"The requested method '{parameters.Method}' does not exist or is not available."
                 }
             })
         };
     }
 
-    async Task<IResult> SendMessageAsync(JsonRpcRequest rpcRequest)
+    async Task<IResult> SendMessageAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
     {
-        var request = rpcRequest.Params.Deserialize(JsonSerializationContext.Default.SendMessageRequest) ?? throw new NullReferenceException(); //todo: replace
-        return Results.Ok(new JsonRpcResponse()
+        Models.SendMessageRequest? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonSerializationContext.Default.SendMessageRequest);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
         {
             Id = rpcRequest.Id,
-            JsonRpc = rpcRequest.JsonRpc,
-            Result = request.Message
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
         });
-    }
-
-    async Task<IResult> SendMessageStreamingAsync(JsonRpcRequest rpcRequest)
-    {
-        var request = rpcRequest.Params.Deserialize(JsonSerializationContext.Default.SendMessageRequest) ?? throw new NullReferenceException(); //todo: replace
-        return Results.ServerSentEvents(new List<Models.Response>()
+        try
         {
-            request.Message
-        }.ToAsyncEnumerable());
+            var response = await server.SendMessageAsync(parameters!, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = response
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
     }
 
-}
-
-
-/// <summary>
-/// Represents the base class for all A2A RPC messages.
-/// </summary>
-[Description("Represents the base class for all A2A RPC messages.")]
-[DataContract]
-public abstract record JsonRpcMessage
-{
-
-    /// <summary>
-    /// Gets or sets the JSON RPC version to use.
-    /// </summary>
-    [Description("The JSON RPC version to use.")]
-    [Required, AllowedValues(JsonRpcVersion.V2), DefaultValue(JsonRpcVersion.V2)]
-    [DataMember(Name = "jsonrpc", Order = 0), JsonPropertyName("jsonrpc"), JsonPropertyOrder(0)]
-    public virtual string JsonRpc { get; set; } = JsonRpcVersion.V2;
-
-    /// <summary>
-    /// Gets or sets the message's unique identifier.
-    /// </summary>
-    [Description("The message's unique identifier.")]
-    [Required, MinLength(1)]
-    [DataMember(Name = "id", Order = 1), JsonPropertyName("id"), JsonPropertyOrder(1)]
-    public virtual string Id { get; set; } = null!;
-
-}
-
-
-/// <summary>
-/// Represents the base class for all A2A RPC requests.
-/// </summary>
-[Description("Represents the base class for all A2A RPC requests.")]
-[DataContract]
-public sealed record JsonRpcRequest
-    : JsonRpcMessage
-{
-
-    /// <summary>
-    /// Initializes a new <see cref="JsonRpcRequest"/>.
-    /// </summary>
-    public JsonRpcRequest()
+    async Task<IResult> SendStreamingMessageAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
     {
-        Id = Guid.NewGuid().ToString("N");
+        Models.SendMessageRequest? request;
+        try
+        {
+            request = JsonSerializer.Deserialize(rpcRequest.Params, JsonSerializationContext.Default.SendMessageRequest);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(request, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var stream = server.SendStreamingMessageAsync(request!, cancellationToken);
+            return Results.ServerSentEvents(stream);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
     }
 
-    /// <summary>
-    /// Initializes a new <see cref="JsonRpcRequest"/>.
-    /// </summary>
-    /// <param name="method">The name of the RPC method to invoke.</param>
-    public JsonRpcRequest(string method)
-        : this()
+    async Task<IResult> GetTaskAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(method);
-        Method = method;
+        GetTaskMethodParameters? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonRpcSerializationContext.Default.GetTaskMethodParameters);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var task = await server.GetTaskAsync(parameters!.TaskId, parameters.HistoryLength, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = task
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
     }
 
-    /// <summary>
-    /// Gets or sets the name of the RPC method to invoke.
-    /// </summary>
-    [Description("The name of the RPC method to invoke.")]
-    [Required, MinLength(1)]
-    [DataMember(Name = "method", Order = 2), JsonInclude, JsonPropertyName("method"), JsonPropertyOrder(2)]
-    public string Method { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the request's parameters.
-    /// </summary>
-    [Description("The request's parameters.")]
-    [Required]
-    [DataMember(Name = "params", Order = 3), JsonInclude, JsonPropertyName("params"), JsonPropertyOrder(3)]
-    public JsonObject Params { get; set; } = null!;
-
-}
-
-
-/// <summary>
-/// Represents an object used to describe an error that has occurred during an RPC call.
-/// </summary>
-[Description("Represents an object used to describe an error that has occurred during an RPC call.")]
-[DataContract]
-public sealed record JsonRpcError
-{
-
-    /// <summary>
-    /// Initializes a new <see cref="JsonRpcError"/>
-    /// </summary>
-    public JsonRpcError() { }
-
-    /// <summary>
-    /// Initializes a new <see cref="JsonRpcError"/>
-    /// </summary>
-    /// <param name="code">The error code</param>
-    /// <param name="message">The error message</param>
-    /// <param name="data">Data, if any, associated to the error</param>
-    public JsonRpcError(int code, string message, object? data = null)
+    async Task<IResult> ListTasksAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(message);
-        Code = code;
-        Message = message;
-        Data = data;
+        TaskQueryOptions? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonSerializationContext.Default.TaskQueryOptions);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var task = await server.ListTasksAsync(parameters, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = task
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
     }
 
-    /// <summary>
-    /// Gets or sets the error code.
-    /// </summary>
-    [Description("The error code.")]
-    [DataMember(Name = "code", Order = 1), JsonPropertyName("code"), JsonPropertyOrder(1)]
-    public int Code { get; set; }
-
-    /// <summary>
-    /// Gets or sets the error message.
-    /// </summary>
-    [Description("The error message.")]
-    [Required, MinLength(1)]
-    [DataMember(Name = "message", Order = 2), JsonPropertyName("message"), JsonPropertyOrder(2)]
-    public string Message { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets data, if any, associated to the error.
-    /// </summary>
-    [Description("Data, if any, associated to the error.")]
-    [DataMember(Name = "data", Order = 3), JsonPropertyName("data"), JsonPropertyOrder(3)]
-    public object? Data { get; set; }
-
-}
-
-
-/// <summary>
-/// Represents the base class for all A2A responses.
-/// </summary>
-[Description("Represents the base class for all A2A RPC responses.")]
-[DataContract]
-public sealed record JsonRpcResponse
-    : JsonRpcMessage
-{
-
-    /// <summary>
-    /// Gets or sets the error, if any, that has occurred during the request's execution.
-    /// </summary>
-    [Description("The error, if any, that has occurred during the request's execution.")]
-    [DataMember(Name = "error", Order = 2), JsonPropertyName("error"), JsonPropertyOrder(2)]
-    public JsonRpcError? Error { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the response's content.
-    /// </summary>
-    [Description("The response's content.")]
-    [Required]
-    [DataMember(Name = "result", Order = 2), JsonInclude, JsonPropertyName("result"), JsonPropertyOrder(2)]
-    public object? Result { get; set; } = null!;
-
-}
-
-
-/// <summary>
-/// Enumerates all supported versions of the JSON RPC specification
-/// </summary>
-public static class JsonRpcVersion
-{
-
-    /// <summary>
-    /// Indicates JSON RPC 2.0
-    /// </summary>
-    public const string V2 = "2.0";
-
-    /// <summary>
-    /// Gets a new <see cref="IEnumerable{T}"/> containing all supported values
-    /// </summary>
-    /// <returns>An <see cref="IEnumerable{T}"/> containing all supported values</returns>
-    public static IEnumerable<string> AsEnumerable()
+    async Task<IResult> CancelTaskAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
     {
-        yield return V2;
+        CancelTaskMethodParameters? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonRpcSerializationContext.Default.CancelTaskMethodParameters);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var task = await server.CancelTaskAsync(parameters!.Id, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = task
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
     }
 
-}
+    async Task<IResult> SubscribeToTaskAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
+    {
+        SubscribeToTaskMethodParameters? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonRpcSerializationContext.Default.SubscribeToTaskMethodParameters);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var stream = server.SubscribeToTaskAsync(parameters!.Id, cancellationToken);
+            return Results.ServerSentEvents(stream);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
+    }
 
-/// <summary>
-/// Enumerates all supported JSON-RPC error codes.
-/// </summary>
-public static class JsonRpcErrorCode
-{
+    async Task<IResult> SetOrUpdatePushNotificationConfigAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
+    {
+        SetOrUpdatePushNotificationConfigRequest? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonSerializationContext.Default.SetOrUpdatePushNotificationConfigRequest);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        var segments = parameters!.Parent.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 2) return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.InvalidParams,
+                    Message = "The parent field must be in the format 'tasks/{taskId}'."
+                }
+            });
+        var taskId = segments[1];
+        try
+        {
+            var config = await server.SetOrUpdatePushNotificationConfigAsync(taskId, parameters.Config with
+            {
+                Id = parameters.ConfigId
+            }, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = config
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
+    }
 
-    /// <summary>
-    /// Indicates an invalid request.
-    /// </summary>
-    public const int InvalidRequest = -32600;
-    /// <summary>
-    /// Indicates that the method does not exist.
-    /// </summary>
-    public const int MethodNotFound = -32601;
-    /// <summary>
-    /// Indicates that the invalid parameters were provided.
-    /// </summary>
-    public const int InvalidParams = -32602;
-    /// <summary>
-    /// Indicates an internal error.
-    /// </summary>
-    public const int InternalError = -32603;
-    /// <summary>
-    /// Indicates a parse error.
-    /// </summary>
-    public const int ParseError = -32700;
+    async Task<IResult> GetPushNotificationConfigAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
+    {
+        GetPushNotificationConfigMethodParameters? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonRpcSerializationContext.Default.GetPushNotificationConfigMethodParameters);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var config = await server.GetPushNotificationConfigAsync(parameters!.TaskId, parameters.ConfigId, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = config
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
+    }
+
+    async Task<IResult> ListPushNotificationConfigsAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
+    {
+        PushNotificationConfigQueryOptions? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonSerializationContext.Default.PushNotificationConfigQueryOptions);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            var task = await server.ListPushNotificationConfigAsync(parameters, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Result = task
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
+    }
+
+    async Task<IResult> DeletePushNotificationConfigAsync(JsonRpcRequest rpcRequest, CancellationToken cancellationToken)
+    {
+        DeletePushNotificationConfigMethodParameters? parameters;
+        try
+        {
+            parameters = JsonSerializer.Deserialize(rpcRequest.Params, JsonRpcSerializationContext.Default.DeletePushNotificationConfigMethodParameters);
+        }
+        catch (JsonException ex)
+        {
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.ParseError,
+                    Message = ex.Message
+                }
+            });
+        }
+        if (!IsValid(parameters, out var message)) return Results.Ok(new JsonRpcResponse()
+        {
+            Id = rpcRequest.Id,
+            Version = rpcRequest.Version,
+            Error = new()
+            {
+                Code = JsonRpcErrorCode.InvalidParams,
+                Message = message ?? "Invalid request parameters."
+            }
+        });
+        try
+        {
+            await server.DeletePushNotificationConfigAsync(parameters!.TaskId, parameters.ConfigId, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version
+            });
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, rpcRequest);
+        }
+    }
+
+    static bool IsValid(object? model, out string? message)
+    {
+        message = null;
+        if (model == null)
+        {
+            message = "The request payload is missing or malformed.";
+            return false;
+        }
+        var context = new ValidationContext(model);
+        var results = new List<ValidationResult>();
+        if (Validator.TryValidateObject(model, context, results, validateAllProperties: true)) return true;
+        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        foreach (var result in results)
+        {
+            var members = (result.MemberNames?.Any() == true) ? result.MemberNames : [string.Empty];
+            foreach (var member in members)
+            {
+                errors.TryGetValue(member, out var existing);
+                var list = existing?.ToList() ?? new List<string>();
+                list.Add(result.ErrorMessage ?? "Validation error.");
+                errors[member] = [.. list];
+            }
+        }
+        message = $"Validation failed:\n{string.Join('\n', errors.Select(kvp => kvp.Value.Length == 1 ? $"- {kvp.Key}: {kvp.Value[0]}" : $"- {kvp.Key}:\n{string.Join('\n', kvp.Value.Select(v => $"  - {v}"))}"))}";
+        return false;
+    }
+
+    static IResult HandleException(Exception ex, JsonRpcRequest rpcRequest)
+    {
+        return ex switch
+        {
+            A2AException a2aException => Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = a2aException.ErrorCode,
+                    Message = a2aException.Message
+                }
+            }),
+            Exception exception => Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.InternalError,
+                    Message = exception.Message
+                }
+            }),
+            _ => Results.Ok(new JsonRpcResponse()
+            {
+                Id = rpcRequest.Id,
+                Version = rpcRequest.Version,
+                Error = new()
+                {
+                    Code = JsonRpcErrorCode.InternalError
+                }
+            }),
+        };
+    }
 
 }

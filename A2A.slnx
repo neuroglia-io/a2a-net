@@ -26,4 +26,5 @@
   <Folder Name="/tests/">
     <Project Path="tests/A2A.UnitTests/A2A.UnitTests.csproj" Id="8713248f-c1f3-427b-967f-5f15c5b58913" />
   </Folder>
+  <Folder Name="/tools/" />
 </Solution>

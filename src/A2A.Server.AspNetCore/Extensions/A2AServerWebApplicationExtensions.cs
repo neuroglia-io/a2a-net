@@ -17,36 +17,36 @@ using A2A.Models;
 namespace A2A.Server;
 
 /// <summary>
-/// Defines extensions for <see cref="IEndpointRouteBuilder"/>s.
+/// Defines extensions for <see cref="WebApplication"/>s.
 /// </summary>
-public static class A2AServerEndpointRouteBuilderExtensions
+public static class A2AServerWebApplicationExtensions
 {
 
     const string JwksEndpointRegistrationFlag = "jwks-endpoint:registered";
 
     /// <summary>
-    /// Maps A2A endpoints to the application's routing pipeline.
+    /// Configures the application to use the registered A2A server.
     /// </summary>
-    /// <param name="endpoints">The endpoint route builder used to configure application endpoints.</param>
-    public static void MapA2A(this IEndpointRouteBuilder endpoints)
+    /// <param name="application">The <see cref="WebApplication"/> to configure.</param>
+    public static void UseA2AServer(this WebApplication application)
     {
-        ArgumentNullException.ThrowIfNull(endpoints);
-        endpoints.MapWellKnownA2AAgentCard();
-        var agentCard = endpoints.ServiceProvider.GetRequiredService<AgentCard>();
+        ArgumentNullException.ThrowIfNull(application);
+        application.MapWellKnownA2AAgentCard();
+        var agentCard = application.Services.GetRequiredService<AgentCard>();
         if (agentCard.Interfaces is null || agentCard.Interfaces.Count < 1) return;
-        if (agentCard.Capabilities?.PushNotifications is true) endpoints.MapWellKnownJwksEndpoint();
+        if (agentCard.Capabilities?.PushNotifications is true) application.MapWellKnownJwksEndpoint();
         foreach (var agentInterface in agentCard.Interfaces)
         {
             switch (agentInterface.ProtocolBinding)
             {
                 case ProtocolBinding.Http:
-                    endpoints.MapA2AHttpEndpoints(agentInterface);
+                    application.MapA2AHttpEndpoints(agentInterface);
                     break;
                 case ProtocolBinding.Grpc:
-                    endpoints.MapA2AGrpcEndpoints(agentInterface);
+                    application.MapA2AGrpcEndpoints(agentInterface);
                     break;
                 case ProtocolBinding.JsonRpc:
-                    endpoints.MapA2AJsonRpcEndpoints(agentInterface);
+                    application.MapA2AJsonRpcEndpoints(agentInterface);
                     break;
                 default:
                     throw new NotSupportedException($"The specified protocol binding '{agentInterface.ProtocolBinding}' is not supported.");

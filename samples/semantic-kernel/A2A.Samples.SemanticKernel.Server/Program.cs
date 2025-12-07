@@ -12,8 +12,11 @@
 // limitations under the License.
 
 var builder = WebApplication.CreateBuilder(args);
+var applicationOptions = new ApplicationOptions();
+builder.Configuration.Bind(applicationOptions);
+builder.Services.AddCors();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddKernel();
+builder.Services.AddKernel().AddOpenAIChatClient("gpt-4o", applicationOptions.OpenAI.ApiKey);
 builder.Services.AddA2AServer(server =>
 {
     server
@@ -37,6 +40,14 @@ builder.Services.AddA2AServer(server =>
 });
 
 var app = builder.Build();
-app.MapA2A();
+app.UseCors(builder =>
+{
+    builder
+        .SetIsOriginAllowed((host) => true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+});
+app.UseA2AServer();
 
 await app.RunAsync();

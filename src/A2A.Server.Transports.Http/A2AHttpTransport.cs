@@ -256,15 +256,12 @@ public sealed class A2AHttpTransport(IA2AServer server)
             Status = StatusCodes.Status400BadRequest,
             Detail = "The request payload is invalid."
         });
-        if (request!.Parent.Split('/', StringSplitOptions.RemoveEmptyEntries).Length == 2)
+        if (request!.Parent.Split('/', StringSplitOptions.RemoveEmptyEntries).Length == 2) return Results.Problem(new()
         {
-            return Results.Problem(new()
-            {
-                Title = "Invalid parent format.",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = "The parent field must be in the format 'tasks/{taskId}'."
-            });
-        }
+            Title = "Invalid parent format.",
+            Status = StatusCodes.Status400BadRequest,
+            Detail = "The parent field must be in the format 'tasks/{taskId}'."
+        });
         try
         {
             var pushNotificationConfig = server.SetOrUpdatePushNotificationConfigAsync(taskId, request.Config with

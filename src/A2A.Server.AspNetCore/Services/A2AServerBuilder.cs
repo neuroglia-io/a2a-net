@@ -147,7 +147,6 @@ public sealed class A2AServerBuilder(IServiceCollection services)
         services.AddSingleton(typeof(IA2AServer), serverType);
         services.AddKeyedSingleton<AgentCard>(null, agentDefinition.Card with
         {
-            Url = interfaces.FirstOrDefault(i => i.ProtocolBinding == ProtocolBinding.JsonRpc)?.Url.OriginalString,
             Interfaces = [.. interfaces]
         });
         if (agentDefinition.ExtendedCard is not null) services.AddKeyedSingleton(A2AServerDefaults.ExtendedAgentCardServiceKey, agentDefinition.ExtendedCard with

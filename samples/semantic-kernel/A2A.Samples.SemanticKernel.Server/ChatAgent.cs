@@ -11,23 +11,73 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using A2A.Server.Services;
-using Microsoft.SemanticKernel;
-
 namespace A2A.Samples.SemanticKernel.Server;
 
 public class ChatAgent(Kernel kernel)
     : IA2AAgentRuntime
-{
+{ 
 
     public Task<Models.Response> ProcessAsync(Models.Message message, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<Models.Response>(message);
+        var task = new Models.Task()
+        {
+            ContextId = message.ContextId ?? Guid.NewGuid().ToString("N"),
+            History = [message],
+            Artifacts = 
+            [
+                new Models.Artifact()
+                {
+                    Parts = 
+                    [
+                        new Models.TextPart()
+                        {
+                            Text = "Processing started by Semantic Kernel Chat Agent."
+                        }
+                    ]
+                }
+            ]
+        };
+        return Task.FromResult<Models.Response>(task);
     }
 
-    public IAsyncEnumerable<Models.TaskEvent> ExecuteAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Models.TaskEvent> ExecuteAsync(Models.Task task,  [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        return Enumerable.Empty<Models.TaskEvent>().ToAsyncEnumerable();
+        var chat = kernel.GetRequiredService<IChatClient>();
+        var message = task.History?.LastOrDefault() ?? throw new NullReferenceException($"The history of the task with the specified id '{task.Id}' is null or empty.");
+        var messageText = string.Join('\n', message.Parts.OfType<Models.TextPart>().Select(p => p.Text));
+        var artifactId = Guid.NewGuid().ToString("N");
+        var isFirstChunk = true;
+        await foreach (var content in chat.GetStreamingResponseAsync(messageText, new(), cancellationToken))
+        {
+            yield return new Models.TaskArtifactUpdateEvent()
+            {
+                ContextId = task.ContextId,
+                TaskId = task.Id,
+                Artifact = new() 
+                { 
+                    ArtifactId = artifactId,
+                    Parts = 
+                    [            
+                        new Models.TextPart() 
+                        { 
+                            Text = content.Text
+                        }
+                    ]
+                },
+                Append = !isFirstChunk
+            };
+            isFirstChunk = false;
+        }
+        yield return new Models.TaskStatusUpdateEvent()
+        {
+            ContextId = task.ContextId,
+            TaskId = task.Id,
+            Status = new()
+            {
+                State = TaskState.Completed
+            },
+            Final = true
+        };
     }
 
 }

@@ -11,11 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Samples.SemanticKernel.Server;
-global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Server;
-global using A2A.Server.Services;
-global using Microsoft.Extensions.AI;
-global using Microsoft.SemanticKernel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
+namespace A2A.Server.Transports;
+
+/// <summary>
+/// Represents the parameters for the 'CancelTask' JSON-RPC method.
+/// </summary>
+[Description("Represents the parameters for the 'CancelTask' JSON-RPC method.")]
+[DataContract]
+public sealed record CancelTaskMethodParameters
+{
+
+    /// <summary>
+    /// Gets the unique identifier of the task to cancel.
+    /// </summary>
+    [Description("The unique identifier of the task to cancel.")]
+    [Required, MinLength(1)]
+    [DataMember(Order = 1, Name = "id"), JsonPropertyOrder(1), JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+}

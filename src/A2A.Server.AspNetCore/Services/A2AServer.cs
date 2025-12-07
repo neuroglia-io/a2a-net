@@ -134,7 +134,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         {
             Task = task
         };
-        await foreach (var e in taskEvents.Where(e => e.TaskId == task.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return e switch
+        await foreach (var e in taskEvents.Where(e => e.TaskId == task.Id).TakeUntil(e => e is TaskStatusUpdateEvent statusUpdate && statusUpdate.Final).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return e switch
         {
             TaskArtifactUpdateEvent artifactUpdate => new StreamResponse
             {
@@ -308,14 +308,8 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                         if (artifactUpdateEvent.Append == true)
                         {
                             var artifact = task.Artifacts?.FirstOrDefault(a => a.ArtifactId == artifactUpdateEvent.Artifact.ArtifactId) ?? throw new NullReferenceException($"Failed to find an artifact with id '{artifactUpdateEvent.Artifact.ArtifactId}' in the task with id '{task.Id}'.");
-                            artifact = artifact with
-                            {
-                                Parts = [.. artifact.Parts, .. artifactUpdateEvent.Artifact.Parts],
-                                Metadata = (artifact.Metadata?.ToList() ?? [])
-                                    .Concat(artifactUpdateEvent.Artifact.Metadata?.ToList() ?? [])
-                                    .GroupBy(kv => kv.Key, StringComparer.Ordinal)
-                                    .ToDictionary(g => g.Key, g => g.Last().Value, StringComparer.Ordinal)
-                            };
+                            artifact.Parts = [.. artifact.Parts, .. artifactUpdateEvent.Artifact.Parts];
+                            artifact.Metadata = artifactUpdateEvent.Metadata ?? artifact.Metadata;
                         }
                         else
                         {
@@ -411,6 +405,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             },
             _ => throw new NotSupportedException($"The specified task event type '{e?.GetType().FullName}' is not supported in this context.")
         };
+        taskEvents.OnNext(e);
         var pushNotificationConfigs = await store.ListPushNotificationConfigAsync(new()
         {
             TaskId = e.TaskId

@@ -11,11 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Samples.SemanticKernel.Server;
-global using A2A.Samples.SemanticKernel.Server.Configuration;
-global using A2A.Server;
-global using A2A.Server.Services;
-global using Microsoft.Extensions.AI;
-global using Microsoft.SemanticKernel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
+namespace A2A.Server.Transports;
+
+/// <summary>
+/// Enumerates all supported versions of the JSON RPC specification
+/// </summary>
+public static class JsonRpcVersion
+{
+
+    /// <summary>
+    /// Indicates JSON RPC 2.0
+    /// </summary>
+    public const string V2 = "2.0";
+
+    /// <summary>
+    /// Gets a new <see cref="IEnumerable{T}"/> containing all supported values
+    /// </summary>
+    /// <returns>An <see cref="IEnumerable{T}"/> containing all supported values</returns>
+    public static IEnumerable<string> AsEnumerable()
+    {
+        yield return V2;
+    }
+
+}
