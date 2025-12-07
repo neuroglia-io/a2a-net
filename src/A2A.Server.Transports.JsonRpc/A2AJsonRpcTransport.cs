@@ -13,8 +13,6 @@
 
 using A2A.Models;
 using A2A.Server.Transports.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading;
 
 namespace A2A.Server.Transports;
 
