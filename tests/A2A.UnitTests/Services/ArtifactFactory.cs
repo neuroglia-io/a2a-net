@@ -28,7 +28,7 @@ internal static class ArtifactFactory
             PartFactory.CreateUriFilePart(),
             PartFactory.CreateTextPart(),
         ],
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             ["artifactMetaKey"] = "artifactMetaValue"
         },

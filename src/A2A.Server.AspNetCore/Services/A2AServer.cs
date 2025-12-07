@@ -206,20 +206,19 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
     }
 
     /// <inheritdoc/>
-    public async Task<PushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, PushNotificationConfig config, CancellationToken cancellationToken = default)
+    public async Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentNullException.ThrowIfNull(config);
         if (agentCard.Capabilities?.PushNotifications != true)
         {
             logger.LogError("Push notifications are not supported by the agent.");
             throw new A2AException(ErrorCode.PushNotificationNotSupported);
         }
-        return await store.SetOrUpdatePushNotificationConfigAsync(taskId, config, cancellationToken).ConfigureAwait(false);
+        return await store.SetOrUpdatePushNotificationConfigAsync(config, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task<PushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public async Task<TaskPushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
@@ -410,7 +409,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         {
             TaskId = e.TaskId
         }, cancellationToken).ConfigureAwait(false);
-        var pushNotificationTasks = pushNotificationConfigs.Configs.Select(c => pushNotificationSender.SendPushNotificationAsync(c.Url, response, cancellationToken));
+        var pushNotificationTasks = pushNotificationConfigs.Configs.Select(c => pushNotificationSender.SendPushNotificationAsync(c.PushNotificationConfig.Url, response, cancellationToken));
         await Task.WhenAll(pushNotificationTasks).ConfigureAwait(false);
     }
 

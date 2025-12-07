@@ -21,7 +21,7 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
 {
 
     readonly ConcurrentDictionary<string, Models.Task> tasks = new(StringComparer.Ordinal);
-    readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Models.PushNotificationConfig>> pushNotificationConfigurations = new(StringComparer.Ordinal);
+    readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Models.TaskPushNotificationConfig>> pushNotificationConfigurations = new(StringComparer.Ordinal);
 
     /// <inheritdoc/>
     public Task<Models.Task> AddTaskAsync(Models.Task task, CancellationToken cancellationToken = default)
@@ -82,13 +82,13 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
     }
 
     /// <inheritdoc/>
-    public Task<Models.PushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public Task<Models.TaskPushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
-        if (pushNotificationConfigurations.TryGetValue(taskId, out var configs) && configs.TryGetValue(configId, out var config)) return Task.FromResult<Models.PushNotificationConfig?>(config);
-        return Task.FromResult<Models.PushNotificationConfig?>(null);
+        if (pushNotificationConfigurations.TryGetValue(taskId, out var configs) && configs.TryGetValue(configId, out var config)) return Task.FromResult<Models.TaskPushNotificationConfig?>(config);
+        return Task.FromResult<Models.TaskPushNotificationConfig?>(null);
     }
 
     /// <inheritdoc/>
@@ -98,7 +98,7 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
         queryOptions ??= new Models.PushNotificationConfigQueryOptions();
         var pageSize = (int)(queryOptions.PageSize is > 0 ? Math.Min(queryOptions.PageSize.Value, options.Value.MaxPageSize) : options.Value.DefaultPageSize);
         var offset = DecodeOffsetToken(queryOptions.PageToken);
-        IEnumerable<Models.PushNotificationConfig> query;
+        IEnumerable<Models.TaskPushNotificationConfig> query;
         if (!string.IsNullOrWhiteSpace(queryOptions.TaskId))
         {
             var taskId = queryOptions.TaskId!;
@@ -109,7 +109,6 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
         {
             query = pushNotificationConfigurations.Values.SelectMany(d => d.Values);
         }
-        query = query.OrderBy(c => c.Id, StringComparer.Ordinal);
         var total = query.LongCount();
         var page = query.Skip(offset).Take(pageSize).ToList();
         var nextOffset = offset + page.Count;
@@ -122,14 +121,14 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
     }
 
     /// <inheritdoc/>
-    public Task<Models.PushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, Models.PushNotificationConfig config, CancellationToken cancellationToken = default)
+    public Task<Models.TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(Models.TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentNullException.ThrowIfNull(config);
-        ArgumentException.ThrowIfNullOrWhiteSpace(config.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(config.PushNotificationConfig.Id);
         cancellationToken.ThrowIfCancellationRequested();
-        var configurationsPerTask = pushNotificationConfigurations.GetOrAdd(taskId, _ => new ConcurrentDictionary<string, Models.PushNotificationConfig>(StringComparer.Ordinal));
-        configurationsPerTask[config.Id] = config;
+        var taskId = config.Name.Split('/')[1];
+        var configurationsPerTask = pushNotificationConfigurations.GetOrAdd(taskId, _ => new ConcurrentDictionary<string, Models.TaskPushNotificationConfig>(StringComparer.Ordinal));
+        configurationsPerTask[config.PushNotificationConfig.Id] = config;
         return Task.FromResult(config);
     }
 

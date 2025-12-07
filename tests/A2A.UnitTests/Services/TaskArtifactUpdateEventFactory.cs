@@ -21,7 +21,7 @@ internal static class TaskArtifactUpdateEventFactory
         TaskId = Guid.NewGuid().ToString("N"),
         ContextId = Guid.NewGuid().ToString("N"),
         Artifact = ArtifactFactory.Create(),
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             { "exampleKey", JsonValue.Create("exampleValue") }
         },

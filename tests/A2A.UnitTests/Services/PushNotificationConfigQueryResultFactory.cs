@@ -18,7 +18,7 @@ internal static class PushNotificationConfigQueryResultFactory
 
     internal static PushNotificationConfigQueryResult Create() => new()
     {
-        Configs = [PushNotificationConfigFactory.Create()],
+        Configs = [TaskPushNotificationConfigFactory.Create()],
         NextPageToken = Guid.NewGuid().ToString("N")
     };
 

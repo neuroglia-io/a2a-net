@@ -42,7 +42,7 @@ public interface IA2AStore
     /// <param name="configId">The unique identifier of the push notification configuration to get.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The push notification configuration with the specified identifier, or <see langword="null"/> if not found.</returns>
-    Task<Models.PushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
+    Task<Models.TaskPushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists all tasks.
@@ -63,11 +63,10 @@ public interface IA2AStore
     /// <summary>
     /// Sets or updates the push notification configuration for the specified task.
     /// </summary>
-    /// <param name="taskId">The unique identifier of the task to set or update the push notification configuration for.</param>
     /// <param name="config">The push notification configuration to set or update.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The set or updated <see cref="Models.PushNotificationConfig"/>.</returns>
-    Task<Models.PushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, Models.PushNotificationConfig config, CancellationToken cancellationToken = default);
+    Task<Models.TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(Models.TaskPushNotificationConfig config, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists push notification configurations.

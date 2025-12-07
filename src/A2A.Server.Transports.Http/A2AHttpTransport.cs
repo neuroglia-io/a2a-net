@@ -264,7 +264,7 @@ public sealed class A2AHttpTransport(IA2AServer server)
         });
         try
         {
-            var pushNotificationConfig = server.SetOrUpdatePushNotificationConfigAsync(taskId, new()
+            var pushNotificationConfig = server.SetOrUpdatePushNotificationConfigAsync(new()
             {
                 Name = $"tasks/{taskId}/pushNotificationConfigs/{request.ConfigId}",
                 PushNotificationConfig = request.Config with

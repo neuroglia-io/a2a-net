@@ -71,11 +71,10 @@ public interface IA2AProtocolApi
     /// <summary>
     /// Sets or updates the push notification configuration for the specified task.
     /// </summary>
-    /// <param name="taskId">The unique identifier of the task to set or update the push notification configuration for.</param>
     /// <param name="config">The push notification configuration to set or update.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The set or updated <see cref="TaskPushNotificationConfig"/>.</returns>
-    Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, TaskPushNotificationConfig config, CancellationToken cancellationToken = default);
+    Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(TaskPushNotificationConfig config, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the push notification configuration for the specified task.

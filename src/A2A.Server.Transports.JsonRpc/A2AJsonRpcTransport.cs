@@ -389,23 +389,11 @@ public sealed class A2AJsonRpcTransport(IA2AServer server)
                 Message = message ?? "Invalid request parameters."
             }
         });
-        var segments = parameters!.Parent.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Length == 2) return Results.Ok(new JsonRpcResponse()
-            {
-                Id = rpcRequest.Id,
-                Version = rpcRequest.Version,
-                Error = new()
-                {
-                    Code = JsonRpcErrorCode.InvalidParams,
-                    Message = "The parent field must be in the format 'tasks/{taskId}'."
-                }
-            });
-        var taskId = segments[1];
         try
         {
-            var config = await server.SetOrUpdatePushNotificationConfigAsync(taskId, new()
+            var config = await server.SetOrUpdatePushNotificationConfigAsync(new()
             {
-                Name = parameters.Parent,
+                Name = parameters!.Parent,
                 PushNotificationConfig = parameters.Config with
                 {
                     Id = parameters.ConfigId

@@ -29,7 +29,7 @@ internal static class MessageFactory
             PartFactory.CreateUriFilePart(),
             PartFactory.CreateTextPart(),
         ],
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             ["metaKey"] = "metaValue"
         },

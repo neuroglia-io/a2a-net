@@ -114,8 +114,7 @@ public class A2AGrpcServerService(IA2AServer server)
     /// <inheritdoc/>
     public override async Task<TaskPushNotificationConfig> SetTaskPushNotificationConfig(SetTaskPushNotificationConfigRequest request, ServerCallContext context)
     {
-        var taskId = request.Parent.Split('/')[1];
-        var config = await server.SetOrUpdatePushNotificationConfigAsync(taskId, MapFromGrpc(request.Config), context.CancellationToken).ConfigureAwait(false);
+        var config = await server.SetOrUpdatePushNotificationConfigAsync(MapFromGrpc(request.Config), context.CancellationToken).ConfigureAwait(false);
         return MapToGrpc(config);
     }
 

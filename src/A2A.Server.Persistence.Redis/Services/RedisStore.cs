@@ -86,14 +86,14 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.PushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public async Task<Models.TaskPushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
         var key = GetPushNotificationConfigKey(taskId, configId);
         var json = (await database.StringGetAsync(key).ConfigureAwait(false)).ToString();
-        if (!string.IsNullOrWhiteSpace(json)) return JsonSerializer.Deserialize(json, JsonSerializationContext.Default.PushNotificationConfig);
+        if (!string.IsNullOrWhiteSpace(json)) return JsonSerializer.Deserialize(json, JsonSerializationContext.Default.TaskPushNotificationConfig);
         await database.KeyDeleteAsync(key).ConfigureAwait(false);
         return null;
     }
@@ -171,12 +171,12 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
         var pairs = pageEntries.Select(e => parseGlobalKey(e.Element.ToString())).Where(p => !string.IsNullOrWhiteSpace(p.TaskId) && !string.IsNullOrWhiteSpace(p.ConfigId)).ToArray();
         var keys = pairs.Select(p => GetPushNotificationConfigKey(p.TaskId, p.ConfigId)).ToArray();
         var values = keys.Length == 0? [] : await database.StringGetAsync(keys).ConfigureAwait(false);
-        var pushNotificationConfigs = new List<Models.PushNotificationConfig>(values.Length);
+        var pushNotificationConfigs = new List<Models.TaskPushNotificationConfig>(values.Length);
         foreach (var value in values)
         {
             var json = value.ToString();
             if (string.IsNullOrWhiteSpace(json)) continue;
-            var pushNotificationConfig = JsonSerializer.Deserialize(json, JsonSerializationContext.Default.PushNotificationConfig);
+            var pushNotificationConfig = JsonSerializer.Deserialize(json, JsonSerializationContext.Default.TaskPushNotificationConfig);
             if (pushNotificationConfig is not null) pushNotificationConfigs.Add(pushNotificationConfig);
         }
         string? nextPageToken = null;
@@ -253,25 +253,25 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.PushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, Models.PushNotificationConfig config, CancellationToken cancellationToken = default)
+    public async Task<Models.TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(Models.TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentNullException.ThrowIfNull(config);
-        ArgumentException.ThrowIfNullOrWhiteSpace(config.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(config.PushNotificationConfig.Id);
         cancellationToken.ThrowIfCancellationRequested();
-        var key = GetPushNotificationConfigKey(taskId, config.Id);
+        var taskId = config.Name.Split('/')[1];
+        var key = GetPushNotificationConfigKey(taskId, config.PushNotificationConfig.Id);
         var indexKey = GetPushNotificationConfigIndexKey();
         var byTaskIndexKey = GetPushNotificationConfigByTaskIndexKey(taskId);
         var json = JsonSerializer.Serialize(config, JsonSerializationContext.Default.PushNotificationConfig);
         var score = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var globalMember = GetPushNotificationConfigGlobalKey(taskId, config.Id);
+        var globalMember = GetPushNotificationConfigGlobalKey(taskId, config.PushNotificationConfig.Id);
         for (var attempt = 0; attempt < 10; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var transaction = database.CreateTransaction();
             var addTask = transaction.StringSetAsync(key, json);
             var addToIndexTask = transaction.SortedSetAddAsync(indexKey, globalMember, score);
-            var addToByTaskIndexTask = transaction.SortedSetAddAsync(byTaskIndexKey, config.Id, score);
+            var addToByTaskIndexTask = transaction.SortedSetAddAsync(byTaskIndexKey, config.PushNotificationConfig.Id, score);
             if (await transaction.ExecuteAsync().ConfigureAwait(false))
             {
                 await addTask.ConfigureAwait(false);
@@ -280,7 +280,7 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
                 return config;
             }
         }
-        throw new TimeoutException($"Failed to upsert the push notification config with id '{config.Id}' for the task with id '{taskId}' due to concurrency issues.");
+        throw new TimeoutException($"Failed to upsert the push notification config with id '{config.PushNotificationConfig.Id}' for the task with id '{taskId}' due to concurrency issues.");
     }
 
     /// <inheritdoc/>

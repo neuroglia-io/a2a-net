@@ -25,7 +25,7 @@ internal static class TaskQueryOptionsFactory
         IncludeArtifacts = true,
         LastUpdateAfter = 1625097600,
         PageToken = Guid.NewGuid().ToString("N"),
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             ["filterKey"] = "filterValue"
         }

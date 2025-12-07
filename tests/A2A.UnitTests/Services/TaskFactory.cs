@@ -29,7 +29,7 @@ internal static class TaskFactory
         [
             MessageFactory.Create()
         ],
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             ["metaKey"] = "metaValue"
         }

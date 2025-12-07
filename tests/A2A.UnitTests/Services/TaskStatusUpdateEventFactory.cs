@@ -22,7 +22,7 @@ internal static class TaskStatusUpdateEventFactory
         ContextId = Guid.NewGuid().ToString("N"),
         Status = TaskStatusFactory.Create(),
         Final = true,
-        Metadata = new Dictionary<string, JsonNode>
+        Metadata = new()
         {
             { "exampleKey", JsonValue.Create("exampleValue") }
         }
