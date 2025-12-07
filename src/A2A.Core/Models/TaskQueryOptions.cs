@@ -75,6 +75,6 @@ public sealed record TaskQueryOptions
     /// </summary>
     [Description("Request-specific metadata, if any.")]
     [DataMember(Order = 8, Name = "metadata"), JsonPropertyOrder(8), JsonPropertyName("metadata")]
-    public IReadOnlyDictionary<string, JsonNode>? Metadata { get; init; }
+    public JsonObject? Metadata { get; init; }
 
 }

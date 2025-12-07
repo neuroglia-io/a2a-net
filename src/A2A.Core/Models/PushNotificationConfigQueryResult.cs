@@ -27,7 +27,7 @@ public sealed record PushNotificationConfigQueryResult
     [Description("A collection containing the push notification configurations matching the specified criteria.")]
     [Required]
     [DataMember(Order = 1, Name = "configs"), JsonPropertyOrder(1), JsonPropertyName("configs")]
-    public required IReadOnlyList<PushNotificationConfig> Configs { get; init; }
+    public required IReadOnlyList<TaskPushNotificationConfig> Configs { get; init; }
 
     /// <summary>
     /// Gets the token, if any, used to retrieve the next page of results.

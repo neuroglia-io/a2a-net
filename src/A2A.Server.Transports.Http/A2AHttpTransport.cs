@@ -165,7 +165,7 @@ public sealed class A2AHttpTransport(IA2AServer server)
             HistoryLength = historyLength,
             LastUpdateAfter = lastUpdateAfter,
             IncludeArtifacts = includeArtifacts,
-            Metadata = ParseMetadataFromQuery(httpContext)?.AsReadOnly()
+            Metadata = ParseMetadataFromQuery(httpContext)
         };
         try
         {
@@ -264,9 +264,13 @@ public sealed class A2AHttpTransport(IA2AServer server)
         });
         try
         {
-            var pushNotificationConfig = server.SetOrUpdatePushNotificationConfigAsync(taskId, request.Config with
+            var pushNotificationConfig = server.SetOrUpdatePushNotificationConfigAsync(taskId, new()
             {
-                Id = request.ConfigId
+                Name = $"tasks/{taskId}/pushNotificationConfigs/{request.ConfigId}",
+                PushNotificationConfig = request.Config with
+                {
+                    Id = request.ConfigId
+                }
             }, httpContext.RequestAborted);
             return Results.Ok(pushNotificationConfig);
         }
@@ -389,7 +393,7 @@ public sealed class A2AHttpTransport(IA2AServer server)
         return false;
     }
 
-    static IDictionary<string, JsonNode>? ParseMetadataFromQuery(HttpContext httpContext, string key = "metadata")
+    static JsonObject? ParseMetadataFromQuery(HttpContext httpContext, string key = "metadata")
     {
         if (!httpContext.Request.Query.TryGetValue(key, out var raw) || raw.Count == 0) return null;
         var json = raw.ToString();
@@ -398,7 +402,7 @@ public sealed class A2AHttpTransport(IA2AServer server)
         {
             var node = JsonNode.Parse(json);
             if (node is not JsonObject jsonObject) return null;
-            return jsonObject.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)!;
+            return jsonObject;
         }
         catch (JsonException)
         {

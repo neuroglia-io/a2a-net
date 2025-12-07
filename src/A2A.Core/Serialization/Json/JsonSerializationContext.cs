@@ -49,6 +49,7 @@ namespace A2A.Serialization.Json;
 [JsonSerializable(typeof(Models.Task))]
 [JsonSerializable(typeof(TaskEvent))]
 [JsonSerializable(typeof(TaskArtifactUpdateEvent))]
+[JsonSerializable(typeof(TaskPushNotificationConfig))]
 [JsonSerializable(typeof(TaskQueryOptions))]
 [JsonSerializable(typeof(TaskQueryResult))]
 [JsonSerializable(typeof(Models.TaskStatus))]

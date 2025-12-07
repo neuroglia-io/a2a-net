@@ -11,23 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using AwesomeAssertions.Primitives;
-
 #pragma warning disable IDE0130 // Namespace does not match folder structure
-namespace A2A.UnitTests;
 
-public static class ObjectAssertionsExtensions
+using A2A.Server.Transports;
+
+namespace A2A.Server;
+
+/// <summary>
+/// Defines extensions for <see cref="IA2AServerBuilder"/>s.
+/// </summary>
+public static class A2AGrpcTransportServerBuilderExtensions
 {
 
-    public static void BeJsonEquivalentTo<T>(this ObjectAssertions should, T expected)
+    /// <summary>
+    /// Configures the server to use the gRPC transport.
+    /// </summary>
+    /// <param name="builder">The <see cref="IA2AServerBuilder"/> to configure.</param>
+    /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
+    public static IA2AServerBuilder UseGrpcTransport(this IA2AServerBuilder builder)
     {
-        should.BeEquivalentTo(expected, opts => opts
-            .Using<JsonNode>(ctx =>
-                ctx.Subject?.ToJsonString().Should().Be(ctx.Expectation?.ToJsonString(JsonSerializerOptions.Web)))
-                .WhenTypeIs<JsonNode>()
-            .Using<ReadOnlyMemory<byte>>(ctx =>
-                ctx.Subject.ToArray().Should().BeEquivalentTo(ctx.Expectation.ToArray()))
-                .WhenTypeIs<ReadOnlyMemory<byte>>());
+        builder.UseTransport<A2AGrpcTransport>(ProtocolBinding.Grpc, "/");
+        return builder;
     }
 
 }

@@ -403,9 +403,13 @@ public sealed class A2AJsonRpcTransport(IA2AServer server)
         var taskId = segments[1];
         try
         {
-            var config = await server.SetOrUpdatePushNotificationConfigAsync(taskId, parameters.Config with
+            var config = await server.SetOrUpdatePushNotificationConfigAsync(taskId, new()
             {
-                Id = parameters.ConfigId
+                Name = parameters.Parent,
+                PushNotificationConfig = parameters.Config with
+                {
+                    Id = parameters.ConfigId
+                }
             }, cancellationToken).ConfigureAwait(false);
             return Results.Ok(new JsonRpcResponse()
             {

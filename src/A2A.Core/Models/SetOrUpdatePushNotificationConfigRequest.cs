@@ -29,9 +29,9 @@ public sealed record SetOrUpdatePushNotificationConfigRequest
     public string? Tenant { get; init; }
 
     /// <summary>
-    /// Gets the unique identifier of the parent task to set or update the push notification configuration for.
+    /// Gets a reference to the parent task to set or update the push notification configuration for.
     /// </summary>
-    [Description("The unique identifier of the parent task to set or update the push notification configuration for.")]
+    [Description("A reference to the parent task to set or update the push notification configuration for.")]
     [Required, MinLength(1)]
     [DataMember(Order = 2, Name = "parent"), JsonPropertyOrder(2), JsonPropertyName("parent")]
     public required string Parent { get; init; }

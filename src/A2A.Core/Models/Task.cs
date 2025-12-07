@@ -65,6 +65,6 @@ public sealed record Task
     /// </summary>
     [Description("A key/value mapping, if any, containing metadata associated with the task.")]
     [DataMember(Order = 6, Name = "metadata"), JsonPropertyOrder(6), JsonPropertyName("metadata")]
-    public IDictionary<string, JsonNode>? Metadata { get; init; }
+    public JsonObject? Metadata { get; init; }
 
 }

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using A2A.Models;
+using A2A.Server.Transports;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace A2A.Server;
@@ -75,11 +76,7 @@ public static class A2AServerWebApplicationExtensions
 
     static void MapA2AJsonRpcEndpoints(this IEndpointRouteBuilder endpoints, AgentInterface agentInterface)
     {
-        endpoints.Map(agentInterface.Url.AbsolutePath, async (HttpContext httpContext) =>
-        {
-            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2ATransport>(ProtocolBinding.JsonRpc);
-            return await transport.HandleAsync(httpContext).ConfigureAwait(false);
-        });
+        endpoints.MapGrpcService<A2AGrpcServerService>();
     }
 
     static void MapWellKnownA2AAgentCard(this IEndpointRouteBuilder endpoints)

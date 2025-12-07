@@ -56,7 +56,7 @@ public sealed record Artifact
     /// </summary>
     [Description("A key/value mapping, if any, containing metadata associated with the artifact.")]
     [DataMember(Order = 5, Name = "metadata"), JsonPropertyOrder(5), JsonPropertyName("metadata")]
-    public IReadOnlyDictionary<string, JsonNode>? Metadata { get; set; }
+    public JsonObject? Metadata { get; set; }
 
     /// <summary>
     /// Gets a collection containing the URIs of the extensions, if any, used to generate the artifact.

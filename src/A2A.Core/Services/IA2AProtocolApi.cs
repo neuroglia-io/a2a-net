@@ -74,8 +74,8 @@ public interface IA2AProtocolApi
     /// <param name="taskId">The unique identifier of the task to set or update the push notification configuration for.</param>
     /// <param name="config">The push notification configuration to set or update.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>The set or updated <see cref="PushNotificationConfig"/>.</returns>
-    Task<PushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, PushNotificationConfig config, CancellationToken cancellationToken = default);
+    /// <returns>The set or updated <see cref="TaskPushNotificationConfig"/>.</returns>
+    Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(string taskId, TaskPushNotificationConfig config, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the push notification configuration for the specified task.
@@ -83,8 +83,8 @@ public interface IA2AProtocolApi
     /// <param name="taskId">The unique identifier of the task to get the push notification configuration for.</param>
     /// <param name="configId">The unique identifier of the push notification configuration to get.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>The specified <see cref="PushNotificationConfig"/>.</returns>
-    Task<PushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
+    /// <returns>The specified <see cref="TaskPushNotificationConfig"/>.</returns>
+    Task<TaskPushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists push notification configurations.

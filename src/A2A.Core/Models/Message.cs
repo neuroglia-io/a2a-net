@@ -65,7 +65,7 @@ public sealed record Message
     /// </summary>
     [Description("A key/value mapping, if any, containing metadata associated with the message.")]
     [DataMember(Order = 6, Name = "metadata"), JsonPropertyOrder(6), JsonPropertyName("metadata")]
-    public IReadOnlyDictionary<string, JsonNode>? Metadata { get; init; }
+    public JsonObject? Metadata { get; init; }
 
     /// <summary>
     /// Gets a collection containing the URIs of the extensions, if any, used to generate the message.

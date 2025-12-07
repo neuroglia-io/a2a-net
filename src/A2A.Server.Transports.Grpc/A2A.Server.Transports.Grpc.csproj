@@ -5,7 +5,7 @@
 	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>A2A.Server</RootNamespace>
+	<RootNamespace>A2A.Server.Transports</RootNamespace>
     <VersionPrefix>0.10.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
@@ -14,9 +14,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Title>A2A-NET Server</Title>
-    <Description>Contains abstractions used by an A2A server.</Description>
-    <PackageTags>a2a;server</PackageTags>
+    <Title>A2A-NET Server GRPC Transport</Title>
+    <Description>Contains the GRPC transport that can be used by an A2A server.</Description>
+    <PackageTags>a2a;server;transports;grpc</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -35,14 +35,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Interactive.Async" Version="7.0.0" />
+    <PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
   </ItemGroup>
-
+	
+  <ItemGroup>
+    <Protobuf Include="..\..\assets\protos\a2a.proto" AdditionalImportDirs="..\..\assets\protos" GrpcServices="Server" />
+  </ItemGroup>
+	
   <ItemGroup>
     <ProjectReference Include="..\A2A.Server.Abstractions\A2A.Server.Abstractions.csproj" />
-    <ProjectReference Include="..\A2A.Server.Transports.Grpc\A2A.Server.Transports.Grpc.csproj" />
-    <ProjectReference Include="..\A2A.Server.Transports.Http\A2A.Server.Transports.Http.csproj" />
-    <ProjectReference Include="..\A2A.Server.Transports.JsonRpc\A2A.Server.Transports.JsonRpc.csproj" />
   </ItemGroup>
 
 </Project>

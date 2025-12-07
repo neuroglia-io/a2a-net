@@ -20,11 +20,11 @@
     <Project Path="src/A2A.Server.Persistence.Redis/A2A.Server.Persistence.Redis.csproj" />
     <Project Path="src/A2A.Server.Scheduling.Memory/A2A.Server.Scheduling.Memory.csproj" Id="33db1d8e-497b-484c-9e5c-3015193bbd3d" />
     <Project Path="src/A2A.Server.Scheduling.Quartz/A2A.Server.Scheduling.Quartz.csproj" Id="35cbf695-5849-4005-b18d-4b1f6add7195" />
+    <Project Path="src/A2A.Server.Transports.Grpc/A2A.Server.Transports.Grpc.csproj" Id="33ae295c-6079-4ad1-ba7f-9a1dee43e8ac" />
     <Project Path="src/A2A.Server.Transports.Http/A2A.Server.Transports.Http.csproj" />
     <Project Path="src/A2A.Server.Transports.JsonRpc/A2A.Server.Transports.JsonRpc.csproj" Id="c1c64372-c4d1-4833-b271-425aff936cb4" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/A2A.UnitTests/A2A.UnitTests.csproj" Id="8713248f-c1f3-427b-967f-5f15c5b58913" />
   </Folder>
-  <Folder Name="/tools/" />
 </Solution>

@@ -57,6 +57,6 @@ public sealed record TaskArtifactUpdateEvent
     /// </summary>
     [Description("A key/value mapping, if any, containing additional metadata about the artifact update.")]
     [DataMember(Order = 5, Name = "metadata"), JsonPropertyOrder(5), JsonPropertyName("metadata")]
-    public IReadOnlyDictionary<string, JsonNode>? Metadata { get; init; }
+    public JsonObject? Metadata { get; init; }
 
 }
