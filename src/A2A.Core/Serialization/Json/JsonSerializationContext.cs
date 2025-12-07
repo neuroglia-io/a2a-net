@@ -44,6 +44,7 @@ namespace A2A.Serialization.Json;
 [JsonSerializable(typeof(SecurityScheme))]
 [JsonSerializable(typeof(SendMessageRequest))]
 [JsonSerializable(typeof(SendMessageConfiguration))]
+[JsonSerializable(typeof(SetOrUpdatePushNotificationConfigRequest))]
 [JsonSerializable(typeof(StreamResponse))]
 [JsonSerializable(typeof(Models.Task))]
 [JsonSerializable(typeof(TaskEvent))]

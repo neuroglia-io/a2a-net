@@ -11,10 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Serialization.Json;
-global using A2A.Server.Services;
-global using Microsoft.AspNetCore.Mvc;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net.Mime;
-global using System.Text.Json;
-global using System.Text.Json.Nodes;
+namespace A2A.UnitTests.Services;
+
+internal static class SetOrUpdatePushNotificationConfigRequestFactory
+{
+
+    internal static SetOrUpdatePushNotificationConfigRequest Create() => new()
+    {
+        Tenant = Guid.NewGuid().ToString("N"),
+        Parent = $"tasks/{Guid.NewGuid():N}",
+        ConfigId = Guid.NewGuid().ToString("N"),
+        Config = PushNotificationConfigFactory.Create()
+    };
+
+}

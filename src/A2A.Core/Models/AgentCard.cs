@@ -26,7 +26,7 @@ public sealed record AgentCard
     /// </summary>
     [Description("The A2A protocol version the agent complies with, if any.")]
     [DataMember(Order = 1, Name = "protocolVersion"), JsonPropertyOrder(1), JsonPropertyName("protocolVersion")]
-    public string? ProtocolVersion { get; set; }
+    public string? ProtocolVersion { get; set; } = "1.0";
 
     /// <summary>
     /// Gets the agent's human readable name.
