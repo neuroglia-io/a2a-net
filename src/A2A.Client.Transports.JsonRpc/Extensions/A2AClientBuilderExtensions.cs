@@ -26,14 +26,15 @@ public static class A2AClientBuilderExtensions
     /// Configures the <see cref="IA2AClientBuilder"/> to use the JSON-RPC transport.
     /// </summary>
     /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
-    /// <param name="baseAdress">The based address of the server to connect to.</param>
+    /// <param name="baseAddress">The based address of the server to connect to.</param>
     /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
-    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Uri baseAdress)
+    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Uri baseAddress)
     {
         builder.Services.AddHttpClient<A2AJsonRpcClientTransport>(httpClient =>
         {
-            httpClient.BaseAddress = baseAdress;
+            httpClient.BaseAddress = baseAddress;
         });
+        builder.Services.AddSingleton<IA2AClientTransport>(provider => provider.GetRequiredService<A2AJsonRpcClientTransport>());
         return builder.UseTransport<A2AJsonRpcClientTransport>();
     }
 

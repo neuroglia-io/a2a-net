@@ -38,7 +38,6 @@ public sealed class A2AClientBuilder(IServiceCollection services)
     public void Build()
     {
         if (transportType is null) throw new InvalidOperationException("The transport type must be specified before building the client.");
-        Services.AddSingleton(typeof(IA2AClientTransport), transportType);
         Services.AddSingleton<IA2AClient, A2AClient>();
     }
 

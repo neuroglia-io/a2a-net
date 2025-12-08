@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Net.ServerSentEvents;
 using Task = System.Threading.Tasks.Task;
 
 namespace A2A.Client.Transports;
@@ -46,13 +47,11 @@ public sealed class A2AHttpClientTransport(HttpClient httpClient)
         {
             Content = content
         };
-        using var httpResponse = await httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        using var httpResponse = await httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
-        await foreach (var streamResponse in httpResponse.Content.ReadFromJsonAsAsyncEnumerable(JsonSerializationContext.Default.StreamResponse, cancellationToken).ConfigureAwait(false))
-        {
-            if (streamResponse is null)continue;
-            yield return streamResponse;
-        }
+        await using var stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        var sseParser = SseParser.Create(stream, (type, bytes) => JsonSerializer.Deserialize(bytes, JsonSerializationContext.Default.StreamResponse)!);
+        await foreach (var sse in sseParser.EnumerateAsync(cancellationToken)) yield return sse.Data;
     }
 
     /// <inheritdoc/>
@@ -107,13 +106,12 @@ public sealed class A2AHttpClientTransport(HttpClient httpClient)
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         var uri = $"/v1/tasks/{id}:subscribe";
         if (!string.IsNullOrWhiteSpace(tenant)) uri += $"?tenant={Uri.EscapeDataString(tenant)}";
-        using var httpResponse = await httpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
+        using var httpResponse = await httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
-        await foreach (var streamResponse in httpResponse.Content.ReadFromJsonAsAsyncEnumerable(JsonSerializationContext.Default.StreamResponse, cancellationToken).ConfigureAwait(false))
-        {
-            if (streamResponse is null) continue;
-            yield return streamResponse;
-        }
+        await using var stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        var sseParser = SseParser.Create(stream, (type, bytes) => JsonSerializer.Deserialize(bytes, JsonSerializationContext.Default.StreamResponse)!);
+        await foreach (var streamResponse in sseParser.EnumerateAsync(cancellationToken)) yield return streamResponse.Data;
     }
 
     /// <inheritdoc/>

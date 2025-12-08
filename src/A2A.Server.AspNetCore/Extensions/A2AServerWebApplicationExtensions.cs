@@ -34,9 +34,9 @@ public static class A2AServerWebApplicationExtensions
         ArgumentNullException.ThrowIfNull(application);
         application.MapWellKnownA2AAgentCard();
         var agentCard = application.Services.GetRequiredService<AgentCard>();
-        if (agentCard.Interfaces is null || agentCard.Interfaces.Count < 1) return;
+        if (agentCard.SupportedInterfaces is null || agentCard.SupportedInterfaces.Count < 1) return;
         if (agentCard.Capabilities?.PushNotifications is true) application.MapWellKnownJwksEndpoint();
-        foreach (var agentInterface in agentCard.Interfaces)
+        foreach (var agentInterface in agentCard.SupportedInterfaces)
         {
             switch (agentInterface.ProtocolBinding)
             {
@@ -74,7 +74,7 @@ public static class A2AServerWebApplicationExtensions
     {
         endpoints.Map(agentInterface.Url.AbsolutePath, async (HttpContext httpContext) =>
         {
-            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2AServerTransport>(ProtocolBinding.Grpc);
+            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2AServerTransport>(ProtocolBinding.JsonRpc);
             return await transport.HandleAsync(httpContext).ConfigureAwait(false);
         });
     }

@@ -182,6 +182,13 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             }
         }, tenant, cancellationToken).ConfigureAwait(false);
         await taskQueue.CancelAsync(task, tenant, cancellationToken).ConfigureAwait(false);
+        await StreamTaskEventAsync(new TaskStatusUpdateEvent()
+        {
+            TaskId = task.Id,
+            ContextId = task.ContextId,
+            Status = task.Status,
+            Final = true
+        }, cancellationToken).ConfigureAwait(false);
         return task;
     }
 
@@ -333,6 +340,11 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         }
         catch (Exception ex)
         {
+            if (ex is OperationCanceledException)
+            {
+                task = await store.GetTaskAsync(taskId, tenant, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find a task with the specified id '{taskId}' during error handling.");
+                if (task.Status.State == TaskState.Cancelled) return;
+            }
             task = await FailAsync(task, tenant, new()
             {
                 Role = Role.Agent,

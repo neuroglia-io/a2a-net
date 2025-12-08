@@ -149,11 +149,11 @@ public sealed class A2AServerBuilder(IServiceCollection services)
         Services.AddSingleton(typeof(IA2AServer), serverType);
         Services.AddKeyedSingleton<AgentCard>(null, agentDefinition.Card with
         {
-            Interfaces = [.. interfaces]
+            SupportedInterfaces = [.. interfaces]
         });
         if (agentDefinition.ExtendedCard is not null) Services.AddKeyedSingleton(A2AServerDefaults.ExtendedAgentCardServiceKey, agentDefinition.ExtendedCard with
         {
-            Interfaces = [.. interfaces]
+            SupportedInterfaces = [.. interfaces]
         });
         Services.AddSingleton(typeof(IA2AAgentRuntime), agentDefinition.RuntimeType);
         transports.ToList().ForEach(transport => Services.AddKeyedScoped(typeof(IA2AServerTransport), transport.ProtocolBinding, transport.Type));

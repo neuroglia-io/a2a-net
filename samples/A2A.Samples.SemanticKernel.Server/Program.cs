@@ -36,6 +36,7 @@ builder.Services.AddA2AServer(server =>
             .UseMemoryStore()
             .UseMemoryTaskQueue()
             .UseHttpTransport()
+            .UseGrpcTransport()
             .UseJsonRpcTransport("/json-rpc");
 });
 

@@ -25,7 +25,7 @@ internal static class AgentCardFactory
         Provider = AgentProviderFactory.Create(),
         IconUrl = new Uri("https://example.com/icon.png"),
         DocumentationUrl = new Uri("https://example.com/docs"),
-        Interfaces = 
+        SupportedInterfaces = 
         [ 
             AgentInterfaceFactory.Create() 
         ],

@@ -32,8 +32,8 @@ public sealed class A2AHttpServerTransport(IA2AServer server)
         {
             "/v1/message:send" => await SendMessageAsync(httpContext).ConfigureAwait(false),
             "/v1/message:stream" => await SendStreamingMessageAsync(httpContext).ConfigureAwait(false),
-            var templatedPath when templatedPath?.StartsWith("/v1/tasks/", StringComparison.OrdinalIgnoreCase) == true => await GetTaskAsync(httpContext).ConfigureAwait(false),
-            var templatedPath when templatedPath?.StartsWith("/v1/tasks", StringComparison.OrdinalIgnoreCase) == true => await ListTasksAsync(httpContext).ConfigureAwait(false),
+            var templatedPath when templatedPath?.StartsWith("/v1/tasks/", StringComparison.OrdinalIgnoreCase) == true && httpContext.Request.Method == HttpMethods.Get => await GetTaskAsync(httpContext).ConfigureAwait(false),
+            var templatedPath when templatedPath?.StartsWith("/v1/tasks", StringComparison.OrdinalIgnoreCase) == true && httpContext.Request.Method == HttpMethods.Get => await ListTasksAsync(httpContext).ConfigureAwait(false),
             var templatedPath when templatedPath?.StartsWith("/v1/tasks/", StringComparison.OrdinalIgnoreCase) == true && templatedPath.EndsWith(":cancel", StringComparison.OrdinalIgnoreCase) => await CancelTaskAsync(httpContext).ConfigureAwait(false),
             var templatedPath when templatedPath?.StartsWith("/v1/tasks/", StringComparison.OrdinalIgnoreCase) == true && templatedPath.EndsWith(":subscribe", StringComparison.OrdinalIgnoreCase) => await SubscribeToTaskAsync(httpContext).ConfigureAwait(false),
             var templatedPath when templatedPath?.StartsWith("/v1/tasks/", StringComparison.OrdinalIgnoreCase) == true && templatedPath.EndsWith("/pushnotificationconfigs", StringComparison.OrdinalIgnoreCase) && httpContext.Request.Method == HttpMethods.Post => await SetTaskPushNotificationConfigAsync(httpContext).ConfigureAwait(false),
@@ -194,7 +194,7 @@ public sealed class A2AHttpServerTransport(IA2AServer server)
             Status = StatusCodes.Status400BadRequest,
             Detail = "The request path is invalid."
         });
-        var taskId = segments[2];
+        var taskId = segments[2].Split(':').First();
         string? tenant = null;
         if (httpContext.Request.Query.TryGetValue("tenant", out var raw)) tenant = raw.ToString();
         try
@@ -219,7 +219,7 @@ public sealed class A2AHttpServerTransport(IA2AServer server)
             Status = StatusCodes.Status400BadRequest,
             Detail = "The request path is invalid."
         });
-        var taskId = segments[2];
+        var taskId = segments[2].Split(':').First();
         string? tenant = null;
         if (httpContext.Request.Query.TryGetValue("tenant", out var raw)) tenant = raw.ToString();
         try

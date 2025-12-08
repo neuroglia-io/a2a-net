@@ -78,7 +78,7 @@ public sealed record AgentCard
     /// </summary>
     [Description("An ordered collection containing the interfaces the agent exposes, if any.")]
     [DataMember(Order = 8, Name = "supportedInterfaces"), JsonPropertyOrder(8), JsonPropertyName("supportedInterfaces")]
-    public IReadOnlyCollection<AgentInterface>? Interfaces { get; set; }
+    public IReadOnlyCollection<AgentInterface>? SupportedInterfaces { get; set; }
 
     /// <summary>
     /// Gets the agent's URL, if any.

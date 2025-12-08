@@ -224,9 +224,9 @@ internal static class A2AGrpcMapper
         return new()
         {
             Request = MapToGrpc(source.Message),
-            Tenant = source.Tenant,
-            Configuration = source.Configuration == null ? null : MapToGrpc(source.Configuration),
-            Metadata = source.Metadata == null ? null : Struct.Parser.ParseJson(source.Metadata.ToJsonString(JsonSerializerOptions.Web))
+            Tenant = source.Tenant ?? string.Empty,
+            Configuration = source.Configuration == null ? new() : MapToGrpc(source.Configuration),
+            Metadata = source.Metadata == null ? new() : Struct.Parser.ParseJson(source.Metadata.ToJsonString(JsonSerializerOptions.Web))
         };
     }
 
@@ -237,7 +237,7 @@ internal static class A2AGrpcMapper
             Parent = source.Parent,
             ConfigId = source.ConfigId,
             Config = MapToGrpc(source.Config),
-            Tenant = source.Tenant
+            Tenant = source.Tenant ?? string.Empty
         };
     }
 
@@ -261,7 +261,7 @@ internal static class A2AGrpcMapper
             TaskId = source.TaskId ?? Guid.NewGuid().ToString("N"),
             MessageId = source.MessageId,
             Role = MapToGrpcRole(source.Role),
-            Metadata = source.Metadata == null ? null : Struct.Parser.ParseJson(source.Metadata.ToJsonString(JsonSerializerOptions.Web))
+            Metadata = source.Metadata == null ? new() : Struct.Parser.ParseJson(source.Metadata.ToJsonString(JsonSerializerOptions.Web))
         };
         target.Parts.AddRange(source.Parts.Select(MapToGrpc));
         if (source.Extensions != null) target.Extensions.AddRange(source.Extensions.Select(e => e.OriginalString));

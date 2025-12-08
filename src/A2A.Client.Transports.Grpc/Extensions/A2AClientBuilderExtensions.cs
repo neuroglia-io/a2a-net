@@ -13,6 +13,7 @@
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 using A2A.Client.Transports;
+using System.Net;
 
 namespace A2A.Client;
 
@@ -34,6 +35,7 @@ public static class A2AClientBuilderExtensions
         {
             options.Address = address;
         });
+        builder.Services.AddSingleton<IA2AClientTransport, A2AGrpcClientTransport>();
         return builder.UseTransport<A2AGrpcClientTransport>();
     }
 
