@@ -22,6 +22,11 @@ public interface IA2AServerBuilder
 {
 
     /// <summary>
+    /// Gets the <see cref="IServiceCollection"/> to configure.
+    /// </summary>
+    IServiceCollection Services { get; }
+
+    /// <summary>
     /// Configures the server to support streaming capabilities.
     /// </summary>
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
@@ -51,9 +56,8 @@ public interface IA2AServerBuilder
     /// Configures the server to use the specified <see cref="IA2AStore"/> implementation.
     /// </summary>
     /// <typeparam name="TStore">The type of <see cref="IA2AStore"/> to use.</typeparam>
-    /// <param name="configure">An <see cref="Action{T}"/>, if any, used to configure additional services.</param>
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
-    IA2AServerBuilder UseStore<TStore>(Action<IServiceCollection>? configure = null)
+    IA2AServerBuilder UseStore<TStore>()
         where TStore : class, IA2AStore;
 
     /// <summary>
@@ -65,14 +69,14 @@ public interface IA2AServerBuilder
         where TQueue : class, IA2ATaskQueue;
 
     /// <summary>
-    /// Configures the server to use the specified <see cref="IA2ATransport"/> implementation.
+    /// Configures the server to use the specified <see cref="IA2AServerTransport"/> implementation.
     /// </summary>
-    /// <typeparam name="TTransport">The type of <see cref="IA2ATransport"/> to use.</typeparam>
+    /// <typeparam name="TTransport">The type of <see cref="IA2AServerTransport"/> to use.</typeparam>
     /// <param name="protocolBinding">The transport's protocol binding.</param>
     /// <param name="path">The route path at which the transport will be made available.</param>
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
     IA2AServerBuilder UseTransport<TTransport>(string protocolBinding, [StringSyntax("Route")] string path)
-        where TTransport : class, IA2ATransport;
+        where TTransport : class, IA2AServerTransport;
 
     /// <summary>
     /// Configures the server to use the specified <see cref="IA2APushNotificationSender"/> implementation.

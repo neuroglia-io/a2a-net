@@ -25,11 +25,11 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     readonly IDatabase database = connectionMultiplexer.GetDatabase();
 
     /// <inheritdoc/>
-    public async Task<Models.Task> AddTaskAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public async Task<Models.Task> AddTaskAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
-        var taskKey = GetTaskKey(task.Id);
-        var metadataKey = GetTaskMetadataKey(task.Id);
+        var taskKey = GetTaskKey(task.Id, tenant);
+        var metadataKey = GetTaskMetadataKey(task.Id, tenant);
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var state = task.Status?.State ?? TaskState.Unspecified;
         var contextId = task.ContextId ?? string.Empty;
@@ -47,15 +47,15 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
                 new HashEntry(TaskHashSetFields.Updated, timestamp),
                 new HashEntry(TaskHashSetFields.Context, contextId)
             ]);
-            var addToTaskCreatedIndexTask = transaction.SortedSetAddAsync(GetTasksCreatedIndexKey(), task.Id, timestamp);
-            var addToTaskUpdateIndexTask = transaction.SortedSetAddAsync(GetTasksUpdatedIndexKey(), task.Id, timestamp);
-            var addToTaskByStateIndexTask = transaction.SortedSetAddAsync(GetTasksByStateUpdatedIndexKey(state), task.Id, timestamp);
+            var addToTaskCreatedIndexTask = transaction.SortedSetAddAsync(GetTasksCreatedIndexKey(tenant), task.Id, timestamp);
+            var addToTaskUpdateIndexTask = transaction.SortedSetAddAsync(GetTasksUpdatedIndexKey(tenant), task.Id, timestamp);
+            var addToTaskByStateIndexTask = transaction.SortedSetAddAsync(GetTasksByStateUpdatedIndexKey(state, tenant), task.Id, timestamp);
             Task? addToTaskByContextIndexTask = null;
             Task? addToTaskByContextAndStateIndexTask = null;
             if (!string.IsNullOrWhiteSpace(contextId))
             {
-                addToTaskByContextIndexTask = transaction.SortedSetAddAsync(GetTasksByContextUpdatedIndexKey(contextId), task.Id, timestamp);
-                addToTaskByContextAndStateIndexTask = transaction.SortedSetAddAsync(GetTasksByContextAndStateUpdatedIndexKey(contextId, state), task.Id, timestamp);
+                addToTaskByContextIndexTask = transaction.SortedSetAddAsync(GetTasksByContextUpdatedIndexKey(contextId, tenant), task.Id, timestamp);
+                addToTaskByContextAndStateIndexTask = transaction.SortedSetAddAsync(GetTasksByContextAndStateUpdatedIndexKey(contextId, state, tenant), task.Id, timestamp);
             }
             var ok = await transaction.ExecuteAsync().ConfigureAwait(false);
             if (ok)
@@ -74,24 +74,24 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.Task?> GetTaskAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<Models.Task?> GetTaskAsync(string id, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         cancellationToken.ThrowIfCancellationRequested();
-        var key = GetTaskKey(id);
+        var key = GetTaskKey(id, tenant);
         var json = (await database.StringGetAsync(key).ConfigureAwait(false)).ToString();
         if (!string.IsNullOrWhiteSpace(json)) return JsonSerializer.Deserialize(json, JsonSerializationContext.Default.Task);
-        await database.KeyDeleteAsync(GetTaskKey(id)).ConfigureAwait(false);
+        await database.KeyDeleteAsync(GetTaskKey(id, tenant)).ConfigureAwait(false);
         return null;
     }
 
     /// <inheritdoc/>
-    public async Task<Models.TaskPushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public async Task<Models.TaskPushNotificationConfig?> GetTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
-        var key = GetPushNotificationConfigKey(taskId, configId);
+        var key = GetPushNotificationConfigKey(taskId, configId, tenant);
         var json = (await database.StringGetAsync(key).ConfigureAwait(false)).ToString();
         if (!string.IsNullOrWhiteSpace(json)) return JsonSerializer.Deserialize(json, JsonSerializationContext.Default.TaskPushNotificationConfig);
         await database.KeyDeleteAsync(key).ConfigureAwait(false);
@@ -107,16 +107,17 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
         var cursor = TryDecodeCursor(queryOptions.PageToken);
         var contextId = queryOptions.ContextId;
         var status = queryOptions.Status ?? string.Empty;
+        var tenant = queryOptions.Tenant;
         var useUpdated = queryOptions.LastUpdateAfter.HasValue || !string.IsNullOrWhiteSpace(status) || !string.IsNullOrWhiteSpace(contextId);
-        var indexKey = useUpdated ? SelectUpdatedIndexKey(contextId, status) : GetTasksCreatedIndexKey();
+        var indexKey = useUpdated ? SelectUpdatedIndexKey(contextId, status, tenant) : GetTasksCreatedIndexKey(tenant);
         var minScore = queryOptions.LastUpdateAfter.HasValue ? queryOptions.LastUpdateAfter.Value : double.NegativeInfinity;
         var total = queryOptions.LastUpdateAfter.HasValue ? await database.SortedSetLengthAsync(indexKey, minScore, double.PositiveInfinity).ConfigureAwait(false) : await database.SortedSetLengthAsync(indexKey).ConfigureAwait(false);
         var fetchCount = (int)pageSize + 50;
         var entries = await database.SortedSetRangeByScoreWithScoresAsync(indexKey, minScore, double.PositiveInfinity, Exclude.None, Order.Descending, 0, fetchCount).ConfigureAwait(false);
-        if (cursor is not null) entries = entries .SkipWhile(e => !(e.Score < cursor.Value.Score || (e.Score == cursor.Value.Score && StringComparer.Ordinal.Compare(e.Element.ToString(), cursor.Value.Member) < 0))) .ToArray();
+        if (cursor is not null) entries = entries.SkipWhile(e => !(e.Score < cursor.Value.Score || (e.Score == cursor.Value.Score && StringComparer.Ordinal.Compare(e.Element.ToString(), cursor.Value.Member) < 0))).ToArray();
         var pageEntries = entries.Take((int)pageSize).ToArray();
         var ids = pageEntries.Select(e => e.Element.ToString()).ToArray();
-        var keys = ids.Select(id => GetTaskKey(id)).ToArray();
+        var keys = ids.Select(id => GetTaskKey(id, tenant)).ToArray();
         var values = keys.Length == 0 ? Array.Empty<RedisValue>() : await database.StringGetAsync(keys).ConfigureAwait(false);
         var tasks = new List<Models.Task>(values.Length);
         for (var i = 0; i < values.Length; i++)
@@ -144,33 +145,34 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.PushNotificationConfigQueryResult> ListPushNotificationConfigAsync(Models.PushNotificationConfigQueryOptions? queryOptions = null, CancellationToken cancellationToken = default)
+    public async Task<Models.TaskPushNotificationConfigQueryResult> ListTaskPushNotificationConfigAsync(Models.TaskPushNotificationConfigQueryOptions queryOptions, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(queryOptions);
         cancellationToken.ThrowIfCancellationRequested();
-        queryOptions ??= new Models.PushNotificationConfigQueryOptions();
         var pageSize = ClampPageSize(queryOptions.PageSize);
         var cursor = TryDecodeCursor(queryOptions.PageToken);
         var hasTaskFilter = !string.IsNullOrWhiteSpace(queryOptions.TaskId);
+        var tenant = queryOptions.Tenant;
         RedisKey indexKey;
         Func<string, (string TaskId, string ConfigId)> parseGlobalKey;
         if (hasTaskFilter)
         {
             var taskId = queryOptions.TaskId!;
-            indexKey = GetPushNotificationConfigByTaskIndexKey(taskId);
+            indexKey = GetPushNotificationConfigByTaskIndexKey(taskId, tenant);
             parseGlobalKey = pushNotificationConfigId => (taskId, pushNotificationConfigId);
         }
         else
         {
-            indexKey = GetPushNotificationConfigIndexKey();
-            parseGlobalKey = ParsePushNotificationConfigGlobalKey;
+            indexKey = GetPushNotificationConfigIndexKey(tenant);
+            parseGlobalKey = member => ParsePushNotificationConfigGlobalKey(member);
         }
         var fetchCount = (int)pageSize + 50;
-        var entries = await database.SortedSetRangeByRankWithScoresAsync(indexKey, 0, fetchCount - 1,order: Order.Descending).ConfigureAwait(false);
-        if (cursor is not null) entries = [.. entries.SkipWhile(e => !(e.Score < cursor.Value.Score ||(e.Score == cursor.Value.Score && StringComparer.Ordinal.Compare(e.Element.ToString(), cursor.Value.Member) < 0)))];
+        var entries = await database.SortedSetRangeByRankWithScoresAsync(indexKey, 0, fetchCount - 1, order: Order.Descending).ConfigureAwait(false);
+        if (cursor is not null) entries = [.. entries.SkipWhile(e => !(e.Score < cursor.Value.Score || (e.Score == cursor.Value.Score && StringComparer.Ordinal.Compare(e.Element.ToString(), cursor.Value.Member) < 0)))];
         var pageEntries = entries.Take((int)pageSize).ToArray();
         var pairs = pageEntries.Select(e => parseGlobalKey(e.Element.ToString())).Where(p => !string.IsNullOrWhiteSpace(p.TaskId) && !string.IsNullOrWhiteSpace(p.ConfigId)).ToArray();
-        var keys = pairs.Select(p => GetPushNotificationConfigKey(p.TaskId, p.ConfigId)).ToArray();
-        var values = keys.Length == 0? [] : await database.StringGetAsync(keys).ConfigureAwait(false);
+        var keys = pairs.Select(p => GetPushNotificationConfigKey(p.TaskId, p.ConfigId, tenant)).ToArray();
+        var values = keys.Length == 0 ? [] : await database.StringGetAsync(keys).ConfigureAwait(false);
         var pushNotificationConfigs = new List<Models.TaskPushNotificationConfig>(values.Length);
         foreach (var value in values)
         {
@@ -185,7 +187,7 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
             var last = pageEntries[^1];
             nextPageToken = EncodeCursor(new Cursor(last.Score, last.Element.ToString()));
         }
-        return new Models.PushNotificationConfigQueryResult
+        return new Models.TaskPushNotificationConfigQueryResult
         {
             Configs = pushNotificationConfigs,
             NextPageToken = nextPageToken
@@ -193,12 +195,12 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.Task> UpdateTaskAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public async Task<Models.Task> UpdateTaskAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentException.ThrowIfNullOrWhiteSpace(task.Id);
-        var taskKey = GetTaskKey(task.Id);
-        var metadataKey = GetTaskMetadataKey(task.Id);
+        var taskKey = GetTaskKey(task.Id, tenant);
+        var metadataKey = GetTaskMetadataKey(task.Id, tenant);
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var newState = task.Status?.State ?? TaskState.Unspecified;
         var newContextId = task.ContextId ?? string.Empty;
@@ -222,20 +224,20 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
                 new HashEntry(TaskHashSetFields.Updated, timestamp),
                 new HashEntry(TaskHashSetFields.Context, newContextId)
             ]);
-            var updateIndexTask = transaction.SortedSetAddAsync(GetTasksUpdatedIndexKey(), task.Id, timestamp);
-            _ = transaction.SortedSetRemoveAsync(GetTasksByStateUpdatedIndexKey(oldStateStr), task.Id);
-            var updateByStateIndexTask = transaction.SortedSetAddAsync(GetTasksByStateUpdatedIndexKey(newState), task.Id, timestamp);
+            var updateIndexTask = transaction.SortedSetAddAsync(GetTasksUpdatedIndexKey(tenant), task.Id, timestamp);
+            _ = transaction.SortedSetRemoveAsync(GetTasksByStateUpdatedIndexKey(oldStateStr, tenant), task.Id);
+            var updateByStateIndexTask = transaction.SortedSetAddAsync(GetTasksByStateUpdatedIndexKey(newState, tenant), task.Id, timestamp);
             Task? updateByContextIndexTask = null;
             Task? updateByContextAndStateIndexTask = null;
             if (!string.IsNullOrWhiteSpace(oldContextId))
             {
-                _ = transaction.SortedSetRemoveAsync(GetTasksByContextUpdatedIndexKey(oldContextId), task.Id);
-                _ = transaction.SortedSetRemoveAsync(GetTasksByContextAndStateUpdatedIndexKey(oldContextId, oldStateStr), task.Id);
+                _ = transaction.SortedSetRemoveAsync(GetTasksByContextUpdatedIndexKey(oldContextId, tenant), task.Id);
+                _ = transaction.SortedSetRemoveAsync(GetTasksByContextAndStateUpdatedIndexKey(oldContextId, oldStateStr, tenant), task.Id);
             }
             if (!string.IsNullOrWhiteSpace(newContextId))
             {
-                updateByContextIndexTask = transaction.SortedSetAddAsync(GetTasksByContextUpdatedIndexKey(newContextId), task.Id, timestamp);
-                updateByContextAndStateIndexTask = transaction.SortedSetAddAsync(GetTasksByContextAndStateUpdatedIndexKey(newContextId, newState), task.Id, timestamp);
+                updateByContextIndexTask = transaction.SortedSetAddAsync(GetTasksByContextUpdatedIndexKey(newContextId, tenant), task.Id, timestamp);
+                updateByContextAndStateIndexTask = transaction.SortedSetAddAsync(GetTasksByContextAndStateUpdatedIndexKey(newContextId, newState, tenant), task.Id, timestamp);
             }
             var ok = await transaction.ExecuteAsync().ConfigureAwait(false);
             if (ok)
@@ -253,46 +255,46 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
     }
 
     /// <inheritdoc/>
-    public async Task<Models.TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(Models.TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
+    public async Task<Models.TaskPushNotificationConfig> SetTaskPushNotificationConfigAsync(Models.SetTaskPushNotificationConfigRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(config);
-        ArgumentException.ThrowIfNullOrWhiteSpace(config.PushNotificationConfig.Id);
+        ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
-        var taskId = config.Name.Split('/')[1];
-        var key = GetPushNotificationConfigKey(taskId, config.PushNotificationConfig.Id);
-        var indexKey = GetPushNotificationConfigIndexKey();
-        var byTaskIndexKey = GetPushNotificationConfigByTaskIndexKey(taskId);
-        var json = JsonSerializer.Serialize(config, JsonSerializationContext.Default.PushNotificationConfig);
+        var taskId = request.Parent.Split('/')[1];
+        var tenant = request.Tenant;
+        var key = GetPushNotificationConfigKey(taskId, request.ConfigId, tenant);
+        var indexKey = GetPushNotificationConfigIndexKey(tenant);
+        var byTaskIndexKey = GetPushNotificationConfigByTaskIndexKey(taskId, tenant);
+        var json = JsonSerializer.Serialize(request.Config, JsonSerializationContext.Default.TaskPushNotificationConfig);
         var score = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var globalMember = GetPushNotificationConfigGlobalKey(taskId, config.PushNotificationConfig.Id);
+        var globalMember = GetPushNotificationConfigGlobalKey(taskId, request.ConfigId);
         for (var attempt = 0; attempt < 10; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var transaction = database.CreateTransaction();
             var addTask = transaction.StringSetAsync(key, json);
             var addToIndexTask = transaction.SortedSetAddAsync(indexKey, globalMember, score);
-            var addToByTaskIndexTask = transaction.SortedSetAddAsync(byTaskIndexKey, config.PushNotificationConfig.Id, score);
+            var addToByTaskIndexTask = transaction.SortedSetAddAsync(byTaskIndexKey, request.ConfigId, score);
             if (await transaction.ExecuteAsync().ConfigureAwait(false))
             {
                 await addTask.ConfigureAwait(false);
                 await addToByTaskIndexTask.ConfigureAwait(false);
                 await addToIndexTask.ConfigureAwait(false);
-                return config;
+                return request.Config;
             }
         }
-        throw new TimeoutException($"Failed to upsert the push notification config with id '{config.PushNotificationConfig.Id}' for the task with id '{taskId}' due to concurrency issues.");
+        throw new TimeoutException($"Failed to upsert the push notification config with id '{request.ConfigId}' for the task with id '{taskId}' due to concurrency issues.");
     }
 
     /// <inheritdoc/>
-    public async Task<bool> DeletePushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
         var globalMember = GetPushNotificationConfigGlobalKey(taskId, configId);
-        var key = GetPushNotificationConfigKey(taskId, configId);
-        var indexKey = GetPushNotificationConfigIndexKey();
-        var byTaskIndexKey = GetPushNotificationConfigByTaskIndexKey(taskId);
+        var key = GetPushNotificationConfigKey(taskId, configId, tenant);
+        var indexKey = GetPushNotificationConfigIndexKey(tenant);
+        var byTaskIndexKey = GetPushNotificationConfigByTaskIndexKey(taskId, tenant);
         for (var attempt = 0; attempt < 10; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -305,32 +307,38 @@ public sealed class RedisStore(IOptions<RedisStateStoreOptions> options, IConnec
         throw new TimeoutException($"Failed to delete push notification config '{configId}' for task '{taskId}' due to concurrency issues.");
     }
 
-    RedisKey GetTaskKey(string taskId) => $"{options.Value.KeyPrefix}task:{taskId}";
+    RedisKey GetTaskKey(string taskId, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:{taskId}";
 
-    RedisKey GetTaskMetadataKey(string taskId) => $"{options.Value.KeyPrefix}task-metadata:{taskId}";
+    RedisKey GetTaskMetadataKey(string taskId, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task-metadata:{taskId}";
 
-    RedisKey GetTasksCreatedIndexKey() => $"{options.Value.KeyPrefix}task:index:created";
+    RedisKey GetTasksCreatedIndexKey(string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:index:created";
 
-    RedisKey GetTasksUpdatedIndexKey() => $"{options.Value.KeyPrefix}task:index:updated";
+    RedisKey GetTasksUpdatedIndexKey(string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:index:updated";
 
-    RedisKey GetTasksByStateUpdatedIndexKey(string state) => $"{options.Value.KeyPrefix}task:index:status:{state}:updated";
+    RedisKey GetTasksByStateUpdatedIndexKey(string state, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:index:status:{state}:updated";
 
-    RedisKey GetTasksByContextUpdatedIndexKey(string contextId) => $"{options.Value.KeyPrefix}task:index:context:{contextId}:updated";
+    RedisKey GetTasksByContextUpdatedIndexKey(string contextId, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:index:context:{contextId}:updated";
 
-    RedisKey GetTasksByContextAndStateUpdatedIndexKey(string contextId, string state) => $"{options.Value.KeyPrefix}task:index:context:{contextId}:status:{state}:updated";
+    RedisKey GetTasksByContextAndStateUpdatedIndexKey(string contextId, string state, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}task:index:context:{contextId}:status:{state}:updated";
 
-    RedisKey GetPushNotificationConfigKey(string taskId, string pushNotificationConfigId) => $"{options.Value.KeyPrefix}push-notification-config:{taskId}:{pushNotificationConfigId}";
+    RedisKey GetPushNotificationConfigKey(string taskId, string pushNotificationConfigId, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}push-notification-config:{taskId}:{pushNotificationConfigId}";
 
-    RedisKey GetPushNotificationConfigIndexKey() => $"{options.Value.KeyPrefix}push-notification-config:index";
+    RedisKey GetPushNotificationConfigIndexKey(string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}push-notification-config:index";
 
-    RedisKey GetPushNotificationConfigByTaskIndexKey(string taskId) => $"{options.Value.KeyPrefix}push-notification-config:index:task:{taskId}";
+    RedisKey GetPushNotificationConfigByTaskIndexKey(string taskId, string? tenant = null) => $"{options.Value.KeyPrefix}{GetTenantPrefix(tenant)}push-notification-config:index:task:{taskId}";
 
-    RedisKey SelectUpdatedIndexKey(string? contextId, string status)
+    RedisKey SelectUpdatedIndexKey(string? contextId, string status, string? tenant = null)
     {
-        if (!string.IsNullOrWhiteSpace(contextId) && !string.IsNullOrWhiteSpace(status)) return GetTasksByContextAndStateUpdatedIndexKey(contextId!, status);
-        if (!string.IsNullOrWhiteSpace(contextId)) return GetTasksByContextUpdatedIndexKey(contextId!);
-        if (!string.IsNullOrWhiteSpace(status)) return GetTasksByStateUpdatedIndexKey(status);
-        return GetTasksUpdatedIndexKey();
+        if (!string.IsNullOrWhiteSpace(contextId) && !string.IsNullOrWhiteSpace(status)) return GetTasksByContextAndStateUpdatedIndexKey(contextId!, status, tenant);
+        if (!string.IsNullOrWhiteSpace(contextId)) return GetTasksByContextUpdatedIndexKey(contextId!, tenant);
+        if (!string.IsNullOrWhiteSpace(status)) return GetTasksByStateUpdatedIndexKey(status, tenant);
+        return GetTasksUpdatedIndexKey(tenant);
+    }
+
+    string GetTenantPrefix(string? tenant)
+    {
+        if (string.IsNullOrWhiteSpace(tenant)) return string.Empty;
+        return $"tenant:{tenant}:";
     }
 
     static string GetPushNotificationConfigGlobalKey(string taskId, string configId) => $"{taskId}:{configId}";

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Task = System.Threading.Tasks.Task;
+
 namespace A2A.Services;
 
 /// <summary>
@@ -40,9 +42,10 @@ public interface IA2AProtocolApi
     /// </summary>
     /// <param name="id">The unique identifier of the task to get.</param>
     /// <param name="historyLength">The maximum number of messages, if any, to include in the history.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, that owns the task to get.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The specified <see cref="Task"/>.</returns>
-    Task<Models.Task> GetTaskAsync(string id, uint? historyLength, CancellationToken cancellationToken = default);
+    Task<Models.Task> GetTaskAsync(string id, uint? historyLength = null, string? tenant = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists tasks.
@@ -56,50 +59,54 @@ public interface IA2AProtocolApi
     /// Cancels the specified task.
     /// </summary>
     /// <param name="id">The unique identifier of the task to cancel.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, that owns the task to cancel.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The cancelled <see cref="Task"/>.</returns>
-    Task<Models.Task> CancelTaskAsync(string id, CancellationToken cancellationToken = default);
+    Task<Models.Task> CancelTaskAsync(string id, string? tenant = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Subscribes to the specified task.
     /// </summary>
     /// <param name="id">The unique identifier of the task to subscribe to.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, that owns the task to subscribe to.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A stream of <see cref="StreamResponse"/> used to monitor the progress of the operation.</returns>
-    IAsyncEnumerable<StreamResponse> SubscribeToTaskAsync(string id, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<StreamResponse> SubscribeToTaskAsync(string id, string? tenant = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets or updates the push notification configuration for the specified task.
     /// </summary>
-    /// <param name="config">The push notification configuration to set or update.</param>
+    /// <param name="request">The request to process.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The set or updated <see cref="TaskPushNotificationConfig"/>.</returns>
-    Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(TaskPushNotificationConfig config, CancellationToken cancellationToken = default);
+    Task<TaskPushNotificationConfig> SetTaskPushNotificationConfigAsync(SetTaskPushNotificationConfigRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the push notification configuration for the specified task.
     /// </summary>
     /// <param name="taskId">The unique identifier of the task to get the push notification configuration for.</param>
     /// <param name="configId">The unique identifier of the push notification configuration to get.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, that owns the task to get the specified push notification configuration for.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>The specified <see cref="TaskPushNotificationConfig"/>.</returns>
-    Task<TaskPushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
+    Task<TaskPushNotificationConfig> GetTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists push notification configurations.
     /// </summary>
     /// <param name="queryOptions">The query options, if any.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="PushNotificationConfigQueryResult"/> representing the result of the operation.</returns>
-    Task<PushNotificationConfigQueryResult> ListPushNotificationConfigAsync(PushNotificationConfigQueryOptions? queryOptions = null, CancellationToken cancellationToken = default);
+    /// <returns>A new <see cref="TaskPushNotificationConfigQueryResult"/> representing the result of the operation.</returns>
+    Task<TaskPushNotificationConfigQueryResult> ListTaskPushNotificationConfigAsync(TaskPushNotificationConfigQueryOptions queryOptions, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes the specified push notification configuration.
     /// </summary>
     /// <param name="taskId">The unique identifier of the task to delete the push notification configuration from.</param>
     /// <param name="configId">The unique identifier of the push notification configuration to delete.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, that owns the task to delete the specified push notification configuration from.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A boolean indicating whether the deletion was successful.</returns>
-    Task<bool> DeletePushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default);
+    Task DeletePushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default);
 
 }

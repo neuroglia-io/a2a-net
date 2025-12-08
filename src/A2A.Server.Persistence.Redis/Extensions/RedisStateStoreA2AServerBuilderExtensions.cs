@@ -12,8 +12,6 @@
 // limitations under the License.
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
-using Microsoft.Extensions.DependencyInjection;
-
 namespace A2A.Server;
 
 /// <summary>
@@ -31,10 +29,8 @@ public static class RedisStateStoreA2AServerBuilderExtensions
     public static IA2AServerBuilder UseRedisStore(this IA2AServerBuilder builder, Action<RedisStateStoreOptions>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        builder.UseStore<RedisStore>(services =>
-        {
-            if (configure != null) services.Configure(configure);
-        });
+        if (configure is not null) builder.Services.Configure(configure);
+        builder.UseStore<RedisStore>();
         return builder;
     }
 

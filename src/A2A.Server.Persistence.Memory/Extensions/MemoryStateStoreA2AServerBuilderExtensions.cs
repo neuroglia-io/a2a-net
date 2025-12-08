@@ -29,10 +29,8 @@ public static class MemoryStateStoreA2AServerBuilderExtensions
     public static IA2AServerBuilder UseMemoryStore(this IA2AServerBuilder builder, Action<MemoryStateStoreOptions>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        builder.UseStore<MemoryStore>(services =>
-        {
-            if (configure is not null) services.Configure(configure);
-        });
+        if (configure is not null) builder.Services.Configure(configure);
+        builder.UseStore<MemoryStore>();
         return builder;
     }
 

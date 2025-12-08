@@ -52,7 +52,7 @@ public class A2AServerTests
     {
         //arrange
         var store = new Mock<IA2AStore>(MockBehavior.Strict);
-        store.Setup(t => t.GetTaskAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((Models.Task?)null);
+        store.Setup(t => t.GetTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((Models.Task?)null);
         var server = A2AServerFactory.Create(store: store.Object);
         var request = SendMessageRequestFactory.Create();
 

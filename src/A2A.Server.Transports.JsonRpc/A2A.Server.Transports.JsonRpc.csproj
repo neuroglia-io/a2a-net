@@ -35,6 +35,7 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <ProjectReference Include="..\A2A.Core.JsonRpc\A2A.Core.JsonRpc.csproj" />
     <ProjectReference Include="..\A2A.Server.Abstractions\A2A.Server.Abstractions.csproj" />
   </ItemGroup>
 

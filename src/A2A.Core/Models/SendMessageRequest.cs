@@ -37,10 +37,17 @@ public sealed record SendMessageRequest
     public SendMessageConfiguration? Configuration { get; init; }
 
     /// <summary>
+    /// Gets the identifier of the tenant, if any, on whose behalf the request is made.
+    /// </summary>
+    [Description("The identifier of the tenant, if any, on whose behalf the request is made.")]
+    [DataMember(Order = 3, Name = "tenant"), JsonPropertyOrder(3), JsonPropertyName("tenant")]
+    public string? Tenant { get; init; }
+
+    /// <summary>
     /// Gets a key/value mapping, if any, containing additional context or parameters for the request.
     /// </summary>
     [Description("A key/value mapping, if any, containing additional context or parameters for the request.")]
-    [DataMember(Order = 3, Name = "metadata"), JsonPropertyOrder(3), JsonPropertyName("metadata")]
-    public IReadOnlyDictionary<string, JsonNode>? Metadata { get; init; }
+    [DataMember(Order = 4, Name = "metadata"), JsonPropertyOrder(4), JsonPropertyName("metadata")]
+    public JsonObject? Metadata { get; init; }
 
 }

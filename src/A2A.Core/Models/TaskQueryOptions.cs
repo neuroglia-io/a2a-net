@@ -71,10 +71,17 @@ public sealed record TaskQueryOptions
     public bool? IncludeArtifacts { get; init; }
 
     /// <summary>
+    /// Gets the identifier of the tenant, if any, to get tasks for.
+    /// </summary>
+    [Description("The identifier of the tenant, if any, to get tasks for.")]
+    [DataMember(Order = 8, Name = "tenant"), JsonPropertyOrder(8), JsonPropertyName("tenant")]
+    public string? Tenant { get; init; }
+
+    /// <summary>
     /// Gets request-specific metadata, if any.
     /// </summary>
     [Description("Request-specific metadata, if any.")]
-    [DataMember(Order = 8, Name = "metadata"), JsonPropertyOrder(8), JsonPropertyName("metadata")]
+    [DataMember(Order = 9, Name = "metadata"), JsonPropertyOrder(9), JsonPropertyName("metadata")]
     public JsonObject? Metadata { get; init; }
 
 }

@@ -20,7 +20,8 @@ internal static class SendMessageRequestFactory
     {
         Message = MessageFactory.Create(),
         Configuration = SendMessageConfigurationFactory.Create(),
-        Metadata = new Dictionary<string, JsonNode>
+        Tenant = Guid.NewGuid().ToString("N"),
+        Metadata = new()
         {
             ["metaKey"] = "metaValue"
         }

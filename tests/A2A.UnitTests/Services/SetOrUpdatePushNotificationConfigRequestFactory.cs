@@ -16,12 +16,12 @@ namespace A2A.UnitTests.Services;
 internal static class SetOrUpdatePushNotificationConfigRequestFactory
 {
 
-    internal static SetOrUpdatePushNotificationConfigRequest Create() => new()
+    internal static SetTaskPushNotificationConfigRequest Create() => new()
     {
         Tenant = Guid.NewGuid().ToString("N"),
         Parent = $"tasks/{Guid.NewGuid():N}",
         ConfigId = Guid.NewGuid().ToString("N"),
-        Config = PushNotificationConfigFactory.Create()
+        Config = TaskPushNotificationConfigFactory.Create()
     };
 
 }

@@ -24,22 +24,24 @@ public sealed class MemoryTaskQueue(IServiceProvider serviceProvider)
     readonly ConcurrentDictionary<string, CancellationTokenSource> runningTasks = [];
 
     /// <inheritdoc/>
-    public Task EnqueueAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public Task EnqueueAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        runningTasks.TryAdd(task.Id, cancellationTokenSource);
-        _ = serviceProvider.GetRequiredService<IA2AServer>().ExecuteTaskAsync(task.Id, cancellationTokenSource.Token);
+        runningTasks.TryAdd(GetCacheKey(task.Id, tenant), cancellationTokenSource);
+        _ = serviceProvider.GetRequiredService<IA2AServer>().ExecuteTaskAsync(task.Id, tenant, cancellationTokenSource.Token);
         return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public async Task CancelAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public async Task CancelAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
-        if (!runningTasks.TryRemove(task.Id, out var cancellationTokenSource)) return;
+        if (!runningTasks.TryRemove(GetCacheKey(task.Id, tenant), out var cancellationTokenSource)) return;
         await cancellationTokenSource.CancelAsync();
         cancellationTokenSource.Dispose();
     }
+
+    static string GetCacheKey(string taskId, string? tenant) => $"{(string.IsNullOrWhiteSpace(tenant) ? string.Empty : $"{tenant}:")}{taskId}";
 
 }

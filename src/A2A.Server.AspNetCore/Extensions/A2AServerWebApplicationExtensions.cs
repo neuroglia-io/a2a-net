@@ -60,23 +60,23 @@ public static class A2AServerWebApplicationExtensions
         var group = endpoints.MapGroup(agentInterface.Url.AbsolutePath);
         group.Map("/{*path}", async (HttpContext httpContext) =>
         {
-            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2ATransport>(ProtocolBinding.Http);
+            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2AServerTransport>(ProtocolBinding.Http);
             return await transport.HandleAsync(httpContext).ConfigureAwait(false);
         });
     }
 
     static void MapA2AGrpcEndpoints(this IEndpointRouteBuilder endpoints, AgentInterface agentInterface)
     {
-        endpoints.Map(agentInterface.Url.AbsolutePath, async (HttpContext httpContext) =>
-        {
-            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2ATransport>(ProtocolBinding.Grpc);
-            return await transport.HandleAsync(httpContext).ConfigureAwait(false);
-        });
+        endpoints.MapGrpcService<A2AGrpcServerService>();
     }
 
     static void MapA2AJsonRpcEndpoints(this IEndpointRouteBuilder endpoints, AgentInterface agentInterface)
     {
-        endpoints.MapGrpcService<A2AGrpcServerService>();
+        endpoints.Map(agentInterface.Url.AbsolutePath, async (HttpContext httpContext) =>
+        {
+            var transport = httpContext.RequestServices.GetRequiredKeyedService<IA2AServerTransport>(ProtocolBinding.Grpc);
+            return await transport.HandleAsync(httpContext).ConfigureAwait(false);
+        });
     }
 
     static void MapWellKnownA2AAgentCard(this IEndpointRouteBuilder endpoints)

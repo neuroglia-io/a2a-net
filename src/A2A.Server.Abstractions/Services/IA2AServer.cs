@@ -24,8 +24,9 @@ public interface IA2AServer
     /// Executes the specified task.
     /// </summary>
     /// <param name="taskId">The unique identifier of the task to execute.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, the task to execute belongs to.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new awaitable <see cref="Task"/>.</returns>
-    Task ExecuteTaskAsync(string taskId, CancellationToken cancellationToken = default);
+    Task ExecuteTaskAsync(string taskId, string? tenant = null, CancellationToken cancellationToken = default);
 
 }

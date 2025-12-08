@@ -23,16 +23,18 @@ public interface IA2ATaskQueue
     /// Enqueues the specified task for execution.
     /// </summary>
     /// <param name="task">The task to enqueue.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, the task to enqueue belongs to.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new awaitable <see cref="Task"/>.</returns>
-    Task EnqueueAsync(Models.Task task, CancellationToken cancellationToken = default);
+    Task EnqueueAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Cancels the execution of the specified task.
     /// </summary>
     /// <param name="task">The task to cancel.</param>
+    /// <param name="tenant">The identifier of the tenant, if any, the task to cancel belongs to.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new awaitable <see cref="Task"/>.</returns>
-    Task CancelAsync(Models.Task task, CancellationToken cancellationToken = default);
+    Task CancelAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default);
 
 }

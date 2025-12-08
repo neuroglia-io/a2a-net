@@ -30,7 +30,7 @@ public static class A2AGrpcTransportServerBuilderExtensions
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
     public static IA2AServerBuilder UseGrpcTransport(this IA2AServerBuilder builder)
     {
-        builder.UseTransport<A2AGrpcTransport>(ProtocolBinding.Grpc, "/");
+        builder.UseTransport<A2AGrpcServerTransport>(ProtocolBinding.Grpc, "/");
         return builder;
     }
 

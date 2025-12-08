@@ -36,6 +36,9 @@ public sealed class A2AServerBuilder(IServiceCollection services)
     readonly List<TransportDefinition> transports = [];
 
     /// <inheritdoc/>
+    public IServiceCollection Services { get; } = services;
+
+    /// <inheritdoc/>
     public IA2AServerBuilder SupportsStreaming()
     {
         capabilities = capabilities with
@@ -74,11 +77,10 @@ public sealed class A2AServerBuilder(IServiceCollection services)
     }
 
     /// <inheritdoc/>
-    public IA2AServerBuilder UseStore<TStore>(Action<IServiceCollection>? configure = null)
+    public IA2AServerBuilder UseStore<TStore>()
         where TStore : class, IA2AStore
     {
         storeType = typeof(TStore);
-        configure?.Invoke(services);
         return this;
     }
 
@@ -92,7 +94,7 @@ public sealed class A2AServerBuilder(IServiceCollection services)
 
     /// <inheritdoc/>
     public IA2AServerBuilder UseTransport<TTransport>(string protocolBinding, [StringSyntax("Route")] string path)
-        where TTransport : class, IA2ATransport
+        where TTransport : class, IA2AServerTransport
     {
         ArgumentNullException.ThrowIfNull(protocolBinding);
         ArgumentNullException.ThrowIfNull(path);
@@ -140,22 +142,22 @@ public sealed class A2AServerBuilder(IServiceCollection services)
             ProtocolBinding = transport.ProtocolBinding,
             Url = new(serverAddress, transport.Uri)
         });
-        services.AddSingleton(typeof(IA2ATaskEventStream), taskEventStreamType);
-        services.AddSingleton(typeof(IA2AStore), storeType);
-        services.AddSingleton(typeof(IA2ATaskQueue), taskQueueType);
-        services.AddSingleton(typeof(IA2APushNotificationSender), pushNotificationSenderType);
-        services.AddSingleton(typeof(IA2AServer), serverType);
-        services.AddKeyedSingleton<AgentCard>(null, agentDefinition.Card with
+        Services.AddSingleton(typeof(IA2ATaskEventStream), taskEventStreamType);
+        Services.AddSingleton(typeof(IA2AStore), storeType);
+        Services.AddSingleton(typeof(IA2ATaskQueue), taskQueueType);
+        Services.AddSingleton(typeof(IA2APushNotificationSender), pushNotificationSenderType);
+        Services.AddSingleton(typeof(IA2AServer), serverType);
+        Services.AddKeyedSingleton<AgentCard>(null, agentDefinition.Card with
         {
             Interfaces = [.. interfaces]
         });
-        if (agentDefinition.ExtendedCard is not null) services.AddKeyedSingleton(A2AServerDefaults.ExtendedAgentCardServiceKey, agentDefinition.ExtendedCard with
+        if (agentDefinition.ExtendedCard is not null) Services.AddKeyedSingleton(A2AServerDefaults.ExtendedAgentCardServiceKey, agentDefinition.ExtendedCard with
         {
             Interfaces = [.. interfaces]
         });
-        services.AddSingleton(typeof(IA2AAgentRuntime), agentDefinition.RuntimeType);
-        transports.ToList().ForEach(transport => services.AddKeyedScoped(typeof(IA2ATransport), transport.ProtocolBinding, transport.Type));
-        return services;
+        Services.AddSingleton(typeof(IA2AAgentRuntime), agentDefinition.RuntimeType);
+        transports.ToList().ForEach(transport => Services.AddKeyedScoped(typeof(IA2AServerTransport), transport.ProtocolBinding, transport.Type));
+        return Services;
     }
 
     sealed record TransportDefinition(Type Type, string ProtocolBinding, Uri Uri);

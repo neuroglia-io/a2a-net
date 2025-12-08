@@ -25,12 +25,17 @@ public sealed class QuartzTaskExecutionJob(IA2AServer server)
     /// Gets the key of the job data used to store the task identifier.
     /// </summary>
     public const string TaskId = "taskId";
+    /// <summary>
+    /// Gets the key of the job data used to store the tenant identifier.
+    /// </summary>
+    public const string Tenant = "tenant";
 
     /// <inheritdoc />
     public async Task Execute(IJobExecutionContext context)
     {
         var taskId = context.MergedJobDataMap.GetString(TaskId) ?? throw new NullReferenceException($"The required '{TaskId}' job data is missing.");
-        await server.ExecuteTaskAsync(taskId, context.CancellationToken).ConfigureAwait(false);
+        var tenant = context.MergedJobDataMap.GetString(Tenant);
+        await server.ExecuteTaskAsync(taskId, tenant, context.CancellationToken).ConfigureAwait(false);
     }
 
 }

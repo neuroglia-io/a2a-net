@@ -16,7 +16,7 @@ namespace A2A.UnitTests.Services;
 internal static class PushNotificationConfigQueryOptionsFactory
 {
 
-    internal static PushNotificationConfigQueryOptions Create() => new()
+    internal static TaskPushNotificationConfigQueryOptions Create() => new()
     {
         TaskId = Guid.NewGuid().ToString("N"),
         PageSize = 50,

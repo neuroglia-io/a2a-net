@@ -32,7 +32,7 @@ public static class A2AHttpTransportServerBuilderExtensions
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
     public static IA2AServerBuilder UseHttpTransport(this IA2AServerBuilder builder, [StringSyntax("Route")] string path = "/")
     {
-        builder.UseTransport<A2AHttpTransport>(ProtocolBinding.Http, path);
+        builder.UseTransport<A2AHttpServerTransport>(ProtocolBinding.Http, path);
         return builder;
     }
 

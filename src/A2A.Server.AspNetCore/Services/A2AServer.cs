@@ -53,14 +53,14 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             var response = await agent.ProcessAsync(request.Message, cancellationToken).ConfigureAwait(false);
             if (response is Models.Task task)
             {
-                task = await store.AddTaskAsync(task, cancellationToken).ConfigureAwait(false);
-                await taskQueue.EnqueueAsync(task, cancellationToken).ConfigureAwait(false);
+                task = await store.AddTaskAsync(task, request.Tenant, cancellationToken).ConfigureAwait(false);
+                await taskQueue.EnqueueAsync(task, request.Tenant, cancellationToken).ConfigureAwait(false);
             }
             return response;
         }
         else
         {
-            var task = await store.GetTaskAsync(request.Message.TaskId, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{request.Message.TaskId}'");
+            var task = await store.GetTaskAsync(request.Message.TaskId, request.Tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{request.Message.TaskId}'");
             if (task.Status.State is not TaskState.Unspecified and not TaskState.Submitted and not TaskState.AuthRequired and not TaskState.InputRequired)
             {
                 logger.LogError("Failed to process the message for the task with id '{id}' because the task is in an unexpected state '{state}'", task.Id, task.Status.State);
@@ -69,8 +69,8 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             task = await store.UpdateTaskAsync(task with
             {
                 History = task.History is null ? [request.Message] : task.History.Append(request.Message).ToList()
-            }, cancellationToken).ConfigureAwait(false);
-            await taskQueue.EnqueueAsync(task, cancellationToken).ConfigureAwait(false);
+            }, request.Tenant, cancellationToken).ConfigureAwait(false);
+            await taskQueue.EnqueueAsync(task, request.Tenant, cancellationToken).ConfigureAwait(false);
             return task;
         }
     }
@@ -110,7 +110,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                     };
                     yield break;
                 case Models.Task:
-                    task = await store.AddTaskAsync((Models.Task)response, cancellationToken).ConfigureAwait(false);
+                    task = await store.AddTaskAsync((Models.Task)response, request.Tenant, cancellationToken).ConfigureAwait(false);
                     break;
                 default:
                     throw new NotSupportedException($"The specified response type '{response?.GetType().FullName}' is not supported in this context.");
@@ -118,7 +118,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         }
         else
         {
-            task = await store.GetTaskAsync(request.Message.TaskId, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{request.Message.TaskId}'");
+            task = await store.GetTaskAsync(request.Message.TaskId, request.Tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{request.Message.TaskId}'");
             if (task.Status.State is not TaskState.Unspecified and not TaskState.Submitted and not TaskState.AuthRequired and not TaskState.InputRequired)
             {
                 logger.LogError("Failed to process the message for the task with id '{id}' because the task is in an unexpected state '{state}'", task.Id, task.Status.State);
@@ -127,9 +127,9 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             task = await store.UpdateTaskAsync(task with
             {
                 History = task.History is null ? [request.Message] : task.History.Append(request.Message).ToList()
-            }, cancellationToken).ConfigureAwait(false);
+            }, request.Tenant, cancellationToken).ConfigureAwait(false);
         }
-        await taskQueue.EnqueueAsync(task, cancellationToken).ConfigureAwait(false);
+        await taskQueue.EnqueueAsync(task, request.Tenant, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(request.Message.TaskId)) yield return new StreamResponse
         {
             Task = task
@@ -149,10 +149,10 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
     }
 
     /// <inheritdoc/>
-    public async Task<Models.Task> GetTaskAsync(string id, uint? historyLength, CancellationToken cancellationToken = default)
+    public async Task<Models.Task> GetTaskAsync(string id, uint? historyLength = null, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        var task = await store.GetTaskAsync(id, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
+        var task = await store.GetTaskAsync(id, tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
         if (historyLength.HasValue && task.History is not null) task = task with 
         { 
             History = [.. task.History.TakeLast((int)historyLength.Value)]
@@ -164,10 +164,10 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
     public Task<TaskQueryResult> ListTasksAsync(TaskQueryOptions? queryOptions = null, CancellationToken cancellationToken = default) => store.ListTaskAsync(queryOptions, cancellationToken);
 
     /// <inheritdoc/>
-    public async Task<Models.Task> CancelTaskAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<Models.Task> CancelTaskAsync(string id, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        var task = await store.GetTaskAsync(id, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
+        var task = await store.GetTaskAsync(id, tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
         if (task.Status.State is not not TaskState.AuthRequired and not TaskState.InputRequired and not TaskState.Submitted and not TaskState.Unspecified and not TaskState.Working)
         {
             logger.LogError($"Failed to cancel the task with id '{id}' because it is in an unexpected state '{task.Status}'", id, task.Status);
@@ -180,16 +180,16 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                 State = TaskState.Cancelled, 
                 Timestamp = DateTime.UtcNow
             }
-        }, cancellationToken).ConfigureAwait(false);
-        await taskQueue.CancelAsync(task, cancellationToken).ConfigureAwait(false);
+        }, tenant, cancellationToken).ConfigureAwait(false);
+        await taskQueue.CancelAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         return task;
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<StreamResponse> SubscribeToTaskAsync(string id, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<StreamResponse> SubscribeToTaskAsync(string id, string? tenant = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        var task = await store.GetTaskAsync(id, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
+        var task = await store.GetTaskAsync(id, tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a task with the specified id '{id}'");
         if (task.Status.State != TaskState.Working) yield break;
         await foreach (var e in taskEvents.Where(e => e.TaskId == task.Id).ToAsyncEnumerable().WithCancellation(cancellationToken)) yield return e switch
         {
@@ -206,19 +206,19 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
     }
 
     /// <inheritdoc/>
-    public async Task<TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
+    public async Task<TaskPushNotificationConfig> SetTaskPushNotificationConfigAsync(SetTaskPushNotificationConfigRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(request);
         if (agentCard.Capabilities?.PushNotifications != true)
         {
             logger.LogError("Push notifications are not supported by the agent.");
             throw new A2AException(ErrorCode.PushNotificationNotSupported);
         }
-        return await store.SetOrUpdatePushNotificationConfigAsync(config, cancellationToken).ConfigureAwait(false);
+        return await store.SetTaskPushNotificationConfigAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task<TaskPushNotificationConfig> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public async Task<TaskPushNotificationConfig> GetTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
@@ -227,22 +227,23 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             logger.LogError("Push notifications are not supported by the agent.");
             throw new A2AException(ErrorCode.PushNotificationNotSupported);
         }
-        return await store.GetPushNotificationConfigAsync(taskId, configId, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a push notification configuration with the specified id '{configId}' for the task with id '{taskId}'");
+        return await store.GetTaskPushNotificationConfigAsync(taskId, configId, tenant, cancellationToken).ConfigureAwait(false) ?? throw new A2AException(ErrorCode.TaskNotFound, $"Failed to find a push notification configuration with the specified id '{configId}' for the task with id '{taskId}'");
     }
 
     /// <inheritdoc/>
-    public Task<PushNotificationConfigQueryResult> ListPushNotificationConfigAsync(PushNotificationConfigQueryOptions? queryOptions = null, CancellationToken cancellationToken = default)
+    public Task<TaskPushNotificationConfigQueryResult> ListTaskPushNotificationConfigAsync(TaskPushNotificationConfigQueryOptions queryOptions, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(queryOptions);
         if (agentCard.Capabilities?.PushNotifications != true)
         {
             logger.LogError("Push notifications are not supported by the agent.");
             throw new A2AException(ErrorCode.PushNotificationNotSupported);
         }
-        return store.ListPushNotificationConfigAsync(queryOptions, cancellationToken);
+        return store.ListTaskPushNotificationConfigAsync(queryOptions, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task<bool> DeletePushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public Task DeletePushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
@@ -251,16 +252,16 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             logger.LogError("Push notifications are not supported by the agent.");
             throw new A2AException(ErrorCode.PushNotificationNotSupported);
         }
-        return store.DeletePushNotificationConfigAsync(taskId, configId, cancellationToken);
+        return store.DeleteTaskPushNotificationConfigAsync(taskId, configId, tenant, cancellationToken);
     }
 
     /// <inheritdoc/>
     public Task<AgentCard> GetExtendedAgentCardAsync(CancellationToken cancellationToken = default) => Task.FromResult(serviceProvider.GetKeyedService<AgentCard>(A2AServerDefaults.ExtendedAgentCardServiceKey) ?? serviceProvider.GetRequiredKeyedService<AgentCard>(null));
 
     /// <inheritdoc/>
-    public async Task ExecuteTaskAsync(string taskId, CancellationToken cancellationToken = default)
+    public async Task ExecuteTaskAsync(string taskId, string? tenant = null, CancellationToken cancellationToken = default)
     {
-        var task = await store.GetTaskAsync(taskId, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find a task with the specified id '{taskId}'.");
+        var task = await store.GetTaskAsync(taskId, tenant, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find a task with the specified id '{taskId}'.");
         try
         {
             if (task.Status.State != TaskState.Submitted)
@@ -272,7 +273,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                     Timestamp = DateTime.Now,
                     State = TaskState.Submitted
                 };
-                task = await store.UpdateTaskAsync(task, cancellationToken).ConfigureAwait(false);
+                task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
                 await StreamTaskEventAsync(new TaskStatusUpdateEvent()
                 {
                     TaskId = task.Id,
@@ -292,7 +293,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                         Timestamp = DateTime.Now,
                         State = TaskState.Working
                     };
-                    task = await store.UpdateTaskAsync(task, cancellationToken).ConfigureAwait(false);
+                    task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
                     await StreamTaskEventAsync(new TaskStatusUpdateEvent()
                     {
                         TaskId = task.Id,
@@ -315,7 +316,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                             task.Artifacts ??= [];
                             task.Artifacts.Add(artifactUpdateEvent.Artifact);
                         }
-                        task = await store.UpdateTaskAsync(task, cancellationToken).ConfigureAwait(false);
+                        task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
                         await StreamTaskEventAsync(artifactUpdateEvent, cancellationToken).ConfigureAwait(false);
                         break;
                     case TaskStatusUpdateEvent statusUpdateEvent:
@@ -323,16 +324,16 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                         {
                             Status = statusUpdateEvent.Status
 
-                        }, cancellationToken).ConfigureAwait(false);
+                        }, tenant, cancellationToken).ConfigureAwait(false);
                         await StreamTaskEventAsync(statusUpdateEvent, cancellationToken).ConfigureAwait(false);
                         break;
                 }
             }
-            task = await CompleteAsync(task, cancellationToken).ConfigureAwait(false);
+            task = await CompleteAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            task = await FailAsync(task, new()
+            task = await FailAsync(task, tenant, new()
             {
                 Role = Role.Agent,
                 Parts =
@@ -346,7 +347,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         }
     }
 
-    async Task<Models.Task> CompleteAsync(Models.Task task, CancellationToken cancellationToken = default)
+    async Task<Models.Task> CompleteAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         task.History ??= [];
@@ -356,7 +357,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             Timestamp = DateTime.Now,
             State = TaskState.Completed
         };
-        task = await store.UpdateTaskAsync(task, cancellationToken).ConfigureAwait(false);
+        task = await store.UpdateTaskAsync(task, tenant,cancellationToken).ConfigureAwait(false);
         await StreamTaskEventAsync(new TaskStatusUpdateEvent()
         {
             TaskId = task.Id,
@@ -367,7 +368,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         return task;
     }
 
-    async Task<Models.Task> FailAsync(Models.Task task, Message? message = null, CancellationToken cancellationToken = default)
+    async Task<Models.Task> FailAsync(Models.Task task, string? tenant = null, Message ? message = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         task.History ??= [];
@@ -378,7 +379,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             State = TaskState.Failed,
             Message = message
         };
-        task = await store.UpdateTaskAsync(task, cancellationToken).ConfigureAwait(false);
+        task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         await StreamTaskEventAsync(new TaskStatusUpdateEvent()
         {
             TaskId = task.Id,
@@ -405,7 +406,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             _ => throw new NotSupportedException($"The specified task event type '{e?.GetType().FullName}' is not supported in this context.")
         };
         taskEvents.OnNext(e);
-        var pushNotificationConfigs = await store.ListPushNotificationConfigAsync(new()
+        var pushNotificationConfigs = await store.ListTaskPushNotificationConfigAsync(new()
         {
             TaskId = e.TaskId
         }, cancellationToken).ConfigureAwait(false);

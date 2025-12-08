@@ -32,7 +32,7 @@ public static class A2AJsonRpcTransportServerBuilderExtensions
     /// <returns>The configured <see cref="IA2AServerBuilder"/>.</returns>
     public static IA2AServerBuilder UseJsonRpcTransport(this IA2AServerBuilder builder, [StringSyntax("Route")] string path = "/")
     {
-        builder.UseTransport<A2AJsonRpcTransport>(ProtocolBinding.JsonRpc, path);
+        builder.UseTransport<A2AJsonRpcServerTransport>(ProtocolBinding.JsonRpc, path);
         return builder;
     }
 

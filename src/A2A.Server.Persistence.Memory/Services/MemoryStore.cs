@@ -20,24 +20,26 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
     : IA2AStore
 {
 
-    readonly ConcurrentDictionary<string, Models.Task> tasks = new(StringComparer.Ordinal);
-    readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Models.TaskPushNotificationConfig>> pushNotificationConfigurations = new(StringComparer.Ordinal);
+    readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Models.Task>> tasksByTenant = new(StringComparer.Ordinal);
+    readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, Models.TaskPushNotificationConfig>>> taskPushNotificationConfigurationsByTenant = new(StringComparer.Ordinal);
 
     /// <inheritdoc/>
-    public Task<Models.Task> AddTaskAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public Task<Models.Task> AddTaskAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentException.ThrowIfNullOrWhiteSpace(task.Id);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!tasks.TryAdd(task.Id, task)) throw new InvalidOperationException($"A task with id '{task.Id}' already exists.");
+        var tasks = tasksByTenant.GetOrAdd(tenant ?? string.Empty, _ => new ConcurrentDictionary<string, Models.Task>(StringComparer.Ordinal));
+        if (!tasks.TryAdd(task.Id, task)) throw new InvalidOperationException($"A task with id '{task.Id}' already exists in the {(string.IsNullOrWhiteSpace(tenant) ? "global scope" : $"scope of tenant '{tenant}'")}.");
         return Task.FromResult(task);
     }
 
     /// <inheritdoc/>
-    public Task<Models.Task?> GetTaskAsync(string id, CancellationToken cancellationToken = default)
+    public Task<Models.Task?> GetTaskAsync(string id, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         cancellationToken.ThrowIfCancellationRequested();
+        if (!tasksByTenant.TryGetValue(tenant ?? string.Empty, out var tasks)) return Task.FromResult<Models.Task?>(null);
         tasks.TryGetValue(id, out var task);
         return Task.FromResult(task);
     }
@@ -49,14 +51,17 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
         queryOptions ??= new Models.TaskQueryOptions();
         var pageSize = (int)(queryOptions.PageSize is > 0 ? Math.Min(queryOptions.PageSize.Value, options.Value.MaxPageSize) : options.Value.DefaultPageSize);
         var offset = DecodeOffsetToken(queryOptions.PageToken);
-        IEnumerable<Models.Task> query = tasks.Values;
+        var query = tasksByTenant.TryGetValue(queryOptions.Tenant ?? string.Empty, out var tasks) ? tasks.Values: Enumerable.Empty<Models.Task>();
         if (!string.IsNullOrWhiteSpace(queryOptions.ContextId)) query = query.Where(t => StringComparer.Ordinal.Equals(t.ContextId, queryOptions.ContextId));
         if (!string.IsNullOrWhiteSpace(queryOptions.Status)) query = query.Where(t => StringComparer.Ordinal.Equals(t.Status?.State.ToString(), queryOptions.Status));
-        if (queryOptions.LastUpdateAfter is { } after) query = query.Where(t =>
+        if (queryOptions.LastUpdateAfter.HasValue)
         {
-            var timestamp = t.Status?.Timestamp is DateTime dateTime ? new DateTimeOffset(DateTime.SpecifyKind(dateTime, dateTime.Kind == DateTimeKind.Unspecified ? DateTimeKind.Utc : dateTime.Kind)).ToUnixTimeSeconds() : 0;
-            return timestamp > after;
-        });
+            query = query.Where(t =>
+            {
+                var timestamp = t.Status?.Timestamp is DateTime dateTime ? new DateTimeOffset(dateTime.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dateTime, DateTimeKind.Utc): dateTime).ToUnixTimeSeconds() : 0;
+                return timestamp > queryOptions.LastUpdateAfter;
+            });
+        }
         query = query.OrderByDescending(GetSortTimeSeconds);
         var total = query.LongCount();
         var page = query.Skip(offset).Take(pageSize).Select(t => t.Project(queryOptions)).ToList();
@@ -72,48 +77,49 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
     }
 
     /// <inheritdoc/>
-    public Task<Models.Task> UpdateTaskAsync(Models.Task task, CancellationToken cancellationToken = default)
+    public Task<Models.Task> UpdateTaskAsync(Models.Task task, string? tenant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         ArgumentException.ThrowIfNullOrWhiteSpace(task.Id);
         cancellationToken.ThrowIfCancellationRequested();
-        tasks.AddOrUpdate(task.Id,_ => throw new InvalidOperationException($"Failed to find a task with id '{task.Id}'."), (_, __) => task);
+        var tasks = tasksByTenant.GetOrAdd(tenant ?? string.Empty, _ => new ConcurrentDictionary<string, Models.Task>(StringComparer.Ordinal));
+        tasks.AddOrUpdate(task.Id,_ => throw new InvalidOperationException($"Failed to find a task with id '{task.Id}' in tenant '{tenant}'."), (_, __) => task);
         return Task.FromResult(task);
     }
 
     /// <inheritdoc/>
-    public Task<Models.TaskPushNotificationConfig?> GetPushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public Task<Models.TaskPushNotificationConfig?> GetTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
-        if (pushNotificationConfigurations.TryGetValue(taskId, out var configs) && configs.TryGetValue(configId, out var config)) return Task.FromResult<Models.TaskPushNotificationConfig?>(config);
+        if (taskPushNotificationConfigurationsByTenant.TryGetValue(tenant ?? string.Empty, out var perTenant) &&perTenant.TryGetValue(taskId, out var configs) &&configs.TryGetValue(configId, out var config)) return Task.FromResult<Models.TaskPushNotificationConfig?>(config);
         return Task.FromResult<Models.TaskPushNotificationConfig?>(null);
     }
 
     /// <inheritdoc/>
-    public Task<Models.PushNotificationConfigQueryResult> ListPushNotificationConfigAsync(Models.PushNotificationConfigQueryOptions? queryOptions = null, CancellationToken cancellationToken = default)
+    public Task<Models.TaskPushNotificationConfigQueryResult> ListTaskPushNotificationConfigAsync(Models.TaskPushNotificationConfigQueryOptions queryOptions, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(queryOptions);
         cancellationToken.ThrowIfCancellationRequested();
-        queryOptions ??= new Models.PushNotificationConfigQueryOptions();
         var pageSize = (int)(queryOptions.PageSize is > 0 ? Math.Min(queryOptions.PageSize.Value, options.Value.MaxPageSize) : options.Value.DefaultPageSize);
         var offset = DecodeOffsetToken(queryOptions.PageToken);
         IEnumerable<Models.TaskPushNotificationConfig> query;
-        if (!string.IsNullOrWhiteSpace(queryOptions.TaskId))
+        if (!taskPushNotificationConfigurationsByTenant.TryGetValue(queryOptions.Tenant ?? string.Empty, out var perTenant)) query = Enumerable.Empty<Models.TaskPushNotificationConfig>();
+        else if (!string.IsNullOrWhiteSpace(queryOptions.TaskId))
         {
             var taskId = queryOptions.TaskId!;
-            if (pushNotificationConfigurations.TryGetValue(taskId, out var dict)) query = dict.Values;
-            else query = [];
+            query = perTenant.TryGetValue(taskId, out var configs) ? configs.Values : Enumerable.Empty<Models.TaskPushNotificationConfig>();
         }
         else
         {
-            query = pushNotificationConfigurations.Values.SelectMany(d => d.Values);
+            query = perTenant.Values.SelectMany(d => d.Values);
         }
         var total = query.LongCount();
         var page = query.Skip(offset).Take(pageSize).ToList();
         var nextOffset = offset + page.Count;
         var nextToken = nextOffset < total ? EncodeOffsetToken(nextOffset) : null;
-        return Task.FromResult(new Models.PushNotificationConfigQueryResult
+        return Task.FromResult(new Models.TaskPushNotificationConfigQueryResult
         {
             Configs = page,
             NextPageToken = nextToken
@@ -121,26 +127,28 @@ public sealed class MemoryStore(IOptions<MemoryStateStoreOptions> options)
     }
 
     /// <inheritdoc/>
-    public Task<Models.TaskPushNotificationConfig> SetOrUpdatePushNotificationConfigAsync(Models.TaskPushNotificationConfig config, CancellationToken cancellationToken = default)
+    public Task<Models.TaskPushNotificationConfig> SetTaskPushNotificationConfigAsync(Models.SetTaskPushNotificationConfigRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(config);
-        ArgumentException.ThrowIfNullOrWhiteSpace(config.PushNotificationConfig.Id);
+        ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
-        var taskId = config.Name.Split('/')[1];
-        var configurationsPerTask = pushNotificationConfigurations.GetOrAdd(taskId, _ => new ConcurrentDictionary<string, Models.TaskPushNotificationConfig>(StringComparer.Ordinal));
-        configurationsPerTask[config.PushNotificationConfig.Id] = config;
-        return Task.FromResult(config);
+        var taskId = request.Parent.Split('/')[1];
+        var configs = taskPushNotificationConfigurationsByTenant.GetOrAdd(request.Tenant ?? string.Empty, _ => new ConcurrentDictionary<string, ConcurrentDictionary<string, Models.TaskPushNotificationConfig>>(StringComparer.Ordinal));
+        var configsPerTask = configs.GetOrAdd(taskId, _ => new ConcurrentDictionary<string, Models.TaskPushNotificationConfig>(StringComparer.Ordinal));
+        configsPerTask[request.ConfigId] = request.Config;
+        return Task.FromResult(request.Config);
     }
 
     /// <inheritdoc/>
-    public Task<bool> DeletePushNotificationConfigAsync(string taskId, string configId, CancellationToken cancellationToken = default)
+    public Task<bool> DeleteTaskPushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskId);
         ArgumentException.ThrowIfNullOrWhiteSpace(configId);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!pushNotificationConfigurations.TryGetValue(taskId, out var configurationsPerTask)) return Task.FromResult(false);
+        if (!taskPushNotificationConfigurationsByTenant.TryGetValue(tenant ?? string.Empty, out var configs)) return Task.FromResult(false);
+        if (!configs.TryGetValue(taskId, out var configurationsPerTask))  return Task.FromResult(false);
         var removed = configurationsPerTask.TryRemove(configId, out _);
-        if (configurationsPerTask.IsEmpty) pushNotificationConfigurations.TryRemove(taskId, out _);
+        if (configurationsPerTask.IsEmpty) configs.TryRemove(taskId, out _);
+        if (configs.IsEmpty) taskPushNotificationConfigurationsByTenant.TryRemove(tenant ?? string.Empty, out _);
         return Task.FromResult(removed);
     }
 
