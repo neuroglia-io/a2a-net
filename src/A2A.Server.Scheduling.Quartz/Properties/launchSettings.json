@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "A2A.Server.Scheduling.Quartz": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:60173;http://localhost:60177"
+    }
+  }
+}

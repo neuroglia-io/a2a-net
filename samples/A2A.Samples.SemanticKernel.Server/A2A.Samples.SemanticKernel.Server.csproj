@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>3519fad9-3086-4550-9ae6-41cfd23d0996</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.68.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\A2A.Server.AspNetCore\A2A.Server.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Persistence.Memory\A2A.Server.Persistence.Memory.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Scheduling.Memory\A2A.Server.Scheduling.Memory.csproj" />
+  </ItemGroup>
+
+</Project>
