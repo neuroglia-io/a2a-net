@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\A2A.Server.Persistence.Memory\A2A.Server.Persistence.Memory.csproj" />
-    <ProjectReference Include="..\..\..\src\A2A.Server.Persistence.Redis\A2A.Server.Persistence.Redis.csproj" />
-    <ProjectReference Include="..\..\..\src\A2A.Server.Scheduling.Memory\A2A.Server.Scheduling.Memory.csproj" />
-    <ProjectReference Include="..\..\..\src\A2A.Server.Scheduling.Quartz\A2A.Server.Scheduling.Quartz.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Persistence.Memory\A2A.Server.Persistence.Memory.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Persistence.Redis\A2A.Server.Persistence.Redis.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Scheduling.Memory\A2A.Server.Scheduling.Memory.csproj" />
+    <ProjectReference Include="..\..\src\A2A.Server.Scheduling.Quartz\A2A.Server.Scheduling.Quartz.csproj" />
   </ItemGroup>
 
   <ItemGroup>

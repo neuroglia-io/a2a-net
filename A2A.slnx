@@ -1,4 +1,16 @@
 <Solution>
+  <Folder Name="/.github/">
+    <File Path=".github/PULL_REQUEST_TEMPLATE.md" />
+  </Folder>
+  <Folder Name="/.github/ISSUE_TEMPLATE/">
+    <File Path=".github/ISSUE_TEMPLATE/bug.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/config.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/feature.yml" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/publish.yml" />
+    <File Path=".github/workflows/test.yml" />
+  </Folder>
   <Folder Name="/docs/">
     <File Path="CODEOWNERS" />
     <File Path="CODE_OF_CONDUCT.md" />
@@ -30,7 +42,7 @@
     <Project Path="src/A2A.Server.Transports.JsonRpc/A2A.Server.Transports.JsonRpc.csproj" Id="c1c64372-c4d1-4833-b271-425aff936cb4" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/a2a-net.IntegrationTests/A2A.IntegrationTests/A2A.IntegrationTests.csproj" Id="59a2f479-9df3-4aa4-9d17-ce79b48a7730" />
+    <Project Path="tests/A2A.IntegrationTests/A2A.IntegrationTests.csproj" />
     <Project Path="tests/A2A.UnitTests/A2A.UnitTests.csproj" Id="8713248f-c1f3-427b-967f-5f15c5b58913" />
   </Folder>
   <Folder Name="/tools/">
