@@ -15,6 +15,7 @@
     <IsPackable>true</IsPackable>
     <Title>A2A-NET Client gRPC transport</Title>
 	<Description>Contains the gRPC transport that can be used by an A2A client.</Description>
+	<PackageId>a2a-net.Client.Transports.Grpc</PackageId>
     <PackageTags>a2a;client;transports;grpc</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

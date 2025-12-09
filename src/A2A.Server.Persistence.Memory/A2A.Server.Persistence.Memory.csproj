@@ -16,6 +16,7 @@
     <IsPackable>true</IsPackable>
     <Title>A2A-NET Server Memory Persistence</Title>
     <Description>Contains the in-memory implementations used by an A2A server to persist resources.</Description>
+	<PackageId>a2a-net.Server.Persistence.Memory</PackageId>
     <PackageTags>a2a;server;persistence;memory</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

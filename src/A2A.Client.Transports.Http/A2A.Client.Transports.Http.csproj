@@ -15,6 +15,7 @@
     <IsPackable>true</IsPackable>
     <Title>A2A-NET Client HTTP transport</Title>
 	<Description>Contains the HTTP transport that can be used by an A2A client.</Description>
+	<PackageId>a2a-net.Client.Transports.Http</PackageId>
     <PackageTags>a2a;client;transports;http</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

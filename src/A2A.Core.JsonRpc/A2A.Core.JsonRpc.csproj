@@ -15,6 +15,7 @@
     <IsPackable>true</IsPackable>
     <Title>A2A-NET JSON-RPC Core</Title>
     <Description>Contains the core JSON-RPC abstractions and building blocks of the A2A Protocol.</Description>
+	<PackageId>a2a-net.Core.JsonRpc</PackageId>
     <PackageTags>a2a;json-rpc;core</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
