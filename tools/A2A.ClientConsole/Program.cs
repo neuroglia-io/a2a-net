@@ -1,6 +1,7 @@
 ﻿using A2A;
 using A2A.Client;
 using A2A.Models;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -396,6 +397,139 @@ public sealed class Application
     {
         DisplayNewPage();
 
+        var queryOptions = new TaskQueryOptions { PageSize = 10 };
+        var pageSize = (int)queryOptions.PageSize;
+        uint pageNumber = 1;
+        var previousPageTokens = new Stack<string?>();
+        var taskIndex = 0;
+        var pageStartIndex = 0;
+        var backToMenu = false;
+        while (!backToMenu)
+        {
+            var tasksPage = await LoadTasksAsync(queryOptions);
+            if (tasksPage == null)
+            {
+                AnsiConsole.MarkupLine("Press any key to return to the menu...");
+                Console.ReadKey(true);
+                return;
+            }
+            pageStartIndex = ((int)pageNumber - 1) * pageSize;
+            if (tasksPage.Tasks.Count > 0) taskIndex = Math.Clamp(taskIndex, pageStartIndex, pageStartIndex + tasksPage.Tasks.Count - 1);
+            await DisplayTasksPageAsync(tasksPage, pageNumber);
+            while (true)
+            {
+                var key = Console.ReadKey(true).Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                        {
+                            if (string.IsNullOrWhiteSpace(tasksPage.NextPageToken)) continue;
+                            previousPageTokens.Push(queryOptions.PageToken);
+                            pageNumber++;
+                            queryOptions = queryOptions with { PageToken = tasksPage.NextPageToken };
+                            taskIndex = ((int)pageNumber - 1) * pageSize;
+                            goto ReloadPage;
+                        }
+
+                    case ConsoleKey.DownArrow:
+                        {
+                            if (pageNumber == 1) continue;
+                            pageNumber--;
+                            var prevToken = previousPageTokens.Count > 0 ? previousPageTokens.Pop() : null;
+                            queryOptions = queryOptions with { PageToken = prevToken };
+                            taskIndex = ((int)pageNumber - 1) * pageSize;
+                            goto ReloadPage;
+                        }
+                    case ConsoleKey.Enter:
+                        {
+                            if (tasksPage.Tasks.Count == 0) continue;
+                            while (true)
+                            {
+                                var localIndex = taskIndex - pageStartIndex;
+                                localIndex = Math.Clamp(localIndex, 0, tasksPage.Tasks.Count - 1);
+                                DisplayNewPage();
+                                var totalTasks = (tasksPage.TotalSize > 0) ? tasksPage.TotalSize : ((uint)pageStartIndex + tasksPage.Tasks.Count);
+                                DisplayTask(tasksPage.Tasks.ElementAt(localIndex), taskIndex + 1, (int)totalTasks);
+                                var dkey = Console.ReadKey(true).Key;
+                                switch (dkey)
+                                {
+                                    case ConsoleKey.RightArrow:
+                                        {
+                                            var nextGlobal = taskIndex + 1;
+                                            if (nextGlobal <= pageStartIndex + tasksPage.Tasks.Count - 1)
+                                            {
+                                                taskIndex = nextGlobal;
+                                                break;
+                                            }
+                                            if (string.IsNullOrWhiteSpace(tasksPage.NextPageToken)) break;
+                                            previousPageTokens.Push(queryOptions.PageToken);
+                                            pageNumber++;
+                                            queryOptions = queryOptions with { PageToken = tasksPage.NextPageToken };
+                                            var nextPage = await LoadTasksAsync(queryOptions);
+                                            if (nextPage == null || nextPage.Tasks.Count == 0)
+                                            {
+                                                pageNumber--;
+                                                queryOptions = queryOptions with { PageToken = previousPageTokens.Count > 0 ? previousPageTokens.Pop() : null };
+                                                break;
+                                            }
+                                            tasksPage = nextPage;
+                                            pageStartIndex = ((int)pageNumber - 1) * pageSize;
+                                            taskIndex = pageStartIndex;
+                                            break;
+                                        }
+
+                                    case ConsoleKey.LeftArrow:
+                                        {
+                                            var prevGlobal = taskIndex - 1;
+                                            if (prevGlobal >= pageStartIndex)
+                                            {
+                                                taskIndex = prevGlobal;
+                                                break;
+                                            }
+                                            if (pageNumber == 1) break;
+                                            pageNumber--;
+                                            var prevToken = previousPageTokens.Count > 0 ? previousPageTokens.Pop() : null;
+                                            queryOptions = queryOptions with { PageToken = prevToken };
+                                            var prevPage = await LoadTasksAsync(queryOptions);
+                                            if (prevPage == null || prevPage.Tasks.Count == 0)
+                                            {
+                                                pageNumber++;
+                                                previousPageTokens.Push(prevToken);
+                                                break;
+                                            }
+                                            tasksPage = prevPage;
+                                            pageStartIndex = ((int)pageNumber - 1) * pageSize;
+                                            taskIndex = pageStartIndex + tasksPage.Tasks.Count - 1;
+                                            break;
+                                        }
+
+                                    case ConsoleKey.L:
+                                        {
+                                            taskIndex = pageStartIndex;
+                                            DisplayNewPage();
+                                            await DisplayTasksPageAsync(tasksPage, pageNumber);
+                                            goto BackToList;
+                                        }
+
+                                    case ConsoleKey.C:
+                                        backToMenu = true;
+                                        goto ExitAll;
+                                }
+                            }
+
+                        BackToList:
+                            continue;
+                        }
+                }
+            }
+
+        ReloadPage:
+            continue;
+        }
+
+    ExitAll:
+        return;
     }
 
     async Task SwitchTransportAsync()
@@ -404,10 +538,222 @@ public sealed class Application
         SelectInterface();
     }
 
+    async Task DisplayTasksPageAsync(TaskQueryResult? page, uint pageNumber)
+    {
+        DisplayNewPage();
+        if (page == null || page.Tasks.Count == 0) 
+        {
+            AnsiConsole.MarkupLine("[yellow]No tasks found.[/]");
+            return;
+        }
+        var tasksTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Blue);
+        tasksTable.AddColumn("[bold]Task ID[/]");
+        tasksTable.AddColumn("[bold]Context ID[/]");
+        tasksTable.AddColumn("[bold]Status[/]");
+        tasksTable.AddColumn("[bold]Status Timestamp[/]");
+        foreach (var task in page.Tasks) tasksTable.AddRow(task.Id, task.ContextId, $"[{GetTaskStatusColor(task.Status?.State)}]{task.Status?.State[11..] ?? "UNSPECIFIED"}[/]", task.Status?.Timestamp.ToString() ?? "N/A");
+        var pageSize = 10;
+        var totalCount = page.TotalSize;
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        var footer = new Grid()
+            .AddColumn(new GridColumn().NoWrap())
+            .AddRow($"[dim]Page[/] [bold]{pageNumber}[/]/[bold]{totalPages}[/]  •  [dim]Total results:[/] [bold]{totalCount}[/]")
+            .AddEmptyRow()
+            .AddRow("[dim]Controls:[/] [bold]Up[/]=next page  •  [bold]Down[/]=previous page  •  [bold]Enter[/]=task details •  [bold]c[/]=back to menu");
+        AnsiConsole.Write(new Panel(new Rows(tasksTable, footer))
+            .Border(BoxBorder.Rounded)
+            .BorderStyle(new Style(Color.Blue))
+            .Padding(1, 0, 1, 0));
+    }
+
+    async Task<TaskQueryResult?> LoadTasksAsync(TaskQueryOptions queryOptions)
+    {
+        try
+        {
+            TaskQueryResult tasks = null!;
+            await AnsiConsole.Status().StartAsync("Loading tasks...", async context =>
+            {
+                context.Spinner(Spinner.Known.Dots);
+                tasks = await client!.ListTasksAsync(queryOptions);
+            });
+            return tasks;
+        }
+        catch (Exception ex)
+        {
+            DisplayError($"An error occurred while loading tasks: {ex.Message}");
+            return null;
+        }
+    }
+
     static void DisplayError(string message)
     {
         AnsiConsole.MarkupLine($"[red]{message}[/]");
     }
+
+    static void DisplayTask(A2A.Models.Task task, int taskIndex, int totalTasks)
+    {
+        static string Esc(string? s) => Markup.Escape(s ?? string.Empty);
+
+        static string AggregateTextParts(IEnumerable<object>? parts)
+        {
+            if (parts == null) return string.Empty;
+
+            var sb = new System.Text.StringBuilder();
+
+            var haveEmittedAnyText = false;
+            var newlinePendingBecauseOfNonText = false;
+
+            foreach (var part in parts)
+            {
+                var pt = part?.GetType();
+                var textProp = pt?.GetProperty("Text");
+                var isTextPart = textProp != null && textProp.PropertyType == typeof(string);
+
+                if (isTextPart)
+                {
+                    var text = (string?)textProp!.GetValue(part);
+                    if (string.IsNullOrEmpty(text))
+                        continue;
+
+                    // Only insert a newline when a NON-text part was seen since the last emitted text
+                    if (haveEmittedAnyText && newlinePendingBecauseOfNonText)
+                        sb.AppendLine();
+
+                    sb.Append(text);
+
+                    haveEmittedAnyText = true;
+                    newlinePendingBecauseOfNonText = false;
+                }
+                else
+                {
+                    // Mark a boundary ONLY if we've already emitted text;
+                    // this boundary becomes a newline only if we later see more text.
+                    if (haveEmittedAnyText)
+                        newlinePendingBecauseOfNonText = true;
+                }
+            }
+
+            return sb.ToString().Trim();
+        }
+
+        var renderables = new List<IRenderable>();
+
+        // --- Summary table ---
+        var summary = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Blue)
+            .Expand();
+
+        summary.AddColumn("[bold]Task ID[/]");
+        summary.AddColumn("[bold]Context ID[/]");
+        summary.AddColumn("[bold]Status[/]");
+        summary.AddColumn("[bold]Status Timestamp[/]");
+
+        summary.AddRow(
+            Esc(task.Id),
+            Esc(task.ContextId),
+            $"[{GetTaskStatusColor(task.Status?.State)}]{Esc(task.Status?.State?[11..] ?? "UNSPECIFIED")}[/]",
+            Esc(task.Status?.Timestamp.ToString() ?? "N/A")
+        );
+
+        renderables.Add(summary);
+
+        // --- History messages ---
+        var history = task.History;
+        if (history != null && history.Count > 0)
+        {
+            renderables.Add(new Rule("[bold]History[/]").RuleStyle(new Style(Color.Grey)));
+
+            var historyTable = new Table()
+                .Border(TableBorder.Rounded)
+                .BorderColor(Color.Blue)
+                .Expand();
+
+            historyTable.AddColumn(new TableColumn("[bold]Message ID[/]").NoWrap());
+            historyTable.AddColumn(new TableColumn("[bold]Role[/]").NoWrap());
+            historyTable.AddColumn(new TableColumn("[bold]Parts[/]").NoWrap());
+            historyTable.AddColumn(new TableColumn("[bold]Text[/]"));
+
+            foreach (var message in history)
+            {
+                var aggregatedText = AggregateTextParts(message.Parts);
+                historyTable.AddRow(
+                    Esc(message.MessageId),
+                    Esc(message.Role[5..]),
+                    Esc(message.Parts?.Count.ToString() ?? "0"),
+                    Esc(string.IsNullOrWhiteSpace(aggregatedText) ? "—" : aggregatedText)
+                );
+            }
+
+            renderables.Add(historyTable);
+        }
+
+        // --- Artifacts ---
+        var artifacts = task.Artifacts; // adjust casing if needed
+        if (artifacts != null && artifacts.Count > 0)
+        {
+            renderables.Add(new Rule("[bold]Artifacts[/]").RuleStyle(new Style(Color.Grey)));
+
+            var artifactsTable = new Table()
+                .Border(TableBorder.Rounded)
+                .BorderColor(Color.Blue)
+                .Expand();
+
+            artifactsTable.AddColumn("[bold]Name[/]");
+            artifactsTable.AddColumn("[bold]Parts[/]");
+            artifactsTable.AddColumn("[bold]Text[/]");
+
+            foreach (var artifact in artifacts)
+            {
+                var at = artifact?.GetType();
+
+                var name =
+                    (string?)at?.GetProperty("Name")?.GetValue(artifact) ??
+                    (string?)at?.GetProperty("Id")?.GetValue(artifact) ??
+                    "(unnamed)";
+
+                var partsObj = at?.GetProperty("Parts")?.GetValue(artifact) as System.Collections.IEnumerable;
+                var parts = partsObj?.Cast<object>().ToList() ?? new List<object>();
+
+                var aggregatedText = AggregateTextParts(parts);
+
+                artifactsTable.AddRow(
+                    Esc(name),
+                    Esc(parts.Count.ToString()),
+                    Esc(string.IsNullOrWhiteSpace(aggregatedText) ? "—" : aggregatedText)
+                );
+            }
+
+            renderables.Add(artifactsTable);
+        }
+
+        // --- Footer ---
+        var footer = new Grid()
+            .AddColumn(new GridColumn().NoWrap())
+            .AddRow($"[dim]Task[/] [bold]{taskIndex}[/]/[bold]{totalTasks}[/]")
+            .AddEmptyRow()
+            .AddRow("[dim]Controls:[/] [bold]left[/]=previous task  •  [bold]right[/]=next task •  [bold]l[/]=back to list  •  [bold]c[/]=back to menu");
+
+        renderables.Add(footer);
+
+        AnsiConsole.Write(
+            new Panel(new Rows(renderables.ToArray()))
+                .Border(BoxBorder.Rounded)
+                .BorderStyle(new Style(Color.Blue))
+                .Padding(1, 0, 1, 0)
+        );
+    }
+
+    static string GetTaskStatusColor(string? state) => state switch
+    {
+        TaskState.Completed => "green",
+        TaskState.Failed or TaskState.Rejected => "red",
+        TaskState.Cancelled => "yellow",
+        TaskState.Unspecified => "dim",
+        _ => "blue"
+    };
 
     static class AgentSelectionChoice
     {
@@ -429,316 +775,3 @@ public sealed class Application
     }
 
 }
-
-//while (true)
-//{
-
-
-//       
-
-//        var currentMode = "chat";
-//        var conversationHistory = new List<Message>();
-//        var currentTaskId = (string?)null;
-//        var cancellationTokenSource = new CancellationTokenSource();
-
-//        while (true)
-//        {
-//            AnsiConsole.Clear();
-//            AnsiConsole.Write(new FigletText("A2A Protocol Chat").Color(Color.Blue));
-//            AnsiConsole.MarkupLine($"[grey]Connected to: {agentCard.Name} | Mode: {currentMode.ToUpper()}[/]");
-//            AnsiConsole.WriteLine();
-
-//            var modeChoice = AnsiConsole.Prompt(
-//                new SelectionPrompt<string>()
-//                    .Title($"Current mode: [blue]{currentMode.ToUpper()}[/]. What would you like to do?")
-//                    .AddChoices(currentMode == "chat" ? ["Send a message", "Switch to Tasks", "Disconnect"] : ["View task details", "Switch to Chat", "Disconnect"])
-//            );
-
-//            if (modeChoice == "Disconnect") break;
-
-//            if (modeChoice == "Switch to Tasks")
-//            {
-//                currentMode = "tasks";
-
-//                if (client != null)
-//                {
-//                    try
-//                    {
-//                        await AnsiConsole.Status().StartAsync("Loading tasks...", async ctx =>
-//                        {
-//                            ctx.Spinner(Spinner.Known.Dots);
-//                            var taskList = await client.ListTasksAsync();
-
-//                            AnsiConsole.Clear();
-//                            AnsiConsole.Write(new FigletText("A2A Protocol Chat").Color(Color.Blue));
-//                            AnsiConsole.MarkupLine($"[grey]Connected to: {agentCard.Name} | Mode: TASKS[/]");
-//                            AnsiConsole.WriteLine();
-
-//                            if (taskList.Tasks.Count > 0)
-//                            {
-//                                var tasksTable = new Table()
-//                                    .Border(TableBorder.Rounded)
-//                                    .BorderColor(Color.Blue);
-
-//                                tasksTable.AddColumn("[bold]Task ID[/]");
-//                                tasksTable.AddColumn("[bold]Context ID[/]");
-//                                tasksTable.AddColumn("[bold]Status[/]");
-//                                tasksTable.AddColumn("[bold]Status Timestamp[/]");
-
-//                                foreach (var task in taskList.Tasks)
-//                                {
-//                                    var statusColor = task.Status?.State switch
-//                                    {
-//                                        TaskState.Completed => "green",
-//                                        TaskState.Failed or TaskState.Rejected => "red",
-//                                        TaskState.Cancelled => "yellow",
-//                                        TaskState.Unspecified => "dim",
-//                                        _ => "blue"
-//                                    };
-
-//                                    tasksTable.AddRow(task.Id, task.ContextId, $"[{statusColor}]{task.Status?.State[11..] ?? "UNSPECIFIED"}[/]", task.Status?.Timestamp.ToString() ?? "N/A");
-//                                }
-
-//                                AnsiConsole.Write(tasksTable);
-//                            }
-//                            else
-//                            {
-//                                AnsiConsole.MarkupLine("[yellow]No tasks found.[/]");
-//                            }
-//                        });
-//                    }
-//                    catch (Exception ex)
-//                    {
-//                        AnsiConsole.MarkupLine($"[red]Error loading tasks: {ex.Message}[/]");
-//                    }
-//                }
-//                else
-//                {
-//                    AnsiConsole.MarkupLine("[yellow]Client not available. Cannot retrieve tasks.[/]");
-//                }
-
-//                AnsiConsole.WriteLine();
-//                AnsiConsole.MarkupLine("Press any key to continue...");
-//                Console.ReadKey(true);
-//                continue;
-//            }
-
-//            if (modeChoice == "Switch to Chat")
-//            {
-//                currentMode = "chat";
-//                continue;
-//            }
-
-//            if (modeChoice == "Send a message")
-//            {
-//                var userInput = AnsiConsole.Ask<string>("[green]You:[/]");
-
-//                if (string.IsNullOrWhiteSpace(userInput)) continue;
-
-//                if (client == null)
-//                {
-//                    AnsiConsole.MarkupLine("[red]Client not available. Cannot send message.[/]");
-//                    AnsiConsole.MarkupLine("Press any key to continue...");
-//                    Console.ReadKey(true);
-//                    continue;
-//                }
-
-//                var userMessage = new Message
-//                {
-//                    Role = Role.User,
-//                    Parts = [new TextPart { Text = userInput }]
-//                };
-
-//                conversationHistory.Add(userMessage);
-
-//                var request = new SendMessageRequest
-//                {
-//                    Message = userMessage
-//                };
-
-//                try
-//                {
-//                    var supportsStreaming = agentCard.Capabilities?.Streaming == true;
-
-//                    if (supportsStreaming)
-//                    {
-//                        AnsiConsole.MarkupLine("[blue]Agent:[/] [dim](streaming...)[/]");
-//                        var responseText = new StringBuilder();
-
-//                        cancellationTokenSource = new CancellationTokenSource();
-
-//                        var streamingTask = System.Threading.Tasks.Task.Run(async () =>
-//                        {
-//                            string? currentArtifactId = null;
-//                            await foreach (var streamResponse in client.SendStreamingMessageAsync(request, cancellationTokenSource.Token))
-//                            {
-//                                if (streamResponse.Task != null)
-//                                {
-//                                    currentTaskId = streamResponse.Task.Id;
-//                                    AnsiConsole.MarkupLine($"\n[yellow]⚙  Task started: {currentTaskId}[/]");
-//                                    AnsiConsole.MarkupLine("[dim]Status: {0}[/]", streamResponse.Task.Status?.State ?? "unknown");
-//                                    if (streamResponse.Task.Artifacts != null)
-//                                    {
-//                                        foreach(var artifact in streamResponse.Task.Artifacts)
-//                                        {
-//                                            foreach (var part in artifact.Parts)
-//                                            {
-//                                                if (part is TextPart textPart)
-//                                                {
-//                                                    responseText.Append(textPart.Text);
-//                                                    AnsiConsole.Markup(textPart.Text);
-//                                                }
-//                                            }
-//                                        }
-//                                    }   
-//                                }
-//                                else if (streamResponse.Message != null)
-//                                {
-//                                    foreach (var part in streamResponse.Message.Parts)
-//                                    {
-//                                        if (part is TextPart textPart)
-//                                        {
-//                                            responseText.Append(textPart.Text);
-//                                            AnsiConsole.Markup(textPart.Text);
-//                                        }
-//                                    }
-//                                }
-//                                else if (streamResponse.StatusUpdate != null)
-//                                {
-//                                    AnsiConsole.MarkupLine($"\n[dim]Task status: {streamResponse.StatusUpdate.Status?.State}[/]");
-//                                }
-//                                else if (streamResponse.ArtifactUpdate != null)
-//                                {
-//                                    if (streamResponse.ArtifactUpdate.Artifact.ArtifactId != currentArtifactId) currentArtifactId = streamResponse.ArtifactUpdate.Artifact.ArtifactId;
-//                                    foreach (var part in streamResponse.ArtifactUpdate.Artifact.Parts)
-//                                    {
-//                                        switch (part)
-//                                        {
-//                                            case TextPart textPart:
-//                                                AnsiConsole.Markup(textPart.Text);
-//                                                break;
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }, cancellationTokenSource.Token);
-
-//                        AnsiConsole.MarkupLine("\n[dim]Press 'C' to cancel the task...[/]");
-//                        while (!streamingTask.IsCompleted)
-//                        {
-//                            if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.C)
-//                            {
-//                                if (currentTaskId != null)
-//                                {
-//                                    try
-//                                    {
-//                                        await client.CancelTaskAsync(currentTaskId);
-//                                        AnsiConsole.MarkupLine("\n[yellow]Task cancelled.[/]");
-//                                    }
-//                                    catch (Exception ex)
-//                                    {
-//                                        AnsiConsole.MarkupLine($"\n[red]Failed to cancel task: {ex.Message}[/]");
-//                                    }
-//                                }
-//                                break;
-//                            }
-//                            await System.Threading.Tasks.Task.Delay(100);
-//                        }
-
-//                        try
-//                        {
-//                            await streamingTask;
-//                        }
-//                        catch (OperationCanceledException)
-//                        {
-//                            AnsiConsole.MarkupLine("\n[yellow]Operation cancelled.[/]");
-//                        }
-
-//                        if (responseText.Length > 0)
-//                        {
-//                            var agentMessage = new Message
-//                            {
-//                                Role = Role.Agent,
-//                                Parts = [new TextPart { Text = responseText.ToString() }]
-//                            };
-//                            conversationHistory.Add(agentMessage);
-//                        }
-//                    }
-//                    else
-//                    {
-//                        var response = await client.SendMessageAsync(request);
-
-//                        if (response is Message message)
-//                        {
-//                            AnsiConsole.MarkupLine("[blue]Agent:[/]");
-//                            foreach (var part in message.Parts)
-//                            {
-//                                if (part is TextPart textPart)
-//                                {
-//                                    AnsiConsole.MarkupLine(textPart.Text);
-//                                }
-//                            }
-//                            conversationHistory.Add(message);
-//                        }
-//                        else if (response is A2A.Models.Task task)
-//                        {
-//                            currentTaskId = task.Id;
-//                            AnsiConsole.MarkupLine($"[yellow]⚙ Task created: {currentTaskId}[/]");
-//                            AnsiConsole.MarkupLine($"[dim]Status: {task.Status?.State ?? "unknown"}[/]");
-//                        }
-//                    }
-//                }
-//                catch (Exception ex)
-//                {
-//                    AnsiConsole.MarkupLine($"[red]Error sending message: {ex.Message}[/]");
-//                }
-
-//                AnsiConsole.WriteLine();
-//                AnsiConsole.MarkupLine("[dim]Press any key to continue...[/]");
-//                Console.ReadKey(true);
-//            }
-
-//            if (modeChoice == "View task details" && currentTaskId != null)
-//            {
-//                try
-//                {
-//                    var task = await client!.GetTaskAsync(currentTaskId);
-
-//                    var tasksTable = new Table().Border(TableBorder.Rounded).BorderColor(Color.Blue);
-
-//                    tasksTable.AddColumn("[bold]Task ID[/]");
-//                    tasksTable.AddColumn("[bold]Context ID[/]");
-//                    tasksTable.AddColumn("[bold]Status[/]");
-//                    tasksTable.AddColumn("[bold]Status Timestamp[/]");
-
-//                    var statusColor = task.Status?.State switch
-//                    {
-//                        TaskState.Completed => "green",
-//                        TaskState.Failed or TaskState.Rejected => "red",
-//                        TaskState.Cancelled => "yellow",
-//                        TaskState.Unspecified => "dim",
-//                        _ => "blue"
-//                    };
-
-//                    tasksTable.AddRow(task.Id, task.ContextId, $"[{statusColor}]{task.Status?.State[11..] ?? "UNSPECIFIED"}[/]", task.Status?.Timestamp.ToString() ?? "N/A");
-//                    AnsiConsole.Write(tasksTable);
-//                }
-//                catch (Exception ex)
-//                {
-//                    AnsiConsole.MarkupLine($"[red]Error retrieving task: {ex.Message}[/]");
-//                }
-
-//                AnsiConsole.WriteLine();
-//                AnsiConsole.MarkupLine("[dim]Press any key to continue...[/]");
-//                Console.ReadKey(true);
-//            }
-//        }
-
-//        break;
-//    }
-//    else
-//    {
-//        AnsiConsole.MarkupLine("[yellow]⚠[/] No interfaces available on this agent.");
-//        if (!AnsiConsole.Confirm("Try a different server?")) return;
-//    }
-//}

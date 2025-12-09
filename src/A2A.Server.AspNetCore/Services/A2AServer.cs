@@ -173,14 +173,14 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             logger.LogError($"Failed to cancel the task with id '{id}' because it is in an unexpected state '{task.Status}'", id, task.Status);
             throw new A2AException(ErrorCode.TaskNotCancelable, $"Failed to cancel the task with id '{id}' because it is in an unexpected state '{task.Status}'");
         }
-        task = await store.UpdateTaskAsync(task with
-        { 
-            Status = task.Status with
-            {
-                State = TaskState.Cancelled, 
-                Timestamp = DateTime.UtcNow
-            }
-        }, tenant, cancellationToken).ConfigureAwait(false);
+        task.History ??= [];
+        if (task.Status.Message != null) task.History.Add(task.Status.Message);
+        task.Status = task.Status with
+        {
+            State = TaskState.Cancelled,
+            Timestamp = DateTime.UtcNow
+        };
+        task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         await taskQueue.CancelAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         await StreamTaskEventAsync(new TaskStatusUpdateEvent()
         {
@@ -271,42 +271,21 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         var task = await store.GetTaskAsync(taskId, tenant, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find a task with the specified id '{taskId}'.");
         try
         {
-            if (task.Status.State != TaskState.Submitted)
-            {
-                task.History ??= [];
-                if (task.Status.Message != null) task.History.Add(task.Status.Message);
-                task.Status = new()
+            if (task.Status.State != TaskState.Submitted) task = await UpdateTaskStatusAsync(task, tenant, new()
                 {
                     Timestamp = DateTime.Now,
                     State = TaskState.Submitted
-                };
-                task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
-                await StreamTaskEventAsync(new TaskStatusUpdateEvent()
-                {
-                    TaskId = task.Id,
-                    ContextId = task.Id,
-                    Status = task.Status
-                }, cancellationToken).ConfigureAwait(false);
-            }
+                }, false, cancellationToken).ConfigureAwait(false);
             var working = false;
             await foreach (var e in agent.ExecuteAsync(task, cancellationToken).ConfigureAwait(false))
             {
                 if (!working)
                 {
-                    task.History ??= [];
-                    if (task.Status.Message != null) task.History.Add(task.Status.Message);
-                    task.Status = new()
+                    if (e is not TaskStatusUpdateEvent statusUpdate || statusUpdate.Status.State != TaskState.Working) task = await UpdateTaskStatusAsync(task, tenant, new()
                     {
                         Timestamp = DateTime.Now,
                         State = TaskState.Working
-                    };
-                    task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
-                    await StreamTaskEventAsync(new TaskStatusUpdateEvent()
-                    {
-                        TaskId = task.Id,
-                        ContextId = task.Id,
-                        Status = task.Status
-                    }, cancellationToken).ConfigureAwait(false);
+                    }, false, cancellationToken).ConfigureAwait(false);
                     working = true;
                 }
                 switch (e)
@@ -327,16 +306,11 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                         await StreamTaskEventAsync(artifactUpdateEvent, cancellationToken).ConfigureAwait(false);
                         break;
                     case TaskStatusUpdateEvent statusUpdateEvent:
-                        task = await store.UpdateTaskAsync(task with
-                        {
-                            Status = statusUpdateEvent.Status
-
-                        }, tenant, cancellationToken).ConfigureAwait(false);
-                        await StreamTaskEventAsync(statusUpdateEvent, cancellationToken).ConfigureAwait(false);
+                        await UpdateTaskStatusAsync(task, tenant, statusUpdateEvent.Status, statusUpdateEvent.Final, cancellationToken).ConfigureAwait(false);
                         break;
                 }
             }
-            task = await CompleteAsync(task, tenant, cancellationToken).ConfigureAwait(false);
+            if (task.Status.State != TaskState.Completed) task = await CompleteAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -359,47 +333,41 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         }
     }
 
-    async Task<Models.Task> CompleteAsync(Models.Task task, string? tenant = null, CancellationToken cancellationToken = default)
+    async Task<Models.Task> UpdateTaskStatusAsync(Models.Task task, string? tenant, Models.TaskStatus status, bool final, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(task);
         task.History ??= [];
-        if (task.Status.Message != null) task.History.Add(task.Status.Message);
-        task.Status = new()
-        {
-            Timestamp = DateTime.Now,
-            State = TaskState.Completed
-        };
-        task = await store.UpdateTaskAsync(task, tenant,cancellationToken).ConfigureAwait(false);
-        await StreamTaskEventAsync(new TaskStatusUpdateEvent()
-        {
-            TaskId = task.Id,
-            ContextId = task.ContextId,
-            Status = task.Status,
-            Final = true
-        }, cancellationToken).ConfigureAwait(false);
-        return task;
-    }
-
-    async Task<Models.Task> FailAsync(Models.Task task, string? tenant = null, Message ? message = null, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(task);
-        task.History ??= [];
-        if (task.Status.Message != null) task.History.Add(task.Status.Message);
-        task.Status = new()
-        {
-            Timestamp = DateTime.Now,
-            State = TaskState.Failed,
-            Message = message
-        };
+        if (status.Message != null) task.History.Add(status.Message);
+        task.Status = status;
         task = await store.UpdateTaskAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         await StreamTaskEventAsync(new TaskStatusUpdateEvent()
         {
             TaskId = task.Id,
             ContextId = task.ContextId,
             Status = task.Status,
-            Final = true
+            Final = final
         }, cancellationToken).ConfigureAwait(false);
         return task;
+    }
+
+    Task<Models.Task> CompleteAsync(Models.Task task, string? tenant, CancellationToken cancellationToken)
+    {
+       return UpdateTaskStatusAsync(task, tenant, new()
+        {
+            Timestamp = DateTime.UtcNow,
+            State = TaskState.Completed
+        }, true, cancellationToken);
+    }
+
+    Task<Models.Task> FailAsync(Models.Task task, string? tenant, Message? message, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(task);
+        return UpdateTaskStatusAsync(task, tenant, new()
+        {
+            Timestamp = DateTime.UtcNow,
+            State = TaskState.Failed,
+            Message = message
+        }, true, cancellationToken);
     }
 
     async Task StreamTaskEventAsync(TaskEvent e, CancellationToken cancellationToken)

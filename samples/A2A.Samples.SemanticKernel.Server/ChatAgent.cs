@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
+
 namespace A2A.Samples.SemanticKernel.Server;
 
 public class ChatAgent(Kernel kernel)
@@ -22,20 +24,7 @@ public class ChatAgent(Kernel kernel)
         var task = new Models.Task()
         {
             ContextId = message.ContextId ?? Guid.NewGuid().ToString("N"),
-            History = [message],
-            Artifacts = 
-            [
-                new Models.Artifact()
-                {
-                    Parts = 
-                    [
-                        new Models.TextPart()
-                        {
-                            Text = "Processing started by Semantic Kernel Chat Agent."
-                        }
-                    ]
-                }
-            ]
+            History = [message]
         };
         return Task.FromResult<Models.Response>(task);
     }
@@ -47,6 +36,29 @@ public class ChatAgent(Kernel kernel)
         var messageText = string.Join('\n', message.Parts.OfType<Models.TextPart>().Select(p => p.Text));
         var artifactId = Guid.NewGuid().ToString("N");
         var isFirstChunk = true;
+        yield return new Models.TaskStatusUpdateEvent()
+        {
+            ContextId = task.ContextId,
+            TaskId = task.Id,
+            Status = new()
+            {
+                State = TaskState.Working,
+                Message = new()
+                {
+                    ContextId = task.ContextId,
+                    TaskId = task.Id,
+                    Role = Role.Agent,
+                    Parts =
+                    [
+                        new Models.TextPart()
+                        {
+                            Text = "Processing started by Semantic Kernel Chat Agent."
+                        }
+                    ]
+                }
+            }
+        };
+        var stopwatch = Stopwatch.StartNew();
         await foreach (var content in chat.GetStreamingResponseAsync(messageText, new(), cancellationToken))
         {
             yield return new Models.TaskArtifactUpdateEvent()
@@ -68,13 +80,27 @@ public class ChatAgent(Kernel kernel)
             };
             isFirstChunk = false;
         }
+        stopwatch.Stop();
         yield return new Models.TaskStatusUpdateEvent()
         {
             ContextId = task.ContextId,
             TaskId = task.Id,
             Status = new()
             {
-                State = TaskState.Completed
+                State = TaskState.Completed,
+                Message = new()
+                {
+                    ContextId = task.ContextId,
+                    TaskId = task.Id,
+                    Role = Role.Agent,
+                    Parts =
+                    [
+                        new Models.TextPart()
+                        {
+                            Text = $"Processing completed in {stopwatch.ElapsedMilliseconds}ms."
+                        }
+                    ]
+                }
             },
             Final = true
         };
