@@ -310,7 +310,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
                         break;
                 }
             }
-            if (task.Status.State != TaskState.Completed) task = await CompleteAsync(task, tenant, cancellationToken).ConfigureAwait(false);
+            if (task.Status.State == TaskState.Working) task = await CompleteAsync(task, tenant, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
