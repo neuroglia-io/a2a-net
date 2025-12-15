@@ -173,8 +173,6 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
             logger.LogError($"Failed to cancel the task with id '{id}' because it is in an unexpected state '{task.Status}'", id, task.Status);
             throw new A2AException(ErrorCode.TaskNotCancelable, $"Failed to cancel the task with id '{id}' because it is in an unexpected state '{task.Status}'");
         }
-        task.History ??= [];
-        if (task.Status.Message != null) task.History.Add(task.Status.Message);
         task.Status = task.Status with
         {
             State = TaskState.Cancelled,
