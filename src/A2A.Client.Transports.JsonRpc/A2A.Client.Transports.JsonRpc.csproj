@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<RootNamespace>A2A.Client.Transports</RootNamespace>
-    <VersionPrefix>0.13.0</VersionPrefix>
+    <VersionPrefix>0.14.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
