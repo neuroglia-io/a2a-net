@@ -1,7 +1,6 @@
 ﻿using A2A;
 using A2A.Client;
 using A2A.Models;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -246,9 +245,15 @@ public sealed class Application
     async Task ChatAsync()
     {
         DisplayNewPage();
+        var contextId = Guid.NewGuid().ToString("N");
+        var taskId = (string?)null;
+    CollectInput:
+        AnsiConsole.WriteLine();
         var userInput = AnsiConsole.Ask<string>("[bold blue]You:[/]");
         var userMessage = new Message
         {
+            ContextId = contextId,
+            TaskId = taskId,
             Role = Role.User,
             Parts = [new TextPart { Text = userInput }]
         };
@@ -256,12 +261,11 @@ public sealed class Application
         {
             Message = userMessage
         };
-
         try
         {
             var cancellationTokenSource = new CancellationTokenSource();
             var supportsStreaming = agentCard!.Capabilities?.Streaming == true;
-            var currentTaskId = (string?)null;
+            var loop = false;
             if (supportsStreaming)
             {
                 var responseText = new StringBuilder();
@@ -272,8 +276,8 @@ public sealed class Application
                     {
                         if (streamResponse.Task != null)
                         {
-                            currentTaskId = streamResponse.Task.Id;
-                            AnsiConsole.MarkupLine($"\n[blue]Agent:[/] [dim]Task started: {currentTaskId}[/]");
+                            taskId = streamResponse.Task.Id;
+                            AnsiConsole.MarkupLine($"\n[blue]Agent:[/] [dim]Task started: {taskId}[/]");
                             AnsiConsole.MarkupLine("[blue]Agent:[/] [dim]Status: {0}[/]", streamResponse.Task.Status?.State ?? "unknown");
                             if (streamResponse.Task.Artifacts != null)
                             {
@@ -285,7 +289,7 @@ public sealed class Application
                                         if (part is TextPart textPart)
                                         {
                                             responseText.Append(textPart.Text);
-                                            AnsiConsole.Markup(textPart.Text);
+                                            AnsiConsole.Write(textPart.Text);
                                         }
                                     }
                                 }
@@ -298,13 +302,32 @@ public sealed class Application
                                 if (part is TextPart textPart)
                                 {
                                     responseText.Append(textPart.Text);
-                                    AnsiConsole.Markup(textPart.Text);
+                                    AnsiConsole.Write(textPart.Text);
                                 }
                             }
+                            AnsiConsole.WriteLine();
                         }
                         else if (streamResponse.StatusUpdate != null)
                         {
                             AnsiConsole.MarkupLine($"\n[blue]Agent:[/] [dim]Task status: {streamResponse.StatusUpdate.Status?.State}[/]");
+                            if (streamResponse.StatusUpdate.Status?.Message is not null)
+                            {
+                                foreach (var part in streamResponse.StatusUpdate.Status.Message.Parts)
+                                {
+                                    switch (part)
+                                    {
+                                        case TextPart textPart:
+                                            AnsiConsole.Write(textPart.Text);
+                                            break;
+                                    }
+                                }
+                                AnsiConsole.WriteLine();
+                            }
+                            if (streamResponse.StatusUpdate.Status?.State == TaskState.InputRequired)
+                            {
+                                loop = true;
+                                break;
+                            }
                         }
                         else if (streamResponse.ArtifactUpdate != null)
                         {
@@ -314,7 +337,7 @@ public sealed class Application
                                 switch (part)
                                 {
                                     case TextPart textPart:
-                                        AnsiConsole.Markup(textPart.Text);
+                                        AnsiConsole.Write(textPart.Text);
                                         break;
                                 }
                             }
@@ -326,11 +349,11 @@ public sealed class Application
                 {
                     if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.C)
                     {
-                        if (currentTaskId != null)
+                        if (taskId != null)
                         {
                             try
                             {
-                                await client!.CancelTaskAsync(currentTaskId);
+                                await client!.CancelTaskAsync(taskId);
                                 AnsiConsole.MarkupLine("\n[yellow]Task cancelled.[/]");
                             }
                             catch (Exception ex)
@@ -350,15 +373,7 @@ public sealed class Application
                 {
                     AnsiConsole.MarkupLine("\n[yellow]Operation cancelled.[/]");
                 }
-
-                if (responseText.Length > 0)
-                {
-                    var agentMessage = new Message
-                    {
-                        Role = Role.Agent,
-                        Parts = [new TextPart { Text = responseText.ToString() }]
-                    };
-                }
+                if (loop) goto CollectInput;
             }
             else
             {
@@ -378,8 +393,8 @@ public sealed class Application
                 }
                 else if (response is A2A.Models.Task task)
                 {
-                    currentTaskId = task.Id;
-                    AnsiConsole.MarkupLine($"[yellow]⚙ Task created: {currentTaskId}[/]");
+                    taskId = task.Id;
+                    AnsiConsole.MarkupLine($"[yellow]⚙ Task created: {taskId}[/]");
                     AnsiConsole.MarkupLine($"[dim]Status: {task.Status?.State ?? "unknown"}[/]");
                 }
             }

@@ -25,6 +25,7 @@
     <RepositoryUrl>https://github.com/neuroglia-io/a2a</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <DebugType>embedded</DebugType>
+	<NoWarn>$(NoWarn);Undefined</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
