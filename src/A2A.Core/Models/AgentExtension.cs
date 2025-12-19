@@ -47,6 +47,6 @@ public sealed record AgentExtension
     /// </summary>
     [Description("Optional, extension-specific configuration parameters.")]
     [DataMember(Order = 4, Name = "params"), JsonPropertyOrder(4), JsonPropertyName("params")]
-    public IDictionary<string, JsonNode>? Params { get; set; }
+    public JsonObject? Params { get; set; }
 
 }
