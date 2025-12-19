@@ -21,7 +21,7 @@ internal static class AgentExtensionFactory
         Uri = new Uri("https://example.com/agent-extension"),
         Description = "Sample Agent Extension",
         Required = true,
-        Params = new Dictionary<string, JsonNode>
+        Params = new()
         {
             ["param1"] = "value1",
             ["param2"] = 42

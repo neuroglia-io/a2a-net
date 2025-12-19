@@ -45,10 +45,10 @@ public sealed class AgentExtensionBuilder
     }
 
     /// <inheritdoc/>
-    public IAgentExtensionBuilder WithParameters(IDictionary<string, JsonNode> parameters)
+    public IAgentExtensionBuilder WithParameters(IDictionary<string, JsonNode?> parameters)
     {
         ArgumentNullException.ThrowIfNull(parameters);
-        extension.Params = parameters;
+        extension.Params = new(parameters);
         return this;
     }
 

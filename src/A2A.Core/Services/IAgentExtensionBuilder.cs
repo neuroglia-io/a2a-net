@@ -45,7 +45,7 @@ public interface IAgentExtensionBuilder
     /// </summary>
     /// <param name="parameters">An object representing the extension's configuration parameters.</param>
     /// <returns>The builder instance.</returns>
-    IAgentExtensionBuilder WithParameters(IDictionary<string, JsonNode> parameters);
+    IAgentExtensionBuilder WithParameters(IDictionary<string, JsonNode?> parameters);
 
     /// <summary>
     /// Builds and returns the configured <see cref="AgentExtension"/>.
