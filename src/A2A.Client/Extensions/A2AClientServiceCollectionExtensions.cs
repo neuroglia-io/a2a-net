@@ -30,8 +30,6 @@ public static class A2AClientServiceCollectionExtensions
     {
         var builder = new A2AClientBuilder(services);
         setup.Invoke(builder);
-        builder.Build();
-        services.AddSingleton<IA2AClient, A2AClient>();
         return services;
     }
 

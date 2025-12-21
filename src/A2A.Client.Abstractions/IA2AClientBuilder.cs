@@ -35,6 +35,7 @@ public interface IA2AClientBuilder
     /// <summary>
     /// Builds the configured <see cref="IA2AClient"/>.
     /// </summary>
-    void Build();
+    /// <returns>A new <see cref="IA2AClient"/>.</returns>
+    IA2AClient Build();
 
 }

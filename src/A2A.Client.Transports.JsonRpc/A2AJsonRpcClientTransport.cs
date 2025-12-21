@@ -24,6 +24,8 @@ public sealed class A2AJsonRpcClientTransport(HttpClient httpClient)
     : IA2AClientTransport
 {
 
+    const string ExtensionHeaderName = "A2A-Extensions";
+
     /// <inheritdoc/>
     public async Task<Response> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default)
     {
@@ -255,6 +257,27 @@ public sealed class A2AJsonRpcClientTransport(HttpClient httpClient)
         httpResponse.EnsureSuccessStatusCode();
         var rpcResponse = await httpResponse.Content.ReadFromJsonAsync(JsonRpcSerializationContext.Default.JsonRpcResponse, cancellationToken).ConfigureAwait(false) ?? throw new InvalidOperationException("An error occurred while deserializing the response.");
         if (rpcResponse.Error is not null) throw new Exception($"An error occurred while processing the JSON-RPC request (error code: {rpcResponse.Error.Code}): {rpcResponse.Error.Message}).");
+    }
+
+    /// <inheritdoc/>
+    public void ActivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        var value = uri.OriginalString;
+        if (httpClient.DefaultRequestHeaders.TryGetValues(ExtensionHeaderName, out var existing) && existing.Contains(value, StringComparer.OrdinalIgnoreCase)) return;
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation(ExtensionHeaderName, value);
+    }
+
+    /// <inheritdoc/>
+    public void DeactivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        var value = uri.OriginalString;
+        if (!httpClient.DefaultRequestHeaders.TryGetValues(ExtensionHeaderName, out var existing)) return;
+        var extensions = existing.Where(v => !string.Equals(v, value, StringComparison.OrdinalIgnoreCase)).ToArray();
+        httpClient.DefaultRequestHeaders.Remove(ExtensionHeaderName);
+        if (extensions.Length == 0) return;
+        foreach (var extension in extensions) httpClient.DefaultRequestHeaders.TryAddWithoutValidation(ExtensionHeaderName, extension);
     }
 
 }

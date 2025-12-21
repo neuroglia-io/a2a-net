@@ -31,6 +31,7 @@
     <Project Path="src/A2A.Client/A2A.Client.csproj" Id="1314fd10-cebf-4b91-b9cf-56cae0205d50" />
     <Project Path="src/A2A.Core.JsonRpc/A2A.Core.JsonRpc.csproj" />
     <Project Path="src/A2A.Core/A2A.Core.csproj" />
+    <Project Path="src/A2A.Extensions.A2UI/A2A.Extensions.A2UI.csproj" Id="02619520-5a85-47a8-ac72-d6c2e68f2504" />
     <Project Path="src/A2A.Server.Abstractions/A2A.Server.Abstractions.csproj" Id="9d4c091b-82aa-4d82-b77b-80f4b03a842a" />
     <Project Path="src/A2A.Server.AspNetCore/A2A.Server.csproj" />
     <Project Path="src/A2A.Server.Persistence.Memory/A2A.Server.Persistence.Memory.csproj" Id="42f60b02-fa31-4431-8735-f1e56f738f27" />
