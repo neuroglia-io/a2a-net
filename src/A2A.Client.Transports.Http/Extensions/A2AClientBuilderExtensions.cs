@@ -33,6 +33,7 @@ public static class A2AClientBuilderExtensions
         builder.Services.AddHttpClient<A2AHttpClientTransport>(httpClient =>
         {
             httpClient.BaseAddress = baseAddress;
+            httpClient.DefaultRequestHeaders.Add("A2A-Version", A2AProtocolVersion.Latest);
         });
         builder.Services.AddSingleton<IA2AClientTransport>(provider => provider.GetRequiredService<A2AHttpClientTransport>());
         return builder.UseTransport<A2AHttpClientTransport>();

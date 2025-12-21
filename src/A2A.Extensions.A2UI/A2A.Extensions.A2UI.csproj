@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
 	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>A2A.Server.Transports</RootNamespace>
+	<RootNamespace>A2A.Extensions</RootNamespace>
     <VersionPrefix>0.16.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
@@ -14,10 +14,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Title>A2A-NET Server JSON-RPC Transport</Title>
-    <Description>Contains the JSON-RPC transport that can be used by an A2A server.</Description>
-	<PackageId>a2a-net.Server.Transports.JsonRpc</PackageId>
-    <PackageTags>a2a;server;transports;json-rpc</PackageTags>
+    <Title>A2A-NET A2UI Extension</Title>
+    <Description>The A2UI extension.</Description>
+	<PackageId>a2a-net.Extensions.A2UI</PackageId>
+    <PackageTags>a2a;extensions:a2ui</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -34,10 +34,4 @@
   		<PackagePath>\</PackagePath>
   	</None>
   </ItemGroup>
-	
-  <ItemGroup>
-    <ProjectReference Include="..\A2A.Core.JsonRpc\A2A.Core.JsonRpc.csproj" />
-    <ProjectReference Include="..\A2A.Server.Abstractions\A2A.Server.Abstractions.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Grpc.Core;
+using System.Collections.Generic;
 using Task = System.Threading.Tasks.Task;
 
 namespace A2A.Client.Transports;
@@ -24,18 +25,27 @@ public sealed class A2AGrpcClientTransport(A2a.V1.A2AService.A2AServiceClient gr
     : IA2AClientTransport
 {
 
+    const string VersionMetadataKey = "A2A-Version";
+    const string ExtensionMetadataKey = "A2A-Extensions";
+
+    ListValue? extensions;
+
     /// <inheritdoc/>
     public async Task<Models.Response> SendMessageAsync(Models.SendMessageRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return A2AGrpcMapper.MapFromGrpc(await grpcClient.SendMessageAsync(A2AGrpcMapper.MapToGrpc(request), cancellationToken: cancellationToken).ConfigureAwait(false));
+        var grpcRequest = A2AGrpcMapper.MapToGrpc(request);
+        SetRequestMetadata(grpcRequest.Metadata);
+        return A2AGrpcMapper.MapFromGrpc(await grpcClient.SendMessageAsync(grpcRequest, cancellationToken: cancellationToken).ConfigureAwait(false));
     }
 
     /// <inheritdoc/>
     public async IAsyncEnumerable<Models.StreamResponse> SendStreamingMessageAsync(Models.SendMessageRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var result = grpcClient.SendStreamingMessage(A2AGrpcMapper.MapToGrpc(request), cancellationToken: cancellationToken);
+        var grpcRequest = A2AGrpcMapper.MapToGrpc(request);
+        SetRequestMetadata(grpcRequest.Metadata);
+        var result = grpcClient.SendStreamingMessage(grpcRequest, cancellationToken: cancellationToken);
         await foreach (var streamResponse in result.ResponseStream.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
             if (streamResponse is null) continue;
@@ -140,6 +150,39 @@ public sealed class A2AGrpcClientTransport(A2a.V1.A2AService.A2AServiceClient gr
             Name = $"tasks/{taskId}/pushNotificationConfigs/{configId}",
             Tenant = tenant
         }, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    void SetRequestMetadata(Struct metadata)
+    {
+        metadata.Fields[VersionMetadataKey] = Value.ForString(A2AProtocolVersion.Latest);
+        if (extensions is not null) metadata.Fields[ExtensionMetadataKey] = new()
+        {
+            ListValue = extensions
+        };
+    }
+
+    /// <inheritdoc/>
+    public void ActivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        var value = uri.OriginalString;
+        extensions ??= new();
+        if (extensions.Values.Any(v => v.StringValue.Equals(value, StringComparison.OrdinalIgnoreCase))) return;
+        extensions.Values.Add(new Value() 
+        { 
+            StringValue = value 
+        });
+    }
+
+    /// <inheritdoc/>
+    public void DeactivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        if (extensions is null) return;
+        var value = uri.OriginalString;
+        var toRemove = extensions.Values.FirstOrDefault(v => v.StringValue.Equals(value, StringComparison.OrdinalIgnoreCase));
+        if (toRemove is null) return;
+        extensions.Values.Remove(toRemove);
     }
 
 }

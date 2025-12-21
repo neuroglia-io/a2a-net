@@ -16,15 +16,20 @@ namespace A2A.Client;
 /// <summary>
 /// Represents the default implementation of the <see cref="IA2AClientBuilder"/> interface.
 /// </summary>
-/// <param name="services">The <see cref="IServiceCollection"/> to configure.</param>
-public sealed class A2AClientBuilder(IServiceCollection services)
+public sealed class A2AClientBuilder 
     : IA2AClientBuilder
 {
 
     Type? transportType;
 
+    internal A2AClientBuilder(IServiceCollection services)
+    {
+        Services = services;
+        Services.AddSingleton<IA2AClient, A2AClient>();
+    }
+
     /// <inheritdoc/>
-    public IServiceCollection Services { get; } = services;
+    public IServiceCollection Services { get; }
 
     /// <inheritdoc/>
     public IA2AClientBuilder UseTransport<TTransport>()
@@ -35,10 +40,16 @@ public sealed class A2AClientBuilder(IServiceCollection services)
     }
 
     /// <inheritdoc/>
-    public void Build()
+    public IA2AClient Build()
     {
         if (transportType is null) throw new InvalidOperationException("The transport type must be specified before building the client.");
-        Services.AddSingleton<IA2AClient, A2AClient>();
+        return Services.BuildServiceProvider().GetRequiredService<IA2AClient>();
     }
+
+    /// <summary>
+    /// Creates a new <see cref="IA2AClientBuilder"/>.
+    /// </summary>
+    /// <returns>A new <see cref="IA2AClientBuilder"/>.</returns>
+    public static IA2AClientBuilder Create() => new A2AClientBuilder(new ServiceCollection());
 
 }

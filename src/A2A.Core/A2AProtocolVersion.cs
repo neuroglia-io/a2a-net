@@ -11,27 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace A2A.Client;
+namespace A2A;
 
 /// <summary>
-/// Defines the fundamentals of an A2A client.
+/// Enumerates the supported A2A protocol versions.
 /// </summary>
-public interface IA2AClient
-    : IA2AProtocolApi
+public static class A2AProtocolVersion
 {
 
     /// <summary>
-    /// Activates the A2A extension identified by the given URI.
+    /// Gets the latest supported A2A protocol version.
     /// </summary>
-    /// <param name="uri">The URI of the A2A extension to activate.</param>
-    /// <returns>The configured <see cref="IA2AClient"/>.</returns>
-    IA2AClient ActivateExtension(Uri uri);
-
-    /// <summary>
-    /// Deactivates the A2A extension identified by the given URI.
-    /// </summary>
-    /// <param name="uri">The URI of the A2A extension to deactivate.</param>
-    /// <returns>The configured <see cref="IA2AClient"/>.</returns>
-    IA2AClient DeactivateExtension(Uri uri);
+    public const string Latest = "0.3";
 
 }
