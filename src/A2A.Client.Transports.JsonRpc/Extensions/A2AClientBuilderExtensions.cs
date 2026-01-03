@@ -26,17 +26,32 @@ public static class A2AClientBuilderExtensions
     /// Configures the <see cref="IA2AClientBuilder"/> to use the JSON-RPC transport.
     /// </summary>
     /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
-    /// <param name="baseAddress">The based address of the server to connect to.</param>
+    /// <param name="configureClient">An <see cref="Action{T1, T2}"/> used to configure the underlying <see cref="HttpClient"/>.</param>
     /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
-    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Uri baseAddress)
+    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Action<IServiceProvider, HttpClient> configureClient)
     {
-        builder.Services.AddHttpClient<A2AJsonRpcClientTransport>(httpClient =>
+        builder.Services.AddHttpClient<IA2AClientTransport, A2AJsonRpcClientTransport>((provider, httpClient) =>
         {
-            httpClient.BaseAddress = baseAddress;
             httpClient.DefaultRequestHeaders.Add("A2A-Version", A2AProtocolVersion.Latest);
+            configureClient(provider, httpClient);
         });
-        builder.Services.AddSingleton<IA2AClientTransport>(provider => provider.GetRequiredService<A2AJsonRpcClientTransport>());
         return builder.UseTransport<A2AJsonRpcClientTransport>();
     }
+
+    /// <summary>
+    /// Configures the <see cref="IA2AClientBuilder"/> to use the JSON-RPCv transport.
+    /// </summary>
+    /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
+    /// <param name="configureClient">An <see cref="Action{T}"/> used to configure the underlying <see cref="HttpClient"/>.</param>
+    /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
+    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Action<HttpClient> configureClient) => UseJsonRpcTransport(builder, (_, httpClient) => configureClient(httpClient));
+
+    /// <summary>
+    /// Configures the <see cref="IA2AClientBuilder"/> to use the JSON-RPC transport.
+    /// </summary>
+    /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
+    /// <param name="baseAddress">The based address of the server to connect to.</param>
+    /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
+    public static IA2AClientBuilder UseJsonRpcTransport(this IA2AClientBuilder builder, Uri baseAddress) => UseJsonRpcTransport(builder, httpClient => httpClient.BaseAddress = baseAddress);
 
 }
