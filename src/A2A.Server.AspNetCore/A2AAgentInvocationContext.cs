@@ -11,7 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using A2A.Services;
-global using Microsoft.IdentityModel.Tokens;
-global using System.Reactive.Subjects;
-global using System.Text.Json.Nodes;
+namespace A2A.Server;
+
+/// <summary>
+/// Represents the default implementation of the A2A agent invocation context.
+/// </summary>
+/// <param name="tenant">The identifier of the tenant, if any, associated with the invocation.</param>
+/// <param name="metadata">The metadata, if any, associated with the invocation.</param>
+public sealed class A2AAgentInvocationContext(string? tenant, JsonObject? metadata)
+    : IA2AAgentInvocationContext
+{
+
+    /// <inheritdoc/>
+    public string? Tenant { get; } = tenant;
+
+    /// <inheritdoc/>
+    public JsonObject? Metadata { get; } = metadata;
+
+}

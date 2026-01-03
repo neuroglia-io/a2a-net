@@ -23,9 +23,10 @@ public interface IA2AAgentRuntime
     /// Processes the specified message.
     /// </summary>
     /// <param name="message">The message to process.</param>
+    /// <param name="context">The context in which the agent is being invoked.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A new <see cref="Models.Response"/> resulting from the processed message.</returns>
-    Task<Models.Response> ProcessAsync(Models.Message message, CancellationToken cancellationToken = default);
+    Task<Models.Response> ProcessAsync(Models.Message message, IA2AAgentInvocationContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the specified task.

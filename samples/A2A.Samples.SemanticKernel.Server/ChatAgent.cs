@@ -19,7 +19,7 @@ public class ChatAgent(Kernel kernel)
     : IA2AAgentRuntime
 { 
 
-    public Task<Models.Response> ProcessAsync(Models.Message message, CancellationToken cancellationToken = default)
+    public Task<Models.Response> ProcessAsync(Models.Message message, IA2AAgentInvocationContext context, CancellationToken cancellationToken = default)
     {
         var task = new Models.Task()
         {

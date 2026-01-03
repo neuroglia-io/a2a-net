@@ -50,7 +50,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         }
         if (string.IsNullOrWhiteSpace(request.Message.TaskId))
         {
-            var response = await agent.ProcessAsync(request.Message, cancellationToken).ConfigureAwait(false);
+            var response = await agent.ProcessAsync(request.Message, new A2AAgentInvocationContext(request.Tenant, request.Metadata), cancellationToken).ConfigureAwait(false);
             if (response is Models.Task task)
             {
                 task = await store.AddTaskAsync(task, request.Tenant, cancellationToken).ConfigureAwait(false);
@@ -100,7 +100,7 @@ public sealed class A2AServer(ILogger<A2AServer> logger, IServiceProvider servic
         Models.Task task;
         if (string.IsNullOrWhiteSpace(request.Message.TaskId))
         {
-            var response = await agent.ProcessAsync(request.Message, cancellationToken).ConfigureAwait(false);
+            var response = await agent.ProcessAsync(request.Message, new A2AAgentInvocationContext(request.Tenant, request.Metadata), cancellationToken).ConfigureAwait(false);
             switch (response)
             {
                 case Message message:
