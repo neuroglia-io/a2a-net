@@ -26,17 +26,36 @@ public static class A2AClientBuilderExtensions
     /// Configures the <see cref="IA2AClientBuilder"/> to use the HTTP transport.
     /// </summary>
     /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
-    /// <param name="baseAddress">The based address of the server to connect to.</param>
+    /// <param name="configureClient">An <see cref="Action{T1, T2}"/> used to configure the underlying <see cref="HttpClient"/>.</param>
+    /// <param name="configureClientBuilder"> An <see cref="Action{T}"/>, if any, used to configure the <see cref="IHttpClientBuilder"/> used to build the underlying <see cref="HttpClient"/>.</param>
     /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
-    public static IA2AClientBuilder UseHttpTransport(this IA2AClientBuilder builder, Uri baseAddress)
+    public static IA2AClientBuilder UseHttpTransport(this IA2AClientBuilder builder, Action<IServiceProvider, HttpClient> configureClient, Action<IHttpClientBuilder>? configureClientBuilder = null)
     {
-        builder.Services.AddHttpClient<A2AHttpClientTransport>(httpClient =>
+        var httpClientBuilder = builder.Services.AddHttpClient<IA2AClientTransport, A2AHttpClientTransport>((provider, httpClient) =>
         {
-            httpClient.BaseAddress = baseAddress;
             httpClient.DefaultRequestHeaders.Add("A2A-Version", A2AProtocolVersion.Latest);
+            configureClient(provider, httpClient);
         });
-        builder.Services.AddSingleton<IA2AClientTransport>(provider => provider.GetRequiredService<A2AHttpClientTransport>());
+        configureClientBuilder?.Invoke(httpClientBuilder);
         return builder.UseTransport<A2AHttpClientTransport>();
     }
+
+    /// <summary>
+    /// Configures the <see cref="IA2AClientBuilder"/> to use the HTTP transport.
+    /// </summary>
+    /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
+    /// <param name="configureClient">An <see cref="Action{T}"/> used to configure the underlying <see cref="HttpClient"/>.</param>
+    /// <param name="configureClientBuilder"> An <see cref="Action{T}"/>, if any, used to configure the <see cref="IHttpClientBuilder"/> used to build the underlying <see cref="HttpClient"/>.</param>
+    /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
+    public static IA2AClientBuilder UseHttpTransport(this IA2AClientBuilder builder, Action<HttpClient> configureClient, Action<IHttpClientBuilder>? configureClientBuilder = null) => UseHttpTransport(builder, (_, httpClient) => configureClient(httpClient), configureClientBuilder);
+
+    /// <summary>
+    /// Configures the <see cref="IA2AClientBuilder"/> to use the HTTP transport.
+    /// </summary>
+    /// <param name="builder">The <see cref="IA2AClientBuilder"/> to configure.</param>
+    /// <param name="baseAddress">The based address of the server to connect to.</param>
+    /// <param name="configureClientBuilder"> An <see cref="Action{T}"/>, if any, used to configure the <see cref="IHttpClientBuilder"/> used to build the underlying <see cref="HttpClient"/>.</param>
+    /// <returns>The configured <see cref="IA2AClientBuilder"/>.</returns>
+    public static IA2AClientBuilder UseHttpTransport(this IA2AClientBuilder builder, Uri baseAddress, Action<IHttpClientBuilder>? configureClientBuilder = null) => UseHttpTransport(builder, httpClient => httpClient.BaseAddress = baseAddress, configureClientBuilder);
 
 }
