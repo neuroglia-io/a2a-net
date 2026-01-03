@@ -2,21 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <RootNamespace>A2A.Client.Transports</RootNamespace>
-    <VersionPrefix>0.17.0</VersionPrefix>
+	<RootNamespace>A2A.Extensions</RootNamespace>
+    <VersionPrefix>0.16.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Title>A2A-NET Client HTTP transport</Title>
-	  <Description>Contains the HTTP transport that can be used by an A2A client.</Description>
-	  <PackageId>a2a-net.Client.Transports.Http</PackageId>
-    <PackageTags>a2a;client;transports;http</PackageTags>
+    <Title>A2A-NET A2UI Extension</Title>
+    <Description>The A2UI extension.</Description>
+	<PackageId>a2a-net.Extensions.A2UI</PackageId>
+    <PackageTags>a2a;extensions:a2ui</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -33,14 +34,4 @@
   		<PackagePath>\</PackagePath>
   	</None>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\A2A.Client.Abstractions\A2A.Client.Abstractions.csproj" />
-    <ProjectReference Include="..\A2A.Core\A2A.Core.csproj" />
-  </ItemGroup>
-
 </Project>

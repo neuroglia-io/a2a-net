@@ -20,6 +20,16 @@ public interface IA2AClientTransport
     : IA2AProtocolApi
 {
 
+    /// <summary>
+    /// Activates the A2A extension identified by the given URI.
+    /// </summary>
+    /// <param name="uri">The URI of the A2A extension to activate.</param>
+    void ActivateExtension(Uri uri);
 
+    /// <summary>
+    /// Deactivates the A2A extension identified by the given URI.
+    /// </summary>
+    /// <param name="uri">The URI of the A2A extension to deactivate.</param>
+    void DeactivateExtension(Uri uri);
 
 }

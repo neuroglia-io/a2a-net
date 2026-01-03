@@ -24,6 +24,8 @@ public sealed class A2AHttpClientTransport(HttpClient httpClient)
     : IA2AClientTransport
 {
 
+    const string ExtensionHeaderName = "A2A-Extensions";
+
     /// <inheritdoc/>
     public async Task<Response> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken = default)
     {
@@ -167,6 +169,27 @@ public sealed class A2AHttpClientTransport(HttpClient httpClient)
         using var httpResponse = await httpClient.DeleteAsync(uri, cancellationToken).ConfigureAwait(false);
         httpResponse.EnsureSuccessStatusCode();
 
+    }
+
+    /// <inheritdoc/>
+    public void ActivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        var value = uri.OriginalString;
+        if (httpClient.DefaultRequestHeaders.TryGetValues(ExtensionHeaderName, out var existing) && existing.Contains(value, StringComparer.OrdinalIgnoreCase)) return;
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation(ExtensionHeaderName, value);
+    }
+
+    /// <inheritdoc/>
+    public void DeactivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        var value = uri.OriginalString;
+        if (!httpClient.DefaultRequestHeaders.TryGetValues(ExtensionHeaderName, out var existing)) return;
+        var extensions = existing.Where(v => !string.Equals(v, value, StringComparison.OrdinalIgnoreCase)).ToArray();
+        httpClient.DefaultRequestHeaders.Remove(ExtensionHeaderName);
+        if (extensions.Length == 0) return;
+        foreach (var extension in extensions) httpClient.DefaultRequestHeaders.TryAddWithoutValidation(ExtensionHeaderName, extension);
     }
 
 }

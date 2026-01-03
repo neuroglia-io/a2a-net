@@ -4,19 +4,19 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>A2A.Client</RootNamespace>
+	  <RootNamespace>A2A.Client</RootNamespace>
     <VersionPrefix>0.17.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <Title>A2A-NET Client</Title>
     <Description>Contains the default implementation of an A2A client.</Description>
-	<PackageId>a2a-net.Client</PackageId>
-	<PackageTags>a2a;client</PackageTags>
+	  <PackageId>a2a-net.Client</PackageId>
+	  <PackageTags>a2a;client</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

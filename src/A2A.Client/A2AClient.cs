@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using A2A.Models;
 using Task = System.Threading.Tasks.Task;
 
 namespace A2A.Client;
@@ -53,5 +52,21 @@ public sealed class A2AClient(IA2AClientTransport transport)
 
     /// <inheritdoc/>
     public Task DeletePushNotificationConfigAsync(string taskId, string configId, string? tenant = null, CancellationToken cancellationToken = default) => transport.DeletePushNotificationConfigAsync(taskId, configId, tenant, cancellationToken);
+
+    /// <inheritdoc/>
+    public IA2AClient ActivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        transport.ActivateExtension(uri);
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IA2AClient DeactivateExtension(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        transport.DeactivateExtension(uri);
+        return this;
+    }
 
 }

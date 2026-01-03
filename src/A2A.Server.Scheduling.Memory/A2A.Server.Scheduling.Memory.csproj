@@ -2,21 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-	<OutputType>Library</OutputType>
+	  <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>A2A.Server</RootNamespace>
+	  <RootNamespace>A2A.Server</RootNamespace>
     <VersionPrefix>0.17.0</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <Title>A2A-NET Server Memory Scheduling</Title>
     <Description>Contains the Memory implementations used by an A2A server to schedule tasks.</Description>
-	<PackageId>a2a-net.Server.Scheduling.Memory</PackageId>
+	  <PackageId>a2a-net.Server.Scheduling.Memory</PackageId>
     <PackageTags>a2a;server;scheduling;memory</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
