@@ -28,6 +28,6 @@ public sealed record DataPart
     [Description("A JSON object containing arbitrary data.")]
     [Required]
     [DataMember(Order = 1, Name = "data"), JsonPropertyOrder(1), JsonPropertyName("data")]
-    public required JsonObject Data { get; init; }
+    public required JsonNode Data { get; init; }
 
 }
