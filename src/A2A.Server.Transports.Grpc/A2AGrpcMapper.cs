@@ -63,10 +63,10 @@ internal static class A2AGrpcMapper
             },
             Part.PartOneofCase.File => new Models.FilePart()
             {
-                Name = source.File.Name,
+                FileName = source.File.Name,
                 MediaType = source.File.MediaType,
-                Uri = string.IsNullOrWhiteSpace(source.File.FileWithUri) ? null : new Uri(source.File.FileWithUri),
-                Bytes = source.File.FileWithBytes.IsEmpty ? null : source.File.FileWithBytes.ToByteArray()
+                Url = string.IsNullOrWhiteSpace(source.File.FileWithUri) ? null : new Uri(source.File.FileWithUri),
+                Raw = source.File.FileWithBytes.IsEmpty ? null : source.File.FileWithBytes.ToByteArray()
             },
             Part.PartOneofCase.Data => new Models.DataPart()
             {
@@ -167,10 +167,10 @@ internal static class A2AGrpcMapper
             {
                 File = new FilePart()
                 {
-                    Name = filePart.Name,
+                    Name = filePart.FileName,
                     MediaType = filePart.MediaType,
-                    FileWithUri = filePart.Uri?.OriginalString ?? string.Empty,
-                    FileWithBytes = filePart.Bytes == null ? ByteString.Empty : ByteString.CopyFrom(filePart.Bytes.Value.ToArray())
+                    FileWithUri = filePart.Url?.OriginalString ?? string.Empty,
+                    FileWithBytes = filePart.Raw == null ? ByteString.Empty : ByteString.CopyFrom(filePart.Raw.Value.ToArray())
                 }
             },
             Models.DataPart dataPart => new Part()
