@@ -18,7 +18,7 @@ internal static class PartFactory
 
     internal static DataPart CreateDataPart() => new()
     {
-        Data = new()
+        Data = new JsonObject()
         {
             ["key"] = "value"
         },
