@@ -26,6 +26,13 @@ public abstract record Part
 {
 
     /// <summary>
+    /// Gets the part content's media type, if any.
+    /// </summary>
+    [Description("The part content's media type, if any.")]
+    [DataMember(Order = 0, Name = "mediaType"), JsonPropertyOrder(0), JsonPropertyName("mediaType")]
+    public string? MediaType { get; init; }
+
+    /// <summary>
     /// Gets a key/value mapping, if any, containing metadata associated with the part.
     /// </summary>
     [Description("A key/value mapping, if any, containing metadata associated with the part.")]

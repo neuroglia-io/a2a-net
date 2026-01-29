@@ -26,28 +26,21 @@ public sealed record FilePart
     /// Gets the file's name, if any.
     /// </summary>
     [Description("The file's name, if any.")]
-    [DataMember(Order = 1, Name = "name"), JsonPropertyOrder(1), JsonPropertyName("name")]
-    public string? Name { get; init; }
+    [DataMember(Order = 1, Name = "filename"), JsonPropertyOrder(1), JsonPropertyName("filename")]
+    public string? FileName { get; init; }
 
     /// <summary>
-    /// Gets the file's media type, if any.
+    /// Gets the file's URL, if any. Required if 'raw' is not set.
     /// </summary>
-    [Description("The file's media type, if any.")]
-    [DataMember(Order = 2, Name = "mediaType"), JsonPropertyOrder(2), JsonPropertyName("mediaType")]
-    public string? MediaType { get; init; }
+    [Description("The file's URL, if any. Required if 'raw' is not set.")]
+    [DataMember(Order = 3, Name = "url"), JsonPropertyOrder(3), JsonPropertyName("url")]
+    public Uri? Url { get; init; }
 
     /// <summary>
-    /// Gets the file's URI, if any. Required if 'bytes' is not set.
+    /// Gets the file's bytes, if any. Required if 'url' is not set.
     /// </summary>
-    [Description("The file's URI, if any. Required if 'bytes' is not set.")]
-    [DataMember(Order = 3, Name = "fileWithUri"), JsonPropertyOrder(3), JsonPropertyName("fileWithUri")]
-    public Uri? Uri { get; init; }
-
-    /// <summary>
-    /// Gets the file's bytes, if any. Required if 'uri' is not set.
-    /// </summary>
-    [Description("The file's bytes, if any. Required if 'uri' is not set.")]
-    [DataMember(Order = 4, Name = "fileWithBytes"), JsonPropertyOrder(4), JsonPropertyName("fileWithBytes")]
-    public ReadOnlyMemory<byte>? Bytes { get; init; }
+    [Description("The file's bytes, if any. Required if 'url' is not set.")]
+    [DataMember(Order = 4, Name = "raw"), JsonPropertyOrder(4), JsonPropertyName("raw")]
+    public ReadOnlyMemory<byte>? Raw { get; init; }
 
 }
